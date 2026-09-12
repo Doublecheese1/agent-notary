@@ -8,6 +8,7 @@ async function api(path, body) {
  const data = await r.json(); if(!r.ok)throw Error(typeof data.detail==='string'?data.detail:JSON.stringify(data.detail));return data;
 }
 function controls(){for(const id of ['prepare','deliver','refund','deploy','read','connect'])el(id).disabled=busy;
+ for(const id of ['prepare','deliver','refund'])el(id).disabled=busy||!config?.enabled||frozen;
  el('approve').disabled=busy||!prepared||approvalDone||frozen;el('lock').disabled=busy||!prepared||!approvalDone||frozen;}
 async function wallet(){
  if(!window.ethereum)throw Error('Open this page in a browser with an EVM test wallet. No wallet extension was detected.');
@@ -37,7 +38,33 @@ async function send(transaction){
  throw Error('Receipt not confirmed in time. Keep the transaction hash and inspect it in your wallet. Do not blindly resend.');
 }
 function action(id,fn){el(id).onclick=async()=>{if(busy)return;busy=true;controls();show('status','Working — complete any request in your wallet.');try{await fn();show('status','Done. Review the result below.');}catch(e){show('status',e.message);}finally{busy=false;controls();}};}
-action('connect',wallet);
+// Network setup is explicitly requested by this button, never while signing a payment.
+async function connectAndCheck(){
+ if(!window.ethereum)throw Error('Open this page in Chrome with MetaMask installed. No wallet extension was detected.');
+ if(frozen)throw Error('Resolve the previous transaction before changing networks.');
+ const current=await ethereum.request({method:'eth_chainId'});
+ if(current!==chain){
+  try{await ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:chain}]});}
+  catch(e){
+   if(e.code!==4902)throw e;
+   await ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:chain,chainName:'Arbitrum Sepolia',nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18},rpcUrls:['https://sepolia-rollup.arbitrum.io/rpc'],blockExplorerUrls:['https://sepolia.arbiscan.io']}]});
+   await ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:chain}]});
+  }
+ }
+ const connected=await wallet();
+ if(!el('treasury').value)el('treasury').value=connected;
+ show('readiness','Checking test balances…');
+ const [eth,usdc]=await Promise.all([
+  ethereum.request({method:'eth_getBalance',params:[connected,'latest']}),
+  ethereum.request({method:'eth_call',params:[{to:'0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d',data:'0x70a08231'+connected.slice(2).toLowerCase().padStart(64,'0')},'latest']})
+ ]);
+ const accounts=await ethereum.request({method:'eth_accounts'});
+ if(await ethereum.request({method:'eth_chainId'})!==chain||accounts[0]?.toLowerCase()!==connected.toLowerCase())throw Error('Wallet changed during check. Connect again.');
+ const ethUnits=BigInt(eth),usdcUnits=BigInt(usdc);
+ show('readiness',{network:'Arbitrum Sepolia — test only',wallet:connected,test_ETH:formatUnits(ethUnits,18),test_USDC:formatUnits(usdcUnits,6),next_step:ethUnits===0n?'No test ETH. On-chain setup is waiting for test funding. You can use /play now without funds.':!config?.enabled?'Wallet checked. Contract deployment and server configuration are still required.':usdcUnits<1005000n?'Less than 1.005 test USDC: not enough for the default 1 USDC deal.':'Default deal balance available. Your wallet will estimate the separate test ETH gas fee.'});
+}
+function formatUnits(value,decimals){const base=10n**BigInt(decimals);return (value/base).toString()+'.'+(value%base).toString().padStart(decimals,'0');}
+action('connect',connectAndCheck);
 action('prepare',async()=>{if(frozen)throw Error('An earlier transaction has an uncertain result. Resolve it in your wallet first.');
  const buyer=await wallet();const salt='0x'+Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,'0')).join('');
  prepared=await api('/prepare-lock',{buyer,seller:el('seller').value.trim(),amount:el('amount').value.trim(),salt,expected_text:el('expected').value,duration_seconds:Number(el('duration').value)});
