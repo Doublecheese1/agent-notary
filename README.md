@@ -1,3 +1,7 @@
+## New: testnet payments
+
+Separate /payments testnet prototype. See [Turkish setup and limitations](PAYMENTS_TR.md). No mainnet or real income is enabled. Existing /play remains wallet-free.
+
 # AgentNotary Protocol
 
 A programmatic escrow lifecycle demo for autonomous agents.
@@ -72,3 +76,4 @@ node test_frontend.cjs
 ```
 
 See [Turkish deployment and verification notes](DEPLOY_TR.md).
+
