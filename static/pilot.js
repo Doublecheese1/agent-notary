@@ -1,6 +1,6 @@
 "use strict";
 const $=id=>document.getElementById(id), CHAIN="0x66eee", STORE="agentnotary-pilot-pending-v2", USDC="0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d";
-let account=null,cfg=null,draft=null,pending=null,busy=false,epoch=0,currentDeal=null,approvalConfirmed=false,activeTerms="";
+let account=null,cfg=null,draft=null,pending=null,busy=false,epoch=0,currentDeal=null,approvalConfirmed=false,activeTerms="",termsVerified=false;
 let unresolved=sessionStorage.getItem(STORE);
 const show=(id,value)=>{const el=$(id);if(el)el.textContent=typeof value==="string"?value:JSON.stringify(value,null,2);};
 const visible=(id,on=true)=>$(id)?.classList.toggle("hidden",!on);
@@ -104,8 +104,8 @@ function renderDeal(d){
  ["contentWrap","uriWrap","reasonWrap"].forEach(x=>visible(x,false));$("actionButtons").replaceChildren();let wait="";
  const now=Number(d.chain_time);
  if(d.state==="PROPOSED"){
-  if(role==="Seller"&&!d.seller_accepted&&activeTerms)actionButton("Accept deal as Seller","sellerAccept");
-  if(role==="Arbitrator"&&!d.arbiter_accepted&&activeTerms)actionButton("Accept unpaid arbitrator role","arbiterAccept");
+  if(role==="Seller"&&!d.seller_accepted&&termsVerified)actionButton("Accept deal as Seller","sellerAccept");
+  if(role==="Arbitrator"&&!d.arbiter_accepted&&termsVerified)actionButton("Accept unpaid arbitrator role","arbiterAccept");
   if(now>=Number(d.acceptance_deadline))actionButton("Return budget after missed acceptance","expireProposal","secondary");
   wait=d.seller_accepted&&d.arbiter_accepted?"Both parties accepted. Refresh the deal.":"Waiting for seller and arbitrator acceptance.";
  }else if(d.state==="LOCKED"){
@@ -126,17 +126,24 @@ function renderDeal(d){
 }
 async function readDeal(){
  const id=$("deal").value.trim();if(!id)throw Error("Paste a Deal ID first.");
- const d=await api("/deals/"+encodeURIComponent(id));renderDeal(d);return d;
+ const d=await api("/deals/"+encodeURIComponent(id));let check=null;termsVerified=false;
+ if(activeTerms){check=await api("/deals/"+encodeURIComponent(id)+"/verify-terms",{terms:activeTerms});termsVerified=check.matches;}
+ renderDeal(d);
+ if(check)mark("termsStatus",check.matches?"Verified against the on-chain terms hash ✓":"These terms do not match the deal. Do not accept.",check.matches);
+ else mark("termsStatus","Terms cannot be verified without the complete invitation link.",false);
+ return d;
 }
 async function prepareAction(action){
  if(busy)return;busy=true;controls();show("status","Preparing the action…");
  try{const d=currentDeal||await readDeal();const result=await api("/deals/"+encodeURIComponent(d.deal_id)+"/prepare-action",{caller:await wallet(),action,terms:activeTerms,content:$("content").value,uri:$("uri").value.trim(),reason:$("reason").value});stage(result.transaction,action,{deal_id:d.deal_id,state:d.state,role:roleFor(d)});show("status","Review the action below, then confirm in MetaMask.");}catch(e){show("status",message(e));}finally{busy=false;controls();}
 }
 bind("connect",connect);bind("refresh",async()=>{await refresh();if(currentDeal)await readDeal();});
-$("startCreate").onclick=()=>{visible("create");visible("open",false);$("create").scrollIntoView?.({behavior:"smooth"});};
-$("startOpen").onclick=()=>{visible("open");visible("create",false);$("open").scrollIntoView?.({behavior:"smooth"});};
+function chooseRole(id,buyer){document.querySelectorAll(".choice").forEach(x=>x.classList.remove("selected"));$(id).classList.add("selected");visible("create",buyer);visible("open",!buyer);$(buyer?"create":"open").scrollIntoView?.({behavior:"smooth"});}
+$("startCreate").onclick=()=>chooseRole("startCreate",true);
+$("startSeller").onclick=()=>chooseRole("startSeller",false);
+$("startArbiter").onclick=()=>chooseRole("startArbiter",false);
 bind("read",readDeal);
-$("deal").addEventListener("input",()=>{if(currentDeal&&!same($("deal").value.trim(),currentDeal.deal_id)){currentDeal=null;activeTerms="";}});
+$("deal").addEventListener("input",()=>{if(currentDeal&&!same($("deal").value.trim(),currentDeal.deal_id)){currentDeal=null;activeTerms="";termsVerified=false;}});
 bind("prepare",async()=>{
  const buyer=await wallet(),version=epoch,salt="0x"+Array.from(crypto.getRandomValues(new Uint8Array(32)),x=>x.toString(16).padStart(2,"0")).join("");
  const split=Number($("split").value);if(!Number.isFinite(split)||split<0||split>100)throw Error("Enter a fallback seller share between 0 and 100 percent.");
@@ -157,6 +164,7 @@ async function inspectReceipt(hash,submitted){
  if(await p.request({method:"eth_chainId"})!==CHAIN)throw Error("The network changed. Check the result on Arbitrum Sepolia.");
  sessionStorage.removeItem(STORE);unresolved=null;pending=null;
  show("receipt",(r.status==="0x1"?"Confirmed ✓":"Transaction failed")+"\nTransaction: "+hash+"\nExplorer: https://sepolia.arbiscan.io/tx/"+hash);
+ $("receiptLink").href="https://sepolia.arbiscan.io/tx/"+hash;visible("receiptLink",true);
  if(r.status==="0x1"&&submitted?.label?.startsWith("Approve"))await syncFunding();
  if(r.status==="0x1"&&$("deal").value.trim()&&!submitted?.label?.startsWith("Approve")){try{await readDeal();}catch{}}
  return true;
