@@ -40,6 +40,19 @@ def page():
 def script():
     return FileResponse(ROOT/'static/pilot.js', media_type='text/javascript', headers={'Cache-Control':'no-store'})
 
+@router.get('/deal/{deal_id}', include_in_schema=False)
+def deal_page(deal_id: str):
+    digest(deal_id)
+    return FileResponse(ROOT/'static/pilot.html', headers={'Cache-Control':'no-store'})
+
+@router.get('/admin', include_in_schema=False)
+def admin_page():
+    return FileResponse(ROOT/'static/pilot-admin.html', headers={'Cache-Control':'no-store'})
+
+@router.get('/admin.js', include_in_schema=False)
+def admin_script():
+    return FileResponse(ROOT/'static/pilot-admin.js', media_type='text/javascript', headers={'Cache-Control':'no-store'})
+
 @router.get('/config')
 def config(wallet: str | None = None):
     who = address(wallet) if wallet else None
