@@ -1,6 +1,14 @@
-## New: testnet payments
+## Current pilot
 
-Separate /payments testnet prototype. See [Turkish setup and limitations](PAYMENTS_TR.md). No mainnet or real income is enabled. Existing /play remains wallet-free.
+The public product test is the fee-free Founding 50 workflow at `/pilot`.
+It uses buyer acceptance, an agreed human arbitrator for disputes, and a
+pre-agreed fallback split. It does not automatically judge research quality.
+The wallet-free `/play` sandbox demonstrates the older validation and fee model.
+
+## Legacy testnet payments
+
+The separate `/payments` exact-text lab remains available for compatibility.
+See [Turkish setup and limitations](PAYMENTS_TR.md). No mainnet or real income is enabled.
 
 # AgentNotary Protocol
 

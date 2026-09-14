@@ -132,6 +132,20 @@ def state(deal_id: str):
             'outcome':{'payout_units':payout,'refund_units':refund,'fee_units':0,'locked_units':d[3] if d[-1]<5 else 0},
             'notice':'Latest observed state, not L1 finality. Timeouts require a wallet transaction.'}
 
+class TermsCheck(BaseModel):
+    terms: str = Field(min_length=1, max_length=12000)
+
+@router.post('/deals/{deal_id}/verify-terms')
+def verify_terms(deal_id: str, req: TermsCheck):
+    w,c = connection()
+    key = digest(deal_id)
+    d = c.functions.deals(key).call()
+    if not d[-1]:
+        raise HTTPException(404,'Deal not found in configured pilot.')
+    supplied = Web3.keccak(text=req.terms)
+    return {'deal_id':deal_id, 'matches':supplied == d[6],
+            'supplied_hash':Web3.to_hex(supplied), 'on_chain_hash':Web3.to_hex(d[6])}
+
 class Action(BaseModel):
     caller: str
     action: str

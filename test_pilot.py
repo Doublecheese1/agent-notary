@@ -69,6 +69,8 @@ class PilotTests(unittest.TestCase):
     def test_admission_and_terms_guards(self):
         self.post('/prepare-admission',{'caller':self.other,'member':self.buyer},409)
         self.admit(); p=self.proposal(); self.send(p['approval']); self.send(p['proposal'])
+        self.assertTrue(self.post('/deals/'+p['deal_id']+'/verify-terms',{'terms':'Agreed exact terms'})['matches'])
+        self.assertFalse(self.post('/deals/'+p['deal_id']+'/verify-terms',{'terms':'different'})['matches'])
         self.post('/deals/'+p['deal_id']+'/prepare-action',{'caller':self.seller,'action':'sellerAccept','terms':'different'},422)
         c=self.client.get('/pilot/config',params={'wallet':self.buyer}).json()
         self.assertTrue(c['member']); self.assertEqual(c['remaining'],49)
