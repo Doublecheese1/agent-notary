@@ -1,0 +1,26 @@
+name: AgentNotary scheduled reports
+
+on:
+  schedule:
+    # Europe/Istanbul is UTC+3 year-round: 09:00 and 20:00 local time.
+    - cron: "0 6,17 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger read-only report email
+        env:
+          REPORT_ENDPOINT_URL: ${{ secrets.REPORT_ENDPOINT_URL }}
+          REPORT_TRIGGER_TOKEN: ${{ secrets.REPORT_TRIGGER_TOKEN }}
+        run: |
+          test -n "$REPORT_ENDPOINT_URL"
+          test -n "$REPORT_TRIGGER_TOKEN"
+          curl --fail --silent --show-error \
+            --retry 2 --retry-all-errors \
+            -X POST "$REPORT_ENDPOINT_URL/internal/reporting/send" \
+            -H "X-AgentNotary-Report-Token: $REPORT_TRIGGER_TOKEN"

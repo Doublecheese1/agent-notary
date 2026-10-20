@@ -1,0 +1,54 @@
+{
+  "product": "AgentNotary",
+  "release": "mainnet-candidate",
+  "chain_id": 42161,
+  "network": "Arbitrum One",
+  "native_usdc": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+  "economics": {
+    "protocol_fee_bps": 150,
+    "protocol_fee_cap_usdc": 50,
+    "fixed_fee_usdc": 0
+  },
+  "limits": {
+    "automatic_min_usdc": 10,
+    "buyer_review_min_usdc": 100,
+    "deal_max_usdc": 1000,
+    "global_escrow_max_usdc": 10000
+  },
+  "policies": {
+    "automatic_id": "agentnotary.json-evidence.v1",
+    "automatic_hash": "0xfc80263827b1f14bff464b89bebc2c5d237a1b355706054f47de87fd1e5bc556",
+    "review_id": "agentnotary.buyer-review.v1",
+    "review_hash": "0x3f9234a62a913d1efc1882bc7c2b2bd289cbcb28c8dcf62f5f949c49c99b3014"
+  },
+  "files_sha256": {
+    "escrow_source": "251cb0ae7f3a9f5d2d277c1f0a1a1ce2df3f87f0d22b087ea7546ebdf87a92ae",
+    "quorum_source": "2da48b6ba0e3a5c2041635426f87007ca1eab226def07eb1996ef7030c3742c8",
+    "ai_review_resolver_source": "c6e04a88fcba3aa5bbb7e8998a536b1ace19997f644b576afa949e6e8445394c",
+    "escrow_artifact": "83568628d3ba019187068d8e0ead63267a06c517466db513d27123be03b88ac5",
+    "quorum_artifact": "e47a10e4320f6ab5324fe169626a7b2b5c85391d240693cc972c7cb0f3071b6a",
+    "ai_review_resolver_artifact": "6dbfc8f90195f1426102db81b49ed62f3cb6f5c89b78e22fd20e1b875788f5d0",
+    "automatic_policy": "b2c8082346abc789c67670b80ef3fb4b8bfda71d7b8281a1befe465c8f745ffe",
+    "review_policy": "6658bf875da1826ebd8393db68405e422bd929fcd7504ef8a3267ac048a53da7"
+  },
+  "deployment_inputs": {
+    "deployer": "0x21a7b51ffF1963C3EE530097B6A71a294a09c26D",
+    "treasury_safe": "",
+    "operations_safe": "",
+    "human_review_safe": "",
+    "ai_review_resolver": "",
+    "validator_a": "",
+    "validator_b": "",
+    "validator_c": "",
+    "ai_reviewer_a": "",
+    "ai_reviewer_b": "",
+    "ai_reviewer_c": ""
+  },
+  "gates": {
+    "mainnet_enabled": false,
+    "accepting_funds": false,
+    "deployment_ui": false,
+    "operations_ui": false
+  },
+  "warning": "Not deployed and not independently audited. Verify every hash and address before funding."
+}

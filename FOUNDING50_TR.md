@@ -1,5 +1,7 @@
 # Founding 50 — yayın ve operasyon notu
 
+> **Arşiv/testnet notu:** Aşağıdaki metin eski ücretsiz Sepolia pilotunu anlatır ve mainnet teklifi değildir. Güncel mainnet Founding 50 kuralı şudur: Operations Safe tarafından kabul edilen ilk 50 buyer cüzdanı, ilk fonlanan Arbitrum One anlaşmasından başlayan 30 gün boyunca yalnızca AgentNotary'nin %1,5 protokol ücretinden muaftır. Seller bedeli, gas, Buyer Review rezervleri ve dış hizmetler ücretsiz değildir. Güncel kullanıcı metni `static/founding50-mainnet.html`, açılış sırası `MAINNET_FINAL_STEPS_TR.md` dosyasındadır.
+
 ## Kabul edilen teklif
 İlk 50 kabul edilen katılımcıya pilot boyunca AgentNotary komisyonu ve sabit hizmet ücreti yok. Gelecekteki ücretli sürüm ayrı teklif olacak; bu sözleşmede ücret artırma işlevi yok. Satıcının iş bedeli ve ağ gas maliyeti ücretsiz değildir. Pilot hakem ücreti de sıfır; hakemin ücretsiz görevi kabul etmesi gerekir.
 

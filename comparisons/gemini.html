@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentNotary Pilot — Institutional Dark Slate Spec</title>
+  <style>
+    /* Reset & Base System */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #0B0F19;
+      color: #F9FAFB;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      padding: 24px 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .app-container {
+      width: 100%;
+      max-width: 880px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Testnet Warning Banner */
+    .testnet-banner {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #FBBF24;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .badge-faucet {
+      background: #78350F;
+      color: #FDE68A;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 11px;
+    }
+
+    /* Header & Navigation */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #1F2937;
+    }
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: #2563EB;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+    }
+    .logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+    .wallet-chip {
+      background: #111827;
+      border: 1px solid #1F2937;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-family: monospace;
+      color: #9CA3AF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot-green { width: 8px; height: 8px; border-radius: 50%; background: #10B981; }
+
+    /* Stepper / Timeline */
+    .stepper-card {
+      background: #111827;
+      border: 1px solid #1F2937;
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .stepper-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #9CA3AF; margin-bottom: 12px; }
+    .stepper-track {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      position: relative;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+    }
+    .step-bar {
+      height: 4px;
+      background: #1F2937;
+      border-radius: 2px;
+    }
+    .step-active .step-bar { background: #3B82F6; }
+    .step-complete .step-bar { background: #10B981; }
+    .step-label { color: #9CA3AF; font-size: 11px; font-weight: 500; }
+    .step-active .step-label { color: #F9FAFB; font-weight: 600; }
+
+    /* Role Cards */
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .role-card {
+      background: #111827;
+      border: 1px solid #1F2937;
+      padding: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+    }
+    .role-card.active {
+      border-color: #3B82F6;
+      background: #1E293B;
+    }
+    .role-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .role-name { font-size: 14px; font-weight: 600; color: #F9FAFB; }
+    .role-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #1F2937;
+      color: #9CA3AF;
+    }
+    .role-card.active .role-badge {
+      background: #2563EB;
+      color: #FFFFFF;
+    }
+    .role-desc { font-size: 11px; color: #9CA3AF; line-height: 1.4; }
+
+    /* Checklist Section */
+    .checklist-card {
+      background: rgba(17, 24, 39, 0.6);
+      border: 1px dashed #1F2937;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 12px;
+    }
+    .checklist-card summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #9CA3AF;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+    }
+    .checklist-items { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; color: #D1D5DB; }
+    .check-line { display: flex; align-items: center; gap: 8px; }
+
+    /* Main Form Area */
+    .form-card {
+      background: #111827;
+      border: 1px solid #1F2937;
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #D1D5DB;
+      display: flex;
+      justify-content: space-between;
+    }
+    .form-input, .form-textarea {
+      background: #0B0F19;
+      border: 1px solid #1F2937;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #F9FAFB;
+      font-size: 13px;
+      outline: none;
+    }
+    .form-input:focus, .form-textarea:focus {
+      border-color: #3B82F6;
+    }
+    .form-helper { font-size: 11px; color: #6B7280; }
+
+    /* Primary CTA */
+    .btn-primary {
+      background: #2563EB;
+      color: #FFFFFF;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { background: #1D4ED8; }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      .role-grid { grid-template-columns: 1fr; }
+      .stepper-track { grid-template-columns: repeat(2, 1fr); row-gap: 12px; }
+      .testnet-banner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- 1. Strict Testnet Banner -->
+    <div class="testnet-banner">
+      <div>
+        <strong>Arbitrum Sepolia Testnet Only:</strong> Simulated environment for AI Agents. No real USDC or fiat currency is involved.
+      </div>
+      <a href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia" target="_blank" class="badge-faucet">Get Test ETH</a>
+    </div>
+
+    <!-- 2. Header -->
+    <header class="header">
+      <div class="logo-group">
+        <div class="logo-icon">§</div>
+        <div>
+          <div class="logo-text">AgentNotary</div>
+        </div>
+      </div>
+      <div class="wallet-chip">
+        <span class="dot-green"></span>
+        <span>0x6f0e...4BD</span>
+      </div>
+    </header>
+
+    <!-- 3. Stepper / State Track -->
+    <div class="stepper-card">
+      <div class="stepper-title">Escrow Lifecycle</div>
+      <div class="stepper-track">
+        <div class="step-item step-active">
+          <div class="step-bar"></div>
+          <span class="step-label">1. Lock Budget</span>
+        </div>
+        <div class="step-item">
+          <div class="step-bar"></div>
+          <span class="step-label">2. Seller Agree</span>
+        </div>
+        <div class="step-item">
+          <div class="step-bar"></div>
+          <span class="step-label">3. Deliver Specs</span>
+        </div>
+        <div class="step-item">
+          <div class="step-bar"></div>
+          <span class="step-label">4. Disburse</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Role Selection (Buyer Active) -->
+    <div class="role-grid">
+      <div class="role-card active">
+        <div class="role-header">
+          <span class="role-name">Buyer</span>
+          <span class="role-badge">Selected Role</span>
+        </div>
+        <p class="role-desc">Define deterministic terms and lock test USDC in the autonomous vault.</p>
+      </div>
+      <div class="role-card">
+        <div class="role-header">
+          <span class="role-name">Seller</span>
+          <span class="role-badge">Passive</span>
+        </div>
+        <p class="role-desc">Review locked escrow parameters and submit verifiable delivery payload.</p>
+      </div>
+      <div class="role-card">
+        <div class="role-header">
+          <span class="role-name">Arbitrator</span>
+          <span class="role-badge">Passive</span>
+        </div>
+        <p class="role-desc">Independent resolver handling disputed payloads via contract triggers.</p>
+      </div>
+    </div>
+
+    <!-- 5. Compact Before You Start Checklist -->
+    <details class="checklist-card" open>
+      <summary>
+        <span>✓ Pre-requisites for Pilot Launch</span>
+        <span>Founding 50 (Zero Fee)</span>
+      </summary>
+      <div class="checklist-items">
+        <div class="check-line"><span>✓</span> Arbitrum Sepolia RPC connected (Chain ID: 421614)</div>
+        <div class="check-line"><span>✓</span> Test USDC approval ready (Auto-batched in primary action)</div>
+        <div class="check-line"><span>✓</span> Programmatic SHA-256 agreement hash enforced</div>
+      </div>
+    </details>
+
+    <!-- 6. Buyer Action Form -->
+    <div class="form-card">
+      <div class="form-group">
+        <label class="form-label">
+          <span>Seller Destination Address</span>
+          <span style="color: #6B7280; font-weight: normal;">Contract or Agent EOA</span>
+        </label>
+        <input type="text" class="form-input" value="0x3a1b4C982d73E7e390C5c05B8544d673D541C89C" />
+        <span class="form-helper">The agent or developer wallet receiving funds upon verified delivery.</span>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">
+          <span>Lock Amount (Test USDC)</span>
+          <span style="color: #9CA3AF;">Balance: 500.00 USDC</span>
+        </div>
+        <input type="number" class="form-input" value="250.00" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          <span>Exact Agreement Terms & Verification Schema</span>
+        </label>
+        <textarea rows="3" class="form-textarea">Deliver JSON response containing valid 'transaction_hash' and 'status: confirmed' matching endpoint specification.</textarea>
+        <span class="form-helper">This text is converted to a cryptographic hash on-chain; neither party can alter terms.</span>
+      </div>
+
+      <button class="btn-primary">
+        <span>🔒 Approve USDC & Lock Budget</span>
+      </button>
+    </div>
+
+  </div>
+
+</body>
+</html>

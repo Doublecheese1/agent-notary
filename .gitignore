@@ -1,0 +1,13 @@
+.env
+.venv/
+.testdeps/
+.local-testdeps/
+.qa-deps/
+.qa-tmp/
+.pnpm-store/
+test-stubs/
+node_modules/
+__pycache__/
+data/
+*.db
+*.pyc

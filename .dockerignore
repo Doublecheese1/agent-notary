@@ -1,0 +1,14 @@
+.env
+.git
+node_modules
+__pycache__
+.venv
+.testdeps
+.local-testdeps
+.qa-deps
+.qa-tmp
+.pnpm-store
+test-stubs
+tests
+test_*.py
+test_*.cjs

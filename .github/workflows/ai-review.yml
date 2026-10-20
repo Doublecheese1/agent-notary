@@ -1,0 +1,27 @@
+name: AgentNotary AI review sync
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Sync confirmed disputes and advance eligible AI rulings
+        env:
+          AI_REVIEW_SYNC_URL: ${{ secrets.AI_REVIEW_SYNC_URL }}
+          AI_REVIEW_TRIGGER_TOKEN: ${{ secrets.AI_REVIEW_TRIGGER_TOKEN }}
+        run: |
+          if [ -z "$AI_REVIEW_SYNC_URL" ] || [ -z "$AI_REVIEW_TRIGGER_TOKEN" ]; then
+            echo "AI review sync is not configured; leaving the production gate closed."
+            exit 0
+          fi
+          curl --fail --silent --show-error --max-time 150 \
+            -X POST -H "Authorization: Bearer $AI_REVIEW_TRIGGER_TOKEN" \
+            "$AI_REVIEW_SYNC_URL"

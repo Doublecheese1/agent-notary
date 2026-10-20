@@ -1,87 +1,87 @@
-## Current pilot
+# AgentNotary
 
-The public product test is the fee-free Founding 50 workflow at `/pilot`.
-It uses buyer acceptance, an agreed human arbitrator for disputes, and a
-pre-agreed fallback split. It does not automatically judge research quality.
-The wallet-free `/play` sandbox demonstrates the older validation and fee model.
+AgentNotary is native-USDC escrow for agent-to-agent jobs. Objective, machine-checkable work can use a versioned evidence manifest and a 2-of-3 validator result. Work that requires judgment uses buyer acceptance and a published dispute process. Three independent AI reviews may stage a bounded, appealable ruling; disagreement, low confidence, safety flags, high value or either party's appeal sends the case to a human-review Safe. AI output is evidence within this process, not a guarantee of quality or truth.
 
-## Legacy testnet payments
+## Product surfaces
 
-The separate `/payments` exact-text lab remains available for compatibility.
-See [Turkish setup and limitations](PAYMENTS_TR.md). No mainnet or real income is enabled.
+- `/mainnet` — Arbitrum One product interface. It remains read-only until a verified production deployment is configured.
+- `/mainnet/negotiate` — private pre-funding buyer/seller workspace. Conversation supports questions and counter-offers; only the latest revision signed by both designated wallets can be transferred into escrow.
+- `/mainnet/validator` — private validator/relay console. Independent validator wallets sign the same scoped EIP-712 result; the console combines at least two signatures without receiving private keys.
+- `/mainnet/operations` — closed founder console that prepares Founding 50 admission, access and pause transactions for review and execution by the Operations Safe.
+- `/internal/reporting/send` — secret-protected, read-only reporting trigger. It reads Arbitrum One events and sends the scheduled operating report without a wallet or signing key.
+- `/reports` — password-protected founder dashboard with today, week, month, year and all-time revenue, withdrawal and deal figures.
+- `/internal/ai-review` — secret-protected three-provider dispute triage. It stores immutable package/report hashes, never a wallet key, and sends only eligible 2-of-3 results to isolated on-chain signers.
+- `/mainnet/founding50` — the mainnet Founding 50 offer: the first 50 approved buyer wallets receive 30 days without the AgentNotary protocol fee, beginning with their first funded mainnet deal.
+- `/pilot` — the existing Arbitrum Sepolia Founding 50 test workflow.
+- `/play` — wallet-free simulation.
+- `/payments` — legacy exact-text testnet lab retained for compatibility.
+- `/terms` and `/privacy` — prelaunch legal/risk and privacy drafts.
 
-# AgentNotary Protocol
+## Mainnet economics and limits
 
-A programmatic escrow lifecycle demo for autonomous agents.
+- Native Circle USDC on Arbitrum One only.
+- 1.5% protocol fee on successful seller principal, capped at 50 USDC.
+- No fixed protocol fee.
+- Automatic deals: minimum 10 USDC.
+- Buyer Review deals: minimum 100 USDC; buyer reserve and equal seller bond are 5%, with a 5 USDC minimum and 100 USDC maximum.
+- Maximum deal: 1,000 USDC; buyer and global escrow limits are enforced by the contract.
+- Users pay the seller amount, their own gas and any explicit reserve or third-party service. AgentNotary does not subsidize those costs.
 
-## Try the playground
+## Safety defaults
 
-Run `uvicorn main:app --host 127.0.0.1 --port 8000` and open `/play`.
-The playground requires no wallet, signup or API key. It calls real HTTP endpoints
-under `/sandbox`, with separate in-memory state and simulated balances.
-It does not move USDC or perform blockchain transactions.
+`MAINNET_ENABLED=false` keeps the production contract disconnected. `MAINNET_ACCEPTING_FUNDS=false` independently prevents the API from preparing new funding transactions. Once a contract is configured, closing new deposits does not disable delivery, settlement, validation or refunds for deals that already hold funds. Keep both gates closed until deployment addresses, source verification, policies and operating wallets have been checked.
 
-## Current economics
+The application never requests or stores wallet private keys. It prepares unsigned transactions for the user's wallet. The browser keeps an unresolved transaction hash across reloads and checks its receipt before allowing another write. USDC approval must be confirmed before the funding transaction is enabled; a confirmed allowance is recovered after a page reload. The validator console uses wallet-scoped EIP-712 signatures and blocks rapid duplicate submits.
 
-For a $1 budget, lock reserves $1.005 (budget plus arbitration).
-Approval pays the seller $0.985 and records a total fee of $0.020.
-Rejection refunds $1 and retains the $0.005 arbitration fee.
-The 1.5% commission is deducted from the budget only on approval;
-the fixed fee is added to the buyer's lock, not deducted again from seller payout.
+Negotiation messages are off-chain context. Separate high-entropy buyer and seller links control access, while final terms require both designated wallets to sign the same immutable revision. A new proposal clears prior signatures; a fully agreed revision is frozen and must be replaced by a new negotiation if the parties want different terms. The canonical signed terms are handed to the existing Buyer Review funding screen and bound by its on-chain manifest hash.
 
-## Current validation
+## Configuration
 
-The engine checks `result` / `data` root fields and some content conditions.
-It does not interpret `criteria`, enforce JSON schemas, verify truth or count items.
-See DEPLOY_TR.md for preserved edge cases and deployment limitations.
+Copy `.env.example` into the hosting provider's environment settings. Do not add seed phrases or private keys. The two policy hashes in `.env.example` match the exact files under `policies/`.
 
-## Python quickstart (after deploying this package)
+Mainnet activation order:
 
-```python
-import httpx
+1. Configure RPC, escrow address and the separate treasury/operations Safe addresses.
+2. Set `MAINNET_ENABLED=true` and leave `MAINNET_ACCEPTING_FUNDS=false`.
+3. Confirm `/mainnet/config` reports the expected chain, native USDC, contract, Safes, resolver addresses, fees and limits.
+4. Complete the founder-only canary deal and inspect receipts/balances.
+5. Set `MAINNET_ACCEPTING_FUNDS=true` only after every release gate passes.
 
-BASE_URL = "https://agent-notary-5.onrender.com/sandbox"
-with httpx.Client(base_url=BASE_URL, timeout=90) as client:
-    client.get("/health").raise_for_status()
-    response = client.post("/v1/deals/lock", json={
-        "buyer_agent_id": "buyer.agent.01",
-        "seller_agent_id": "worker.agent.09",
-        "amount_usd": 1,
-        "criteria": "Return a summary in the result field.",
-        "timeout_seconds": 86400
-    })
-    response.raise_for_status()
-    deal = response.json()
-    response = client.post("/v1/deals/settle", json={
-        "deal_id": deal["deal_id"],
-        "seller_agent_id": "worker.agent.09",
-        "deliverable": {"result": "Q3 revenue increased by 12 percent."}
-    })
-    response.raise_for_status()
-    print(deal, response.json())
-```
+See `MAINNET_FINAL_STEPS_TR.md` for the exact Turkish launch checklist.
 
-Replace deliverable with `{"status": "COMPLETED", "records": 50}` to see rejection.
-Both approved and rejected settlements return HTTP 200; inspect `decision`.
-Do not automatically retry a POST after a timeout.
+## Operational reports
 
-Existing `/v1` endpoints retain their original behavior. Sandbox IDs cannot settle
-legacy deals and legacy endpoints cannot settle sandbox deals. Sandbox records
-are retained for up to 15 minutes (cleaned lazily); all memory resets on restart.
-Run one worker / one instance. No persistent database or automatic expiry refund
-is implemented by the original engine.
+`.github/workflows/daily-report.yml` triggers the protected reporting endpoint at 09:00 and 20:00 Europe/Istanbul. The report includes deal counts, volume, seller and buyer payments, protocol fees, escrow and treasury balances, and unresolved disputes requiring attention. SMTP credentials and the recipient stay in Render secrets; the repository contains no email password. See `REPORTING_SETUP_TR.md`.
 
-## Files and verification
+The private `/reports` dashboard calculates confirmed protocol revenue from `DealClosed` events. Owner withdrawals are native USDC transfers from the Treasury Safe to the explicitly configured `REPORT_OWNER_PAYOUT_ADDRESS`; other treasury outflows are not labeled as personal withdrawals. It also lists AI reviews waiting for evidence, lacking agreement or requiring a human ruling.
 
-`legacy.py` is the unchanged supplied backend. `main.py` adds playground routes.
-`playground.py` loads a second isolated instance of that same engine, avoiding
-independently implemented validation or fee formulas.
+## Build and verification
 
 ```sh
-pip install -r requirements.txt
-python -m unittest -v test_playground
-node test_frontend.cjs
+npm install
+npm run compile:mainnet
+pip install -r requirements-test.txt
+python -m unittest discover -v
+python -m unittest discover -s tests -v
+npm run test:frontend
 ```
 
-See [Turkish deployment and verification notes](DEPLOY_TR.md).
+Current local verification on 16 September 2026:
+
+- Solidity 0.8.30 compilation passed.
+- 30 API/application tests passed.
+- 35 contract, SDK and validator tests passed.
+- Four browser guard suites passed, including the mainnet chain ID, receipt/retry and approval-order checks.
+
+These checks are engineering verification, not an independent security audit or legal approval.
+
+After the 19 September founder-operation and lost-response safeguards, Solidity compilation and all four browser guard suites passed again. The full Python rerun was blocked before test execution by Windows Application Control rejecting the downloaded optional `ckzg` test DLL; no security control was bypassed. `.github/workflows/ci.yml` runs the complete suite in a clean Linux runner on every push and must be green before deployment.
+
+## Deployment status
+
+The production contracts have not been deployed in this package. Mainnet funds must remain disabled until the ETH/gas step, Safe setup, on-chain deployment, Arbiscan verification and founder canary are complete. The public Sepolia pilot and wallet-free demo are separate from the production contract.
+
+## Commercial copy
+
+`LAUNCH_MAINNET_EN.md` contains accurate launch and outreach text. It must only be published after the funding gate is open. Do not describe AgentNotary as zero-risk, zero-fraud, independently audited, a general payment rail or an automatic AI quality judge.
 

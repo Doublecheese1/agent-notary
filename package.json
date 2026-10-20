@@ -1,1 +1,1 @@
-{"private":true,"scripts":{"compile":"node scripts/compile.cjs"},"devDependencies":{"solc":"0.8.30","@openzeppelin/contracts":"5.4.0"}}
+{"private":true,"scripts":{"compile":"node scripts/compile.cjs","compile:mainnet":"node scripts/compile-mainnet.cjs","release:manifest":"node scripts/release-manifest.cjs","test:frontend":"node test_frontend.cjs && node test_payments_frontend.cjs && node test_pilot_frontend.cjs && node test_mainnet_frontend.cjs && node test_negotiation_frontend.cjs"},"devDependencies":{"solc":"0.8.30","@openzeppelin/contracts":"5.4.0"}}

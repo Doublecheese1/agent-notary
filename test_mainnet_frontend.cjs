@@ -1,0 +1,38 @@
+const fs = require("fs");
+const assert = require("assert");
+
+const html = fs.readFileSync("static/mainnet.html", "utf8");
+const js = fs.readFileSync("static/mainnet.js", "utf8");
+const setup = fs.readFileSync("static/mainnet-setup.js", "utf8");
+const operations = fs.readFileSync("static/mainnet-operations.js", "utf8");
+const validatorHtml = fs.readFileSync("static/mainnet-validator.html", "utf8");
+const validatorJs = fs.readFileSync("static/mainnet-validator.js", "utf8");
+
+assert(js.includes('CHAIN="0xa4b1"'), "mainnet UI must use Arbitrum One chain ID");
+assert(!js.includes('CHAIN="0x66eee"'), "mainnet UI must never use Arbitrum Sepolia chain ID");
+assert(js.includes("agentnotary.pendingTx"), "pending transaction hash must survive reloads");
+assert(js.includes("agentnotary.uncertainIntent") && js.includes("saveUncertain"), "lost wallet responses must preserve unresolved intent");
+assert(js.includes("eth_getTransactionReceipt"), "wallet flow must check the receipt");
+assert(js.includes("Do not send it again"), "uncertain writes must block blind retries");
+assert(!js.includes("privateKey"), "browser must not contain a private-key field");
+assert(/CHAIN\s*=\s*"0xa4b1"/.test(setup), "deployment UI must use Arbitrum One");
+assert(!setup.includes("privateKey"), "deployment UI must not contain a private-key field");
+assert(setup.includes("getThreshold()") && setup.includes("0xe75235b8"), "deployment must check Safe multisig thresholds");
+assert(setup.includes("agentnotary.deploymentPending") && setup.includes("Check the saved deployment"), "deployment must retain uncertain writes across reloads");
+assert(operations.includes("prepare-operations-action") && !operations.includes("eth_sendTransaction"), "founder operations must be prepared for Safe execution, not sent from browser");
+for (const id of ["arbitrationWindow", "reasonHash", "evidenceUri", "dealLink", "checkTx"]) {
+  assert(html.includes(`id="${id}"`), `missing mainnet UI element: ${id}`);
+}
+assert(html.includes('id="propose" disabled'), "funding must wait for confirmed approval");
+assert(html.includes('id="fallback" type="number" min="0" max="100" value="0"'), "automatic mode must not default to seller payout on validator silence");
+assert(js.includes("reconcileApproval"), "confirmed allowance must survive a page reload");
+assert(js.includes("prepare-review-action") && js.includes("Appeal AI ruling"), "deal UI must expose the AI appeal path");
+assert(!js.includes("Prepare seller-wins ruling") && !js.includes("Prepare buyer-wins ruling"), "ordinary users must not impersonate the resolver");
+assert(js.includes("if(sending)return"), "wallet send must block rapid duplicate clicks");
+assert(validatorJs.includes("eth_signTypedData_v4"), "validator console must use scoped wallet signatures");
+assert(validatorJs.includes('action:"submitValidation"'), "validator console must prepare quorum relay");
+assert(!validatorJs.includes("privateKey"), "validator console must never request a private key");
+for (const id of ["evidenceHash", "signature1", "signature2", "deadline"]) {
+  assert(validatorHtml.includes(`id="${id}"`), `missing validator console field: ${id}`);
+}
+console.log("Mainnet UI guards passed: chain, receipt, retry, approval recovery, duplicate-click lock and validator relay.");

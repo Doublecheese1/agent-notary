@@ -1,3 +1,7 @@
+## Yeni bağlantı akışı
+
+/payments ekranındaki Bağlan düğmesi cüzdan onayıyla Arbitrum Sepolia ağını ekler/seçer, test ETH ve USDC bakiyelerini okur. Treasury alanı boşsa bağlı adresle doldurulur; kurulumdan önce adresi kontrol edin. Test ETH eksikse zincir işlemi hazır sayılmaz. Faucet bakiyesi sağlanmaz. Ağ veya hesap değişirse yeniden kontrol gerekir. Eski aşağıdaki elle ağ seçimi adımı bu düğmeyle yapılabilir.
+
 # AgentNotary ödeme denemesi
 
 Bu paket Arbitrum Sepolia TEST ağı içindir. Gerçek para kazandırmaz; ana ağ sözleşme tarafından reddedilir. Mevcut /play ve /v1 API davranışı korunur. Yeni ekran /payments adresindedir. Henüz halka açık test ağına sözleşme kurulmadı.

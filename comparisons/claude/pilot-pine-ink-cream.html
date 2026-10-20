@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AgentNotary — Proposed Palette Mockup</title>
+<style>
+  :root {
+    --bg: #F6F1E7;            /* page background — cream */
+    --surface: #FFFFFF;       /* card/surface */
+    --border: #DDD3C0;        /* default border */
+    --border-selected: #1F3D2B; /* selected card border — pine */
+    --fill-selected: #EAF0EA; /* selected card fill */
+    --brand: #1F3D2B;         /* primary brand / button — pine */
+    --brand-hover: #16301F;   /* hover */
+    --text: #14171B;          /* primary text — ink */
+    --text-secondary: #4B534E;/* secondary text */
+    --success: #1F7A4D;
+    --success-bg: #E7F3EC;
+    --warning: #8A5A12;
+    --warning-bg: #FBF0DC;
+    --error: #B23A2E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  .topnav { text-align: center; margin-bottom: 40px; font-size: 14px; }
+  .topnav a { color: var(--brand); text-decoration: underline; margin: 0 10px; }
+  h1 { text-align: center; font-size: 40px; margin: 0 0 8px; letter-spacing: -0.5px; }
+  .subtitle { text-align: center; color: var(--text-secondary); margin: 0 0 24px; font-size: 16px; }
+  .testnet-banner {
+    background: var(--warning-bg);
+    border: 1px solid #EBD9AE;
+    color: var(--warning);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 14px;
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 28px;
+  }
+  .status-banner {
+    background: var(--fill-selected);
+    border: 1px solid var(--border-selected);
+    color: var(--brand);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 15px;
+    margin-bottom: 32px;
+  }
+  .role-prompt { text-align: center; color: var(--text-secondary); font-size: 15px; margin-bottom: 16px; }
+  .cards { display: flex; gap: 16px; margin-bottom: 32px; }
+  .card {
+    flex: 1;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 18px;
+    text-align: center;
+    position: relative;
+  }
+  .card.selected {
+    border: 2px solid var(--border-selected);
+    background: var(--fill-selected);
+    box-shadow: 0 2px 10px rgba(31,61,43,0.12);
+  }
+  .card .check {
+    position: absolute; top: 14px; right: 14px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--brand); color: #fff;
+    font-size: 13px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+  .card .icon { font-size: 30px; margin-bottom: 14px; opacity: 0.85; }
+  .card.selected .icon { opacity: 1; }
+  .card h3 { margin: 0 0 8px; font-size: 19px; }
+  .card p { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.4; }
+  .card.selected p { color: #2C3B30; }
+
+  .progress { display: flex; align-items: center; margin-bottom: 12px; }
+  .progress .seg { flex: 1; height: 4px; background: var(--border); border-radius: 2px; margin: 0 4px; }
+  .progress .seg.active { background: var(--brand); }
+  .progress-labels { display: flex; margin-bottom: 32px; }
+  .progress-labels span { flex: 1; text-align: center; font-size: 13px; color: var(--text-secondary); }
+  .progress-labels span.active { color: var(--brand); font-weight: 700; }
+
+  .demo-link { text-align: center; margin-bottom: 28px; }
+  .demo-link a { color: var(--brand); font-size: 14px; text-decoration: underline; }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+  }
+  .panel h2 { margin: 0 0 20px; font-size: 22px; }
+  .row {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #FBF9F4; border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; font-size: 14px;
+  }
+  .row .val { font-weight: 700; }
+  .row .val.muted { color: var(--text-secondary); font-weight: 600; }
+  .row .val.success { color: var(--success); }
+  .btn-primary {
+    width: 100%; background: var(--brand); color: #fff; border: none;
+    border-radius: 10px; padding: 16px; font-size: 15px; font-weight: 700;
+    margin: 18px 0 10px; cursor: pointer;
+  }
+  .btn-secondary {
+    width: 100%; background: #fff; color: var(--text); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .faucet { text-align: center; font-size: 13px; color: var(--text-secondary); margin: 18px 0 12px; }
+  .faucet a { color: var(--brand); text-decoration: underline; }
+  .fineprint { text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 18px; }
+  .tech { border-top: 1px solid var(--border); padding-top: 14px; font-size: 14px; color: var(--text-secondary); }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 28px 16px 60px; }
+    h1 { font-size: 30px; }
+    .cards { flex-direction: column; }
+    .progress-labels span { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topnav">
+      <a href="#">Founding 50</a> · <a href="#">Wallet-free demo</a>
+    </div>
+
+    <h1>AgentNotary</h1>
+    <p class="subtitle">Arbitrum Sepolia testnet · no real money is used</p>
+
+    <div class="testnet-banner">⚠ Testnet only — no real funds are used in this pilot</div>
+
+    <div class="status-banner">Ready. Connect your wallet to continue.</div>
+
+    <p class="role-prompt">What is your role in this deal?</p>
+    <div class="cards">
+      <div class="card selected">
+        <div class="check">✓</div>
+        <div class="icon">🛒</div>
+        <h3>Buyer</h3>
+        <p>Lock a budget and<br>approve delivery</p>
+      </div>
+      <div class="card">
+        <div class="icon">◇</div>
+        <h3>Seller</h3>
+        <p>Accept a deal and<br>deliver work</p>
+      </div>
+      <div class="card">
+        <div class="icon">⚖</div>
+        <h3>Arbitrator</h3>
+        <p>Rule only when a deal<br>is disputed</p>
+      </div>
+    </div>
+
+    <div class="progress">
+      <div class="seg active"></div>
+      <div class="seg"></div>
+      <div class="seg"></div>
+      <div class="seg"></div>
+    </div>
+    <div class="progress-labels">
+      <span class="active">1 Lock</span>
+      <span>2 Accept</span>
+      <span>3 Deliver</span>
+      <span>4 Result</span>
+    </div>
+
+    <div class="demo-link"><a href="#">Try the 30-second wallet-free demo</a></div>
+
+    <div class="panel">
+      <h2>Before you start</h2>
+      <div class="row"><span>MetaMask and wallet</span><span class="val muted">Not connected</span></div>
+      <div class="row"><span>Network</span><span class="val muted">Arbitrum Sepolia required</span></div>
+      <div class="row"><span>Test ETH for gas</span><span class="val muted">Not checked</span></div>
+      <div class="row"><span>Test USDC</span><span class="val muted">Not checked</span></div>
+      <div class="row"><span>Founding 50 membership</span><span class="val success">49 places left</span></div>
+
+      <button class="btn-primary">Connect wallet and switch network</button>
+      <button class="btn-secondary">Refresh balances</button>
+
+      <p class="faucet">Need free test tokens? <a href="#">Get test ETH</a> · <a href="#">Get test USDC</a></p>
+      <p class="fineprint">MetaMask always asks before a transaction. Connecting alone never sends funds.</p>
+
+      <div class="tech">▶ Technical information</div>
+    </div>
+  </div>
+</body>
+</html>
