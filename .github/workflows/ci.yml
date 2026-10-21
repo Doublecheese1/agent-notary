@@ -26,6 +26,7 @@ jobs:
       - run: pnpm run compile
       - run: node scripts/compile-open.cjs
       - run: pnpm run compile:mainnet
+      - run: pnpm run preflight:mainnet
       - run: pip install -r requirements-test.txt
       - run: python -m unittest discover -v
       - run: python -m unittest discover -s tests -v

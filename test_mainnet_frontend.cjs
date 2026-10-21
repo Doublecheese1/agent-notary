@@ -7,6 +7,11 @@ const setup = fs.readFileSync("static/mainnet-setup.js", "utf8");
 const operations = fs.readFileSync("static/mainnet-operations.js", "utf8");
 const validatorHtml = fs.readFileSync("static/mainnet-validator.html", "utf8");
 const validatorJs = fs.readFileSync("static/mainnet-validator.js", "utf8");
+const setupHtml = fs.readFileSync("static/mainnet-setup.html", "utf8");
+const envExample = fs.readFileSync(".env.example", "utf8");
+const release = JSON.parse(fs.readFileSync("release/mainnet-release.json", "utf8"));
+const APPROVED_DEPLOYER = "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD";
+const EXCHANGE_DEPOSIT = "0x21a7b51ffF1963C3EE530097B6A71a294a09c26D";
 
 assert(js.includes('CHAIN="0xa4b1"'), "mainnet UI must use Arbitrum One chain ID");
 assert(!js.includes('CHAIN="0x66eee"'), "mainnet UI must never use Arbitrum Sepolia chain ID");
@@ -32,6 +37,12 @@ assert(js.includes("if(sending)return"), "wallet send must block rapid duplicate
 assert(validatorJs.includes("eth_signTypedData_v4"), "validator console must use scoped wallet signatures");
 assert(validatorJs.includes('action:"submitValidation"'), "validator console must prepare quorum relay");
 assert(!validatorJs.includes("privateKey"), "validator console must never request a private key");
+assert(setupHtml.includes(APPROVED_DEPLOYER), "deployment page must show the controlled MetaMask deployer");
+assert(envExample.includes(`MAINNET_DEPLOYER_ADDRESS=${APPROVED_DEPLOYER}`), "environment example must use the controlled MetaMask deployer");
+assert.strictEqual(release.deployment_inputs.deployer, APPROVED_DEPLOYER, "release manifest deployer must match the controlled MetaMask wallet");
+for (const [name, content] of Object.entries({setupHtml, envExample, release: JSON.stringify(release)})) {
+  assert(!content.includes(EXCHANGE_DEPOSIT), `${name} must never use the exchange deposit address as deployer`);
+}
 for (const id of ["evidenceHash", "signature1", "signature2", "deadline"]) {
   assert(validatorHtml.includes(`id="${id}"`), `missing validator console field: ${id}`);
 }
