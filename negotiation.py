@@ -179,7 +179,7 @@ def negotiation_script():
 @page_router.get("/{negotiation_id}", include_in_schema=False)
 def negotiation_workspace(negotiation_id: str):
     uuid.UUID(negotiation_id)
-    return FileResponse(ROOT / "static" / "negotiate.html", headers={"Cache-Control": "no-store"})
+    return FileResponse(ROOT / "static" / "negotiate.html", headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow, noarchive"})
 
 
 @router.post("")

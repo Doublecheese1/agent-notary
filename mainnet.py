@@ -113,12 +113,12 @@ def script():
 @router.get("/deal/{deal_id}", include_in_schema=False)
 def deal_page(deal_id: str):
     digest(deal_id)
-    return FileResponse(ROOT / "static/mainnet.html", headers={"Cache-Control": "no-store"})
+    return FileResponse(ROOT / "static/mainnet.html", headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow, noarchive"})
 
 
 @router.get("/setup", include_in_schema=False)
 def setup_page():
-    return FileResponse(ROOT / "static/mainnet-setup.html", headers={"Cache-Control": "no-store"})
+    return FileResponse(ROOT / "static/mainnet-setup.html", headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow, noarchive"})
 
 
 @router.get("/setup.js", include_in_schema=False)
@@ -128,7 +128,7 @@ def setup_script():
 
 @router.get("/validator", include_in_schema=False)
 def validator_page():
-    return FileResponse(ROOT / "static/mainnet-validator.html", headers={"Cache-Control": "no-store"})
+    return FileResponse(ROOT / "static/mainnet-validator.html", headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow, noarchive"})
 
 
 @router.get("/validator.js", include_in_schema=False)
@@ -138,7 +138,7 @@ def validator_script():
 
 @router.get("/operations", include_in_schema=False)
 def operations_page():
-    return FileResponse(ROOT / "static/mainnet-operations.html", headers={"Cache-Control": "no-store"})
+    return FileResponse(ROOT / "static/mainnet-operations.html", headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow, noarchive"})
 
 
 @router.get("/operations.js", include_in_schema=False)

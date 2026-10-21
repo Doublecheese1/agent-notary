@@ -43,11 +43,11 @@ def script():
 @router.get('/deal/{deal_id}', include_in_schema=False)
 def deal_page(deal_id: str):
     digest(deal_id)
-    return FileResponse(ROOT/'static/pilot.html', headers={'Cache-Control':'no-store'})
+    return FileResponse(ROOT/'static/pilot.html', headers={'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow, noarchive'})
 
 @router.get('/admin', include_in_schema=False)
 def admin_page():
-    return FileResponse(ROOT/'static/pilot-admin.html', headers={'Cache-Control':'no-store'})
+    return FileResponse(ROOT/'static/pilot-admin.html', headers={'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow, noarchive'})
 
 @router.get('/admin.js', include_in_schema=False)
 def admin_script():
