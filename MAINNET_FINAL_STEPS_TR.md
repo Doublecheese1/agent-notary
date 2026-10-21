@@ -29,7 +29,7 @@ Tarih: 16 Eylül 2026
 
 Bu adresler private key değildir; yalnızca herkese açık cüzdan adresleridir.
 
-Onaylanmış Arbitrum One deployer/gas cüzdanı: `0x21a7b51ffF1963C3EE530097B6A71a294a09c26D`. 19 Eylül 2026 zincir kontrolünde bakiye `0 ETH`, işlem sayısı `0` ve kontrat kodu yoktu. Kontrat dağıtımları yalnızca bu cüzdandan hazırlanacaktır.
+Onaylanmış Arbitrum One deployer/gas cüzdanı: `0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD`. Bu adres kullanıcının MetaMask Account 1 hesabıdır ve kurtarma kelimeleri çevrimdışı yedeklenmiştir. Önceki `0x21a7…c26D` adresi BtcTurk yatırma adresi olduğu için deployer ve ödeme yapılandırmasından çıkarılmıştır. Kontrat dağıtımları yalnızca yeni onaylı cüzdandan hazırlanacaktır.
 
 1. `treasurySafe`: protokol ücretini alacak ayrı Safe adresi.
 2. `operationsSafe`: yeni buyer kabulü, yeni anlaşmaları durdurma ve gelecekteki resolver değişiklikleri için ayrı Safe adresi.

@@ -31,7 +31,7 @@ const manifest = {
     automatic_policy: hash("policies/automatic-json-evidence-v1.json"),
     review_policy: hash("policies/buyer-review-v1.json")
   },
-  deployment_inputs: {deployer: "0x21a7b51ffF1963C3EE530097B6A71a294a09c26D", treasury_safe: "", operations_safe: "", human_review_safe: "", ai_review_resolver: "", validator_a: "", validator_b: "", validator_c: "", ai_reviewer_a: "", ai_reviewer_b: "", ai_reviewer_c: ""},
+  deployment_inputs: {deployer: "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD", treasury_safe: "", operations_safe: "", human_review_safe: "", ai_review_resolver: "", validator_a: "", validator_b: "", validator_c: "", ai_reviewer_a: "", ai_reviewer_b: "", ai_reviewer_c: ""},
   gates: {mainnet_enabled: false, accepting_funds: false, deployment_ui: false, operations_ui: false},
   warning: "Not deployed and not independently audited. Verify every hash and address before funding."
 };

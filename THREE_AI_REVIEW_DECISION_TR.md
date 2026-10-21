@@ -25,7 +25,7 @@ Bu nedenle Gemini raporundaki HTTP indirme, eksik Pausable, replay bağının bu
 4. Hızlı çift tıklamayla iki cüzdan isteği açılabilecek kısa pencere kapatıldı.
 5. Sayfa yenilendikten sonra zincirde onaylanmış USDC allowance tekrar okunuyor; kullanıcı gereksiz ikinci approval'a zorlanmıyor.
 6. Resolver rotasyonundaki sürekli güven garantisi kapatıldı. Arbitrum One üzerinde yeni Automatic validator yalnızca mevcut immutable quorum ile aynı runtime koduna sahipse; yeni Review Arbitrator yalnızca mevcut Safe ile aynı runtime koduna ve en az iki imza eşiğine sahipse atanabilir. Mevcut anlaşmalar zaten fonlandıkları resolver adresini korur.
-7. Deployer/gas cüzdanı `0x21a7b51ffF1963C3EE530097B6A71a294a09c26D` olarak backend, deployment UI, ortam örneği ve release manifest içinde eşleştirildi. 19 Eylül 2026 doğrudan Arbitrum One RPC kontrolünde bakiye `0 ETH`, nonce `0`, kod `0x` ve chain ID `42161` görüldü.
+7. Deployer/gas cüzdanı `0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD` olarak backend, deployment UI ve release manifest içinde eşleştirildi. Önceki `0x21a7…c26D` adresinin BtcTurk yatırma adresi olduğu doğrulandığı için üretim yapılandırmasından çıkarıldı.
 8. Eski `FOUNDING50_TR.md` belgesinin testnet arşivi olduğu dosyanın başında açıklandı; güncel mainnet teklifiyle karıştırılması önlendi.
 
 ## Değiştirilmeyen kararlar

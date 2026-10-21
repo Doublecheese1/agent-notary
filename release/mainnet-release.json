@@ -32,7 +32,7 @@
     "review_policy": "6658bf875da1826ebd8393db68405e422bd929fcd7504ef8a3267ac048a53da7"
   },
   "deployment_inputs": {
-    "deployer": "0x21a7b51ffF1963C3EE530097B6A71a294a09c26D",
+    "deployer": "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
     "treasury_safe": "",
     "operations_safe": "",
     "human_review_safe": "",

@@ -86,7 +86,7 @@ class MainnetRouteTest(unittest.TestCase):
         self.assertEqual(prepared.status_code, 503)
 
     def test_founder_deployment_is_locked_to_the_approved_wallet(self):
-        approved = "0x21a7b51ffF1963C3EE530097B6A71a294a09c26D"
+        approved = "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD"
         request = {
             "deployer": "0x0000000000000000000000000000000000000001",
             "signer_a": "0x0000000000000000000000000000000000000002",
