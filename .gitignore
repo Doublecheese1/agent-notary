@@ -3,6 +3,7 @@
 .testdeps/
 .local-testdeps/
 .qa-deps/
+.qa-deps-discovery/
 .qa-tmp/
 .pnpm-store/
 test-stubs/

@@ -7,6 +7,7 @@ from mainnet import router as mainnet_router
 from reporting import router as reporting_router
 from negotiation import router as negotiation_router, page_router as negotiation_page_router
 from ai_review import router as ai_review_router
+from discovery import router as discovery_router
 
 app.include_router(router)
 app.include_router(payments_router)
@@ -16,6 +17,7 @@ app.include_router(reporting_router)
 app.include_router(negotiation_router)
 app.include_router(negotiation_page_router)
 app.include_router(ai_review_router)
+app.include_router(discovery_router)
 
 PUBLIC_ORIGIN = "https://agent-notary-5.onrender.com"
 
@@ -35,6 +37,8 @@ def robots():
         "Disallow: /mainnet/negotiate/",
         "Disallow: /pilot/admin",
         "Disallow: /pilot/deal/",
+        "Allow: /.well-known/agent-card.json",
+        "Allow: /llms.txt",
         f"Sitemap: {PUBLIC_ORIGIN}/sitemap.xml",
         "",
     ])

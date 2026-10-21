@@ -14,11 +14,19 @@ Bu belge, `research/AgentNotary-CHATGPT-BRIEF-2026-10-21.md` içindeki pazar ön
 - AI inceleme tasarımında üç sağlayıcı, 2/3 EIP-712 imza ve idempotent relayer sınırı vardır.
 - Gerçek para kabulü kapalıdır. Mainnet kontrat adresleri, Safe adresleri, validator/signer servisleri ve bağımsız inceleme tamamlanmamıştır.
 
+## 21 Ekim 2026 ilerleme kaydı
+
+- `GET /v1/protocol/status` ile ağ, varlık, sandbox ve güvenlik kapıları makinece okunabilir biçimde yayımlandı.
+- `GET /.well-known/agent-card.json` A2A 1.0 HTTP+JSON arayüzünü ve yalnız çalışan iki salt okunur yeteneği ilan ediyor.
+- `POST /a2a/message:send` protokol durumu ve cüzdansız demo bilgisi döndürüyor; zincir işlemi hazırlamıyor ve para taşımıyor.
+- `GET /llms.txt` geliştirici ve ajan keşfi için kısa, doğrulanabilir ürün bilgisini yayımlıyor.
+- Halka açık açılış tarihi 23 Ekim 2026 olarak yayımlandı. Mainnet para kabul kapısı ayrıca kapalı tutuluyor.
+
 ## Henüz mevcut olmayanlar
 
 - x402 uyumlu ücretli uç ve Coinbase facilitator doğrulama/settlement entegrasyonu
 - Yayımlanmış yerel paket ve uzaktan Streamable HTTP MCP sunucusu
-- Çalışan A2A JSON-RPC servisi ve onu doğru biçimde tanımlayan Agent Card
+- Para hareketi yapan A2A yetenekleri; mevcut A2A arayüzü yalnız salt okunurdur
 - Protokoller arası doğrulanabilen, yayımlanmış Settlement Attestation Receipt standardı
 - MCP Registry, Bazaar, x402scan veya ERC-8004 kaydı
 - Herkese açık API anahtarı/faturalama ürünü

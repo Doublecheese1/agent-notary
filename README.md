@@ -16,6 +16,9 @@ AgentNotary is native-USDC escrow for agent-to-agent jobs. Objective, machine-ch
 - `/play` — wallet-free simulation.
 - `/payments` — legacy exact-text testnet lab retained for compatibility.
 - `/terms` and `/privacy` — prelaunch legal/risk and privacy drafts.
+- `/v1/protocol/status` — public, machine-readable launch and capability status. It explicitly reports whether mainnet is enabled and accepting funds.
+- `/.well-known/agent-card.json` and `/a2a/message:send` — A2A 1.0 HTTP+JSON discovery with read-only protocol-status and wallet-free-demo skills.
+- `/llms.txt` — short product and safety facts for agents and developer tools.
 
 ## Mainnet economics and limits
 
@@ -80,6 +83,8 @@ After the 19 September founder-operation and lost-response safeguards, Solidity 
 ## Deployment status
 
 The production contracts have not been deployed in this package. Mainnet funds must remain disabled until the ETH/gas step, Safe setup, on-chain deployment, Arbiscan verification and founder canary are complete. The public Sepolia pilot and wallet-free demo are separate from the production contract.
+
+The public interface launch is scheduled for 23 October 2026. This date does not itself open mainnet deposits. The funding gate remains an independent technical and operational decision.
 
 ## Commercial copy
 
