@@ -12,13 +12,16 @@ from datetime import datetime, time, timedelta, timezone
 from email.message import EmailMessage
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Body, Cookie, Header, HTTPException, Response
+from fastapi import APIRouter, Body, Cookie, Header, HTTPException, Request, Response
 from web3 import Web3
 
 from mainnet import connection
 from ai_review import attention_queue as ai_attention_queue
 
 router = APIRouter(prefix="/internal/reporting", tags=["Internal reporting"])
+_LOGIN_ATTEMPTS: dict[str, list[float]] = {}
+LOGIN_WINDOW_SECONDS = 15 * 60
+LOGIN_MAX_FAILURES = 5
 USDC = 10**6
 STATES = ["NONE", "PROPOSED", "LOCKED", "DELIVERED", "DISPUTED", "PAID", "REFUNDED", "FINALIZED_SPLIT"]
 TOKEN_ABI = [
@@ -142,6 +145,23 @@ def _authorize_session(value: str | None, now: int | None = None) -> None:
     expected = hmac.new(_session_secret(), expires_text.encode("ascii"), hashlib.sha256).hexdigest()
     if expires < int(now or clock.time()) or not secrets.compare_digest(signature, expected):
         raise HTTPException(401, "Session expired")
+
+
+def _login_key(request: Request) -> str:
+    return request.client.host if request.client else "unknown"
+
+
+def _check_login_limit(key: str, now: float | None = None) -> None:
+    current = float(now if now is not None else clock.monotonic())
+    recent = [item for item in _LOGIN_ATTEMPTS.get(key, []) if current - item < LOGIN_WINDOW_SECONDS]
+    _LOGIN_ATTEMPTS[key] = recent
+    if len(recent) >= LOGIN_MAX_FAILURES:
+        raise HTTPException(429, "Too many login attempts. Try again later.")
+
+
+def _record_login_failure(key: str, now: float | None = None) -> None:
+    _check_login_limit(key, now)
+    _LOGIN_ATTEMPTS.setdefault(key, []).append(float(now if now is not None else clock.monotonic()))
 
 
 def _period_start_blocks(w3: Web3, deployment_block: int, latest: int, now_local: datetime) -> dict[str, int]:
@@ -349,11 +369,15 @@ def send_scheduled_report(x_agentnotary_report_token: str | None = Header(defaul
 
 
 @router.post("/login")
-def dashboard_login(response: Response, payload: dict = Body(...)):
+def dashboard_login(request: Request, response: Response, payload: dict = Body(...)):
+    key = _login_key(request)
+    _check_login_limit(key)
     expected = os.getenv("REPORT_DASHBOARD_PASSWORD", "")
     supplied = str(payload.get("password", ""))
     if not reporting_enabled() or len(expected) < 12 or not secrets.compare_digest(supplied, expected):
+        _record_login_failure(key)
         raise HTTPException(401, "Wrong password")
+    _LOGIN_ATTEMPTS.pop(key, None)
     response.set_cookie(
         "agentnotary_report_session",
         _make_session(),

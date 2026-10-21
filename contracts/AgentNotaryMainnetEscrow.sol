@@ -38,7 +38,8 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
     uint16 public constant BPS_DENOMINATOR = 10_000;
     uint256 public constant FOUNDING_PERIOD = 30 days;
     uint256 public constant FOUNDING_LIMIT = 50;
-    uint256 public constant MIN_REVIEW_WINDOW = 24 hours;
+    uint256 public constant MIN_REVIEW_WINDOW = 2 days;
+    uint256 public constant MIN_REVIEW_ARBITRATION_WINDOW = 7 days;
     uint256 public constant MAX_INCONCLUSIVE_RESULTS = 3;
     uint256 public constant MAX_ESCROWED_PER_BUYER = 1_100e6;
 
@@ -190,6 +191,7 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
         operationsSafe = operationsSafe_;
         automaticValidator = automaticValidator_;
         reviewArbitrator = reviewArbitrator_;
+        _pause();
     }
 
     function pauseNewDeals() external onlyOperations { _pause(); }
@@ -283,7 +285,8 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
         } else {
             require(request.amount >= MIN_REVIEW_AMOUNT, "review minimum 100 USDC");
             require(request.arbitrationReserve == arbitrationReserveFor(request.amount), "wrong arbitration reserve");
-            require(request.decisionWindow >= MIN_REVIEW_WINDOW, "review window below 24 hours");
+            require(request.decisionWindow >= MIN_REVIEW_WINDOW, "review window below 2 days");
+            require(request.arbitrationWindow >= MIN_REVIEW_ARBITRATION_WINDOW, "arbitration window below 7 days");
             resolver = reviewArbitrator;
         }
 

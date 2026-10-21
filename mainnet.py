@@ -118,11 +118,15 @@ def deal_page(deal_id: str):
 
 @router.get("/setup", include_in_schema=False)
 def setup_page():
+    if not deployment_ui_enabled():
+        raise HTTPException(404, "Not found")
     return FileResponse(ROOT / "static/mainnet-setup.html", headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow, noarchive"})
 
 
 @router.get("/setup.js", include_in_schema=False)
 def setup_script():
+    if not deployment_ui_enabled():
+        raise HTTPException(404, "Not found")
     return FileResponse(ROOT / "static/mainnet-setup.js", media_type="text/javascript", headers={"Cache-Control": "no-store"})
 
 
@@ -366,7 +370,12 @@ def prepare_proposal(req: Proposal):
         raise HTTPException(422, "Buyer and seller must be different wallets.")
     mode = 0 if req.mode == "automatic" else 1
     amount = units(req.amount)
+    if req.mode == "buyer_review" and req.decision_window < 2 * 24 * 60 * 60:
+        raise HTTPException(422, "Buyer Review requires at least 2 days for the buyer decision window.")
+    if req.mode == "buyer_review" and req.arbitration_window < 7 * 24 * 60 * 60:
+        raise HTTPException(422, "Buyer Review requires at least 7 days for AI review, appeal and human review.")
     reserve = 0 if mode == 0 else contract.functions.arbitrationReserveFor(amount).call()
+    protocol_fee = contract.functions.protocolFeeFor(buyer, amount).call()
     manifest_hash, policy_hash, salt = Web3.keccak(text=req.manifest), digest(req.policy_hash), digest(req.salt)
     register_manifest(Web3.to_hex(manifest_hash), req.manifest)
     request = (
@@ -384,7 +393,9 @@ def prepare_proposal(req: Proposal):
         "deal_id": Web3.to_hex(deal_id), "manifest_hash": Web3.to_hex(manifest_hash),
         "policy_hash": Web3.to_hex(policy_hash), "amount_units": amount,
         "buyer_reserve_units": reserve, "buyer_total_units": total,
-        "seller_bond_units": reserve, "approval": transaction(buyer, USDC, Web3.to_hex(approval_data)),
+        "seller_bond_units": reserve, "protocol_fee_units": protocol_fee,
+        "seller_net_units": amount - protocol_fee,
+        "approval": transaction(buyer, USDC, Web3.to_hex(approval_data)),
         # The proposal cannot be simulated until the approval transaction is confirmed.
         # The browser performs a fresh eth_call immediately before it asks the wallet to send.
         "proposal": transaction(buyer, contract.address, fn._encode_transaction_data()),

@@ -37,6 +37,7 @@ class AIReviewResolverTest(unittest.TestCase):
         )
         self.resolver.functions.bindEscrow(self.escrow.address).transact({"from": self.ops})
         self.escrow.functions.setBuyerAccess(self.buyer, True).transact({"from": self.ops})
+        self.escrow.functions.resumeNewDeals().transact({"from": self.ops})
         self.token.functions.approve(self.escrow.address, 2_000 * USDC).transact({"from": self.buyer})
         self.token.functions.mint(self.seller, 500 * USDC).transact({"from": self.buyer})
         self.token.functions.approve(self.escrow.address, 500 * USDC).transact({"from": self.seller})
@@ -54,11 +55,11 @@ class AIReviewResolverTest(unittest.TestCase):
     def _hash(self, text):
         return Web3.keccak(text=text)
 
-    def _disputed_deal(self, amount=100 * USDC, arbitration=7200):
+    def _disputed_deal(self, amount=100 * USDC, arbitration=604800):
         reserve = self.escrow.functions.arbitrationReserveFor(amount).call()
         request = (
             self._hash(f"salt-{amount}-{arbitration}"), self.seller, 1, amount, reserve, 0,
-            self._hash("manifest"), self._hash("policy"), 3600, 3600, 86400, arbitration,
+            self._hash("manifest"), self._hash("policy"), 3600, 3600, 172800, arbitration,
         )
         tx = self.escrow.functions.proposeDeal(request).transact({"from": self.buyer})
         receipt = self.w3.eth.wait_for_transaction_receipt(tx)

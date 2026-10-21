@@ -30,6 +30,11 @@ for (const id of ["arbitrationWindow", "reasonHash", "evidenceUri", "dealLink", 
 }
 assert(html.includes('id="propose" disabled'), "funding must wait for confirmed approval");
 assert(html.includes('id="fallback" type="number" min="0" max="100" value="0"'), "automatic mode must not default to seller payout on validator silence");
+assert(!html.includes('id="resolverRole"'), "review must not appear as a public starting role");
+assert(html.includes('value="604800" selected'), "buyer review arbitration must default to seven days");
+assert(!html.includes("in two days"), "launch copy must not use a stale relative date");
+assert(!html.includes("three independent AI reviewers"), "unconfigured reviewer independence must not be claimed");
+assert(js.includes("Protocol fee deducted from seller payout"), "funding summary must disclose the seller-side protocol deduction");
 assert(js.includes("reconcileApproval"), "confirmed allowance must survive a page reload");
 assert(js.includes("prepare-review-action") && js.includes("Appeal AI ruling"), "deal UI must expose the AI appeal path");
 assert(!js.includes("Prepare seller-wins ruling") && !js.includes("Prepare buyer-wins ruling"), "ordinary users must not impersonate the resolver");

@@ -1,24 +1,29 @@
 import hashlib
 import json
+import os
 import time
 import uuid
+from pathlib import Path
 from typing import Any, Dict, Optional
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 app = FastAPI(
     title="AgentNotary Clearinghouse",
     version="1.0.0",
-    description="Decentralized trust and automated arbitration protocol for autonomous agents."
+    description="Escrow workflow demo for agent-to-agent jobs."
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[origin.strip() for origin in os.getenv(
+        "PUBLIC_CORS_ORIGINS", "https://agent-notary-5.onrender.com"
+    ).split(",") if origin.strip()],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-AgentNotary-Report-Token"],
 )
 
 # =====================================================================
@@ -41,13 +46,13 @@ class SettleDealRequest(BaseModel):
 # KASA VE PARİBU CÜZDAN AYARI
 # =====================================================================
 
-PARIBU_PAYOUT_WALLET = "0x19cb83a03aed8ec032ab0f6b115e196d4b386727"
+LEGACY_SIMULATED_PAYOUT_WALLET = "0x19cb83a03aed8ec032ab0f6b115e196d4b386727"
 PAYOUT_NETWORK = "Arbitrum One"
 
 DEALS_DB: Dict[str, Dict[str, Any]] = {}
 PLATFORM_TREASURY = {
     "network": PAYOUT_NETWORK,
-    "treasury_wallet": PARIBU_PAYOUT_WALLET,
+    "treasury_wallet": LEGACY_SIMULATED_PAYOUT_WALLET,
     "total_settled_volume_usd": 0.0,
     "total_commission_earned_usd": 0.0,
     "total_transactions": 0
@@ -63,14 +68,14 @@ FIXED_ARBITRATION_FEE = 0.005 # $0.005 hakem denetim bedeli
 def evaluate_deliverable(criteria: str, payload: Dict[str, Any]) -> tuple[bool, str]:
     if not payload:
         return False, "Payload is completely empty."
-    
+
     if "result" not in payload and "data" not in payload:
         return False, "Missing mandatory 'result' or 'data' root key."
-    
+
     content = payload.get("result") or payload.get("data")
     if isinstance(content, list) and len(content) == 0:
         return False, "Delivered list contains 0 items."
-    
+
     if isinstance(content, str) and len(content.strip()) < 5:
         return False, "Delivered content is truncated or trivial."
 
@@ -80,24 +85,26 @@ def evaluate_deliverable(criteria: str, payload: Dict[str, Any]) -> tuple[bool, 
 # API UÇLARI
 # =====================================================================
 
-@app.get("/", tags=["System"])
+@app.get("/", include_in_schema=False)
 def root():
-    return {
-        "service": "AgentNotary Protocol",
-        "status": "ONLINE",
-        "payout_vault": PARIBU_PAYOUT_WALLET
-    }
+    return FileResponse(Path(__file__).resolve().parent / "static" / "index.html")
+
+
+def _require_legacy_public_api() -> None:
+    if os.getenv("LEGACY_PUBLIC_API", "false").lower() != "true":
+        raise HTTPException(410, "This legacy demo endpoint is retired. Use /sandbox/v1/deals instead.")
 
 @app.get("/health", tags=["System"])
 def health_check():
     return {"status": "ONLINE", "timestamp": time.time()}
 
-@app.post("/v1/deals/lock", tags=["Escrow"], status_code=status.HTTP_201_CREATED)
+@app.post("/v1/deals/lock", include_in_schema=False, status_code=status.HTTP_201_CREATED)
 def lock_deal(req: CreateDealRequest):
+    _require_legacy_public_api()
     deal_id = f"deal_{uuid.uuid4().hex[:12]}"
     created_at = time.time()
     total_locked = req.amount_usd + FIXED_ARBITRATION_FEE
-    
+
     DEALS_DB[deal_id] = {
         "deal_id": deal_id,
         "buyer": req.buyer_agent_id,
@@ -110,7 +117,7 @@ def lock_deal(req: CreateDealRequest):
         "expires_at": created_at + req.timeout_seconds,
         "deliverable_hash": None
     }
-    
+
     return {
         "status": "LOCKED",
         "deal_id": deal_id,
@@ -118,15 +125,16 @@ def lock_deal(req: CreateDealRequest):
         "expires_at": DEALS_DB[deal_id]["expires_at"]
     }
 
-@app.post("/v1/deals/settle", tags=["Escrow"])
+@app.post("/v1/deals/settle", include_in_schema=False)
 def settle_deal(req: SettleDealRequest):
+    _require_legacy_public_api()
     deal = DEALS_DB.get(req.deal_id)
     if not deal:
         raise HTTPException(status_code=404, detail="Deal not found.")
-    
+
     if deal["status"] != "LOCKED":
         raise HTTPException(status_code=400, detail=f"Cannot settle deal with status: {deal['status']}")
-    
+
     if deal["seller"] != req.seller_agent_id:
         raise HTTPException(status_code=403, detail="Unauthorized seller agent.")
 
@@ -135,33 +143,33 @@ def settle_deal(req: SettleDealRequest):
     deal["deliverable_hash"] = proof_hash
 
     is_valid, reason = evaluate_deliverable(deal["criteria"], req.deliverable)
-    
+
     if is_valid:
         commission = round(deal["amount_usd"] * COMMISSION_RATE, 4)
         seller_net = round(deal["amount_usd"] - commission, 4)
-        
+
         deal["status"] = "SETTLED"
         deal["settled_at"] = time.time()
-        
+
         PLATFORM_TREASURY["total_settled_volume_usd"] += deal["amount_usd"]
         PLATFORM_TREASURY["total_commission_earned_usd"] += (commission + deal["arbitration_fee"])
         PLATFORM_TREASURY["total_transactions"] += 1
-        
+
         return {
             "decision": "APPROVED",
             "proof_hash": proof_hash,
             "seller_payout_usd": seller_net,
             "protocol_fee_usd": commission + deal["arbitration_fee"],
             "refund_to_buyer_usd": 0.0,
-            "credited_treasury": PARIBU_PAYOUT_WALLET
+            "credited_treasury": LEGACY_SIMULATED_PAYOUT_WALLET
         }
     else:
         deal["status"] = "REJECTED"
         deal["settled_at"] = time.time()
-        
+
         PLATFORM_TREASURY["total_commission_earned_usd"] += deal["arbitration_fee"]
         PLATFORM_TREASURY["total_transactions"] += 1
-        
+
         return {
             "decision": "REJECTED",
             "proof_hash": proof_hash,
@@ -171,8 +179,9 @@ def settle_deal(req: SettleDealRequest):
             "refund_to_buyer_usd": deal["amount_usd"]
         }
 
-@app.get("/v1/analytics/treasury", tags=["Analytics"])
+@app.get("/v1/analytics/treasury", include_in_schema=False)
 def get_treasury_metrics():
+    _require_legacy_public_api()
     return {
         "metrics": PLATFORM_TREASURY,
         "active_escrow_count": len([d for d in DEALS_DB.values() if d["status"] == "LOCKED"])

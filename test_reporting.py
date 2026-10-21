@@ -54,6 +54,9 @@ import reporting
 
 
 class ReportingTest(unittest.TestCase):
+    def tearDown(self):
+        reporting._LOGIN_ATTEMPTS.clear()
+
     def test_morning_window_uses_previous_evening(self):
         now = datetime(2026, 9, 20, 6, 5, tzinfo=timezone.utc)  # 09:05 Istanbul
         with patch.dict(os.environ, {"REPORT_TIMEZONE": "Europe/Istanbul"}, clear=False):
@@ -98,6 +101,13 @@ class ReportingTest(unittest.TestCase):
                 reporting._authorize_session(session + "bad", now=1_001)
             with self.assertRaises(HTTPException):
                 reporting._authorize_session(session, now=50_000)
+
+    def test_login_failures_are_rate_limited(self):
+        for second in range(reporting.LOGIN_MAX_FAILURES):
+            reporting._record_login_failure("test-client", now=float(second))
+        with self.assertRaises(HTTPException) as limited:
+            reporting._check_login_limit("test-client", now=10.0)
+        self.assertEqual(limited.exception.status_code, 429)
 
     def test_render_text_contains_money_and_attention_items(self):
         report = {

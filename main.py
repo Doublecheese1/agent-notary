@@ -22,6 +22,22 @@ app.include_router(discovery_router)
 PUBLIC_ORIGIN = "https://agent-notary-5.onrender.com"
 
 
+@app.middleware("http")
+async def security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; "
+        "form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:; connect-src 'self' https://*.arbitrum.io https://*.arbiscan.io"
+    )
+    return response
+
+
 @app.get("/robots.txt", include_in_schema=False)
 def robots():
     from fastapi.responses import PlainTextResponse
@@ -49,6 +65,7 @@ def robots():
 def sitemap():
     from fastapi.responses import Response
     urls = [
+        ("/", "1.0"),
         ("/mainnet", "1.0"),
         ("/mainnet/founding50", "0.8"),
         ("/play", "0.8"),

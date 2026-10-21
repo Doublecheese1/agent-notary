@@ -28,6 +28,7 @@ contract AgentNotaryAIReviewResolver is EIP712, ReentrancyGuard {
 
     uint8 private constant DISPUTED_STATE = 4;
     uint16 public constant BPS_DENOMINATOR = 10_000;
+    uint256 public constant HUMAN_REVIEW_RESERVE = 3 days;
     bytes32 public constant REVIEW_TYPEHASH = keccak256(
         "AIReview(bytes32 dealId,uint8 decision,bytes32 packageHash,bytes32 reportHash,uint16 confidenceBps,uint32 flags,uint256 nonce,uint256 signatureDeadline)"
     );
@@ -136,7 +137,10 @@ contract AgentNotaryAIReviewResolver is EIP712, ReentrancyGuard {
             IAgentNotaryReviewEscrow(escrow).reviewResolutionContext(dealId);
         require(state == DISPUTED_STATE, "deal not disputed");
         require(amount <= automaticAmountCap, "amount requires human review");
-        require(block.timestamp + appealWindow < arbitrationDeadline, "insufficient appeal time");
+        require(
+            block.timestamp + appealWindow + HUMAN_REVIEW_RESERVE < arbitrationDeadline,
+            "insufficient appeal and human review time"
+        );
 
         bytes32 structHash = keccak256(abi.encode(
             REVIEW_TYPEHASH, dealId, decision, packageHash, reportHash,

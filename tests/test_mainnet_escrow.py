@@ -46,7 +46,9 @@ class MainnetEscrowTest(unittest.TestCase):
             self.token.address, self.treasury, self.ops, self.quorum.address, self.arbitrator
         ).transact({"from": self.buyer}))
         self.escrow = self.w3.eth.contract(address=receipt.contractAddress, abi=escrow_artifact["abi"])
+        self.initially_paused = self.escrow.functions.paused().call()
         self.escrow.functions.setBuyerAccess(self.buyer, True).transact({"from": self.ops})
+        self.escrow.functions.resumeNewDeals().transact({"from": self.ops})
         self.token.functions.approve(self.escrow.address, 2_000 * USDC).transact({"from": self.buyer})
         self.token.functions.mint(self.seller, 500 * USDC).transact({"from": self.buyer})
         self.token.functions.approve(self.escrow.address, 500 * USDC).transact({"from": self.seller})
@@ -130,6 +132,23 @@ class MainnetEscrowTest(unittest.TestCase):
         self.escrow.functions.submitValidation(deal_id, decision, evidence, deadline, signature).transact({"from": self.relayer})
         return evidence, deadline, signature
 
+    def test_deployment_starts_paused(self):
+        self.assertTrue(self.initially_paused)
+
+    def test_buyer_review_rejects_short_decision_or_arbitration_windows(self):
+        amount = 100 * USDC
+        reserve = self.escrow.functions.arbitrationReserveFor(amount).call()
+        with self.assertRaises(TransactionFailed):
+            self._propose(self._request(
+                mode=1, amount=amount, reserve=reserve,
+                decision=172799, arbitration=604800,
+            ))
+        with self.assertRaises(TransactionFailed):
+            self._propose(self._request(
+                mode=1, amount=amount, reserve=reserve,
+                decision=172800, arbitration=604799,
+            ))
+
     def test_automatic_pass_pays_seller_and_protocol(self):
         deal_id = self._propose(self._request())
         content = self._accept_deliver(deal_id)
@@ -207,7 +226,7 @@ class MainnetEscrowTest(unittest.TestCase):
     def test_review_accept_refunds_bonds_and_charges_protocol_fee(self):
         amount = 100 * USDC
         reserve = self.escrow.functions.arbitrationReserveFor(amount).call()
-        deal_id = self._propose(self._request(mode=1, amount=amount, reserve=reserve, decision=86400))
+        deal_id = self._propose(self._request(mode=1, amount=amount, reserve=reserve, decision=172800, arbitration=604800))
         buyer_after_lock = self.token.functions.balanceOf(self.buyer).call()
         seller_before_accept = self.token.functions.balanceOf(self.seller).call()
         self._accept_deliver(deal_id)
@@ -222,7 +241,7 @@ class MainnetEscrowTest(unittest.TestCase):
         buyer_before = self.token.functions.balanceOf(self.buyer).call()
         seller_before = self.token.functions.balanceOf(self.seller).call()
         arb_before = self.token.functions.balanceOf(self.arbitrator).call()
-        deal_id = self._propose(self._request(mode=1, amount=amount, reserve=reserve, decision=86400))
+        deal_id = self._propose(self._request(mode=1, amount=amount, reserve=reserve, decision=172800, arbitration=604800))
         self._accept_deliver(deal_id)
         self.escrow.functions.disputeDelivery(deal_id, self._hash("wrong result"), "ipfs://dispute").transact({"from": self.buyer})
         self.escrow.functions.resolveReview(deal_id, 1).transact({"from": self.arbitrator})
@@ -235,7 +254,7 @@ class MainnetEscrowTest(unittest.TestCase):
         reserve = self.escrow.functions.arbitrationReserveFor(amount).call()
         arb_before = self.token.functions.balanceOf(self.arbitrator).call()
         seller_before = self.token.functions.balanceOf(self.seller).call()
-        deal_id = self._propose(self._request(mode=1, amount=amount, reserve=reserve, decision=86400))
+        deal_id = self._propose(self._request(mode=1, amount=amount, reserve=reserve, decision=172800, arbitration=604800))
         self._accept_deliver(deal_id)
         self.escrow.functions.disputeDelivery(deal_id, self._hash("claim"), "ipfs://dispute").transact({"from": self.buyer})
         self.escrow.functions.resolveReview(deal_id, 0).transact({"from": self.arbitrator})
@@ -245,7 +264,7 @@ class MainnetEscrowTest(unittest.TestCase):
     def test_silence_cannot_finalize_before_24_hours(self):
         amount = 100 * USDC
         reserve = self.escrow.functions.arbitrationReserveFor(amount).call()
-        deal_id = self._propose(self._request(mode=1, amount=amount, reserve=reserve, decision=86400))
+        deal_id = self._propose(self._request(mode=1, amount=amount, reserve=reserve, decision=172800, arbitration=604800))
         self._accept_deliver(deal_id)
         with self.assertRaises(TransactionFailed):
             self.escrow.functions.finalizeIfSilent(deal_id).transact({"from": self.other})

@@ -11,6 +11,9 @@ ROOT = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("_sandbox_engine", ROOT / "legacy.py")
 engine = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(engine)
+# The public legacy routes are retired, but the wallet-free sandbox intentionally
+# runs an isolated copy of the same arithmetic and validation engine.
+engine._require_legacy_public_api = lambda: None
 router = APIRouter()
 mutex = threading.RLock()
 TTL_SECONDS = 900

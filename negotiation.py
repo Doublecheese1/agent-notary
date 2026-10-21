@@ -168,16 +168,22 @@ def serialize(connection: sqlite3.Connection, row: sqlite3.Row, role: str) -> di
 
 @page_router.get("", include_in_schema=False)
 def negotiation_page():
+    if not enabled():
+        raise HTTPException(404, "Not found")
     return FileResponse(ROOT / "static" / "negotiate.html", headers={"Cache-Control": "no-store"})
 
 
 @page_router.get("/app.js", include_in_schema=False)
 def negotiation_script():
+    if not enabled():
+        raise HTTPException(404, "Not found")
     return FileResponse(ROOT / "static" / "negotiate.js", media_type="text/javascript", headers={"Cache-Control": "no-store"})
 
 
 @page_router.get("/{negotiation_id}", include_in_schema=False)
 def negotiation_workspace(negotiation_id: str):
+    if not enabled():
+        raise HTTPException(404, "Not found")
     uuid.UUID(negotiation_id)
     return FileResponse(ROOT / "static" / "negotiate.html", headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow, noarchive"})
 

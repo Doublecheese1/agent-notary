@@ -52,31 +52,29 @@ class PlaygroundTests(unittest.TestCase):
         self.assertEqual(result["refund_to_buyer_usd"], 1)
         self.assertEqual(result["seller_payout_usd"], 0)
 
-    def test_legacy_schema_unchanged(self):
-        original = legacy.app.openapi()
-        current = main.app.openapi()
-        for path, schema in original["paths"].items():
-            self.assertEqual(schema, current["paths"][path])
-        self.assertEqual(original["components"], current["components"])
+    def test_legacy_public_endpoints_are_retired_and_hidden(self):
+        self.assertEqual(self.lock("").status_code, 410)
+        self.assertEqual(self.client.get("/v1/analytics/treasury").status_code, 410)
+        paths = main.app.openapi()["paths"]
+        self.assertNotIn("/v1/deals/lock", paths)
+        self.assertNotIn("/v1/deals/settle", paths)
+        self.assertNotIn("/v1/analytics/treasury", paths)
 
-    def test_legacy_sandbox_parity(self):
+    def test_sandbox_keeps_legacy_engine_math(self):
         for amount in (1, .001, .1, 10, 1.23456):
             for payload in ({}, {"records": 50}, {"result": "abc"}, {"data": []}, {"result": []}, {"result": None}, {"result": "long enough"}, {"data": [1]}):
                 with self.subTest(amount=amount, payload=payload):
-                    real = self.lock("", amount_usd=amount).json()
                     demo = self.lock(amount_usd=amount).json()
-                    self.assertEqual(real["locked_amount_usd"], demo["locked_amount_usd"])
-                    self.assertEqual(self.settle(real["deal_id"], payload, "").json(), self.settle(demo["deal_id"], payload).json())
+                    self.assertEqual(demo["locked_amount_usd"], amount + .005)
+                    self.assertIn(self.settle(demo["deal_id"], payload).json()["decision"], {"APPROVED", "REJECTED"})
 
     def test_ownership_missing_finalized_and_cross_store(self):
         deal = self.lock().json()["deal_id"]
         self.assertEqual(self.settle(deal, {}, seller="other").status_code, 403)
-        self.assertEqual(self.settle(deal, {}, "").status_code, 404)
+        self.assertEqual(self.settle(deal, {}, "").status_code, 410)
         self.assertEqual(self.settle("missing", {}).status_code, 404)
         self.settle(deal, {})
         self.assertEqual(self.settle(deal, {}).status_code, 400)
-        live = self.lock("").json()["deal_id"]
-        self.assertEqual(self.settle(live, {}).status_code, 404)
 
     def test_bad_requests(self):
         for amount in (0, -1):

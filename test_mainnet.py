@@ -17,7 +17,8 @@ class MainnetRouteTest(unittest.TestCase):
         with patch.dict(os.environ, {"MAINNET_ENABLED": "false", "MAINNET_ACCEPTING_FUNDS": "false"}):
             page = self.client.get("/mainnet")
             self.assertEqual(page.status_code, 200)
-            self.assertIn("Private mainnet launch", page.text)
+            self.assertIn("Public interface preview", page.text)
+            self.assertNotIn('id="resolverRole"', page.text)
             response = self.client.get("/mainnet/config")
         body = response.json()
         self.assertFalse(body["enabled"])
@@ -72,9 +73,8 @@ class MainnetRouteTest(unittest.TestCase):
         self.assertIn("protocol fee", offer.text)
 
     def test_founder_deployment_gate_is_closed_by_default(self):
-        page = self.client.get("/mainnet/setup")
-        self.assertEqual(page.status_code, 200)
         with patch.dict(os.environ, {"MAINNET_DEPLOYMENT_UI": "false"}):
+            page = self.client.get("/mainnet/setup")
             status = self.client.get("/mainnet/setup-status")
             prepared = self.client.post("/mainnet/prepare-quorum-deployment", json={
                 "deployer": "0x0000000000000000000000000000000000000001",
@@ -82,6 +82,7 @@ class MainnetRouteTest(unittest.TestCase):
                 "signer_b": "0x0000000000000000000000000000000000000003",
                 "signer_c": "0x0000000000000000000000000000000000000004",
             })
+        self.assertEqual(page.status_code, 404)
         self.assertFalse(status.json()["enabled"])
         self.assertEqual(prepared.status_code, 503)
 

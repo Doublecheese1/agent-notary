@@ -25,6 +25,15 @@ class SeoTest(unittest.TestCase):
         self.assertNotIn("/reports", response.text)
         self.assertNotIn("/setup", response.text)
 
+    def test_root_is_public_landing_page_with_security_headers(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Lock the job", response.text)
+        self.assertNotIn("payout_vault", response.text)
+        self.assertEqual(response.headers.get("x-content-type-options"), "nosniff")
+        self.assertEqual(response.headers.get("x-frame-options"), "DENY")
+        self.assertIn("frame-ancestors 'none'", response.headers.get("content-security-policy", ""))
+
     def test_mainnet_page_has_search_metadata(self):
         response = self.client.get("/mainnet")
         self.assertIn('name="description"', response.text)
