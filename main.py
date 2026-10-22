@@ -135,6 +135,12 @@ def brand_styles():
     from fastapi.responses import FileResponse
     return FileResponse(Path(__file__).resolve().parent / "static" / "brand.css", media_type="text/css")
 
+@app.get("/assets/agentsolis-social-card.png", include_in_schema=False)
+def social_card():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "agentsolis-social-card.png", media_type="image/png")
+
 @app.get("/assets/fonts/Manrope-Variable.ttf", include_in_schema=False)
 def manrope_font():
     from pathlib import Path

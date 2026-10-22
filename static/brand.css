@@ -33,6 +33,7 @@ button,input,textarea,select{font:inherit}
 .landing .hero-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:48px;align-items:center;margin-top:64px}
 .landing h1{font-size:clamp(44px,6.8vw,76px);line-height:1.01;letter-spacing:-.055em;max-width:760px;margin:14px 0 22px;color:var(--solis-navy)}
 .landing .lead{font-size:19px;max-width:670px;color:#263b45;margin:0}
+.landing .hero-proof{max-width:680px;margin:18px 0 0;padding:12px 15px;border:1px solid rgba(11,25,48,.16);border-radius:12px;background:rgba(255,255,255,.38);color:#20374b;font-size:14px}
 .landing .actions{display:flex;gap:12px;flex-wrap:wrap;margin:27px 0 20px}
 .landing .launch{font:500 12px/1.55 'IBM Plex Mono',ui-monospace,monospace;max-width:680px;color:#20374b}
 .settlement-orbit{position:relative;min-height:330px;display:grid;place-items:center}
@@ -52,6 +53,10 @@ button,input,textarea,select{font:inherit}
 .landing .step b{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:var(--solis-navy);color:white;margin-bottom:17px;font:400 13px/1 'IBM Plex Mono',monospace}
 .landing .step h3,.landing .card h3{margin:0 0 8px;font-size:19px;letter-spacing:-.02em}
 .landing .step p,.landing .card p{margin:0;color:var(--solis-muted)}
+.flow-rail .step:not(:last-child):after{content:"→";position:absolute;right:-16px;top:50%;z-index:2;width:18px;height:18px;border-radius:50%;background:var(--solis-cream);color:var(--solis-pine);font-weight:800;text-align:center;line-height:18px}
+.example-section{padding-top:30px!important}.example-deal{overflow:hidden;background:var(--solis-paper);border:1px solid var(--solis-line);border-radius:20px;box-shadow:var(--shadow-sm)}
+.example-title{display:flex;justify-content:space-between;gap:20px;padding:18px 22px;background:#e5f5ef;border-bottom:1px solid var(--solis-line)}
+.example-grid{display:grid;grid-template-columns:repeat(4,1fr)}.example-grid>div{display:flex;flex-direction:column;gap:4px;padding:22px;border-right:1px solid var(--solis-line)}.example-grid>div:last-child{border-right:0}.example-grid small{color:var(--solis-muted)}.example-grid strong{font-size:20px;color:var(--solis-navy)}.example-grid span{font-size:13px;color:var(--solis-muted)}
 .landing .roles{grid-template-columns:1fr 1fr}.landing .facts{grid-template-columns:repeat(3,1fr)}
 .landing .role-card{min-height:190px;display:flex;flex-direction:column}.landing .role-card a{margin-top:auto;font-weight:750}
 .landing .role-symbol{font-size:30px;margin-bottom:20px;color:var(--solis-pine)}
@@ -74,6 +79,9 @@ button,input,textarea,select{font:inherit}
 .workspace .role{background:var(--solis-paper);color:var(--solis-ink);border:1px solid var(--solis-line);min-height:112px;border-radius:14px;box-shadow:none}
 .workspace .role:hover{border-color:var(--solis-teal);transform:translateY(-1px)}
 .workspace .role.selected{background:#e6f5ee;border:2px solid var(--solis-pine)}
+.mode-guide{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 16px}.mode-guide>div{padding:14px;border:1px solid var(--solis-line);border-radius:12px;background:#f8f5ee}.mode-guide strong{display:block;color:var(--solis-navy);margin-bottom:4px}.mode-guide span{display:block;font-size:13px;color:var(--solis-muted)}
+.fallback-example{background:#e8f4ee;color:var(--solis-pine);padding:12px 14px;border-radius:11px;font-size:14px}
+.funding-steps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.fund-step{border:1px solid var(--solis-line);border-radius:12px;padding:12px;background:#f5f1e8;color:var(--solis-muted)}.fund-step strong{display:block;color:var(--solis-ink)}.fund-step.active{border-color:var(--solis-teal);background:#e7f5f0}.fund-step.done{border-color:var(--solis-good);background:#e5f3ec}.field-error{color:var(--solis-bad);font-weight:700;font-size:13px;margin-top:6px}
 .workspace label{display:block;color:var(--solis-muted);font-size:13px;margin:12px 0}
 .workspace input,.workspace textarea,.workspace select{width:100%;display:block;margin-top:6px;padding:12px;border:1px solid #c8bda8;border-radius:10px;background:#fffefb;color:var(--solis-ink)}
 .workspace button{background:var(--solis-pine);color:white;border:0;border-radius:10px;padding:12px 16px;margin:6px 7px 6px 0;font-weight:750;cursor:pointer;transition:transform .18s ease,background .18s ease}
@@ -96,7 +104,7 @@ button,input,textarea,select{font:inherit}
 .content-page .legal-intro{padding:20px 0 8px}.content-page .legal-intro h1{margin-bottom:12px}
 
 @media(max-width:760px){
-  .landing nav{gap:12px}.landing nav a.hide-mobile{display:none}.landing .hero{padding:22px 18px 48px}.landing .hero-grid{grid-template-columns:1fr;margin-top:42px;gap:14px}.landing h1{font-size:44px}.landing .lead{font-size:17px}.settlement-orbit{min-height:270px;transform:scale(.86);margin:-10px 0}.landing .flow,.landing .cards,.landing .roles,.landing .facts{grid-template-columns:1fr}.landing .section{padding:48px 18px}.landing .section-head{display:block}.trust-band{padding:50px 18px!important}.workspace main{padding:15px 12px 54px}.workspace .topbar{align-items:flex-start}.workspace .topbar nav{gap:8px}.workspace .topbar nav a{font-size:12px}.workspace .grid,.workspace .roles{grid-template-columns:1fr}.workspace .role{min-height:84px}
+  .landing nav{gap:12px}.landing nav a.hide-mobile{display:none}.landing .hero{padding:22px 18px 48px}.landing .hero-grid{grid-template-columns:1fr;margin-top:42px;gap:14px}.landing h1{font-size:44px}.landing .lead{font-size:17px}.settlement-orbit{min-height:270px;transform:scale(.86);margin:-10px 0}.landing .flow,.landing .cards,.landing .roles,.landing .facts,.example-grid{grid-template-columns:1fr}.flow-rail .step:after{display:none}.example-title{display:block}.example-grid>div{border-right:0;border-bottom:1px solid var(--solis-line)}.example-grid>div:last-child{border-bottom:0}.landing .section{padding:48px 18px}.landing .section-head{display:block}.trust-band{padding:50px 18px!important}.workspace main{padding:15px 12px 54px}.workspace .topbar{align-items:flex-start}.workspace .topbar nav{gap:8px}.workspace .topbar nav a{font-size:12px}.workspace .grid,.workspace .roles,.mode-guide,.funding-steps{grid-template-columns:1fr}.workspace .role{min-height:84px}
   .content-page main{padding:20px 14px 46px}.content-page .page-hero{padding:26px 21px;border-radius:18px}.content-page .page-nav{align-items:flex-start}.content-page .page-nav>a:not(.brand){font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.button,.step:before,.workspace button{transition:none}}

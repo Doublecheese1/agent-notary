@@ -3,6 +3,8 @@ const assert = require("assert");
 
 const html = fs.readFileSync("static/mainnet.html", "utf8");
 const js = fs.readFileSync("static/mainnet.js", "utf8");
+const landing = fs.readFileSync("static/index.html", "utf8");
+const founding = fs.readFileSync("static/founding50-mainnet.html", "utf8");
 const setup = fs.readFileSync("static/mainnet-setup.js", "utf8");
 const operations = fs.readFileSync("static/mainnet-operations.js", "utf8");
 const validatorHtml = fs.readFileSync("static/mainnet-validator.html", "utf8");
@@ -25,7 +27,7 @@ assert(!setup.includes("privateKey"), "deployment UI must not contain a private-
 assert(setup.includes("getThreshold()") && setup.includes("0xe75235b8"), "deployment must check Safe multisig thresholds");
 assert(setup.includes("agentnotary.deploymentPending") && setup.includes("Check the saved deployment"), "deployment must retain uncertain writes across reloads");
 assert(operations.includes("prepare-operations-action") && !operations.includes("eth_sendTransaction"), "founder operations must be prepared for Safe execution, not sent from browser");
-for (const id of ["arbitrationWindow", "reasonHash", "evidenceUri", "dealLink", "checkTx"]) {
+for (const id of ["arbitrationWindow", "reasonHash", "evidenceUri", "dealLink", "checkTx", "fallbackExample", "approvalStep", "fundingStep", "sellerError"]) {
   assert(html.includes(`id="${id}"`), `missing mainnet UI element: ${id}`);
 }
 assert(html.includes('id="propose" disabled'), "funding must wait for confirmed approval");
@@ -36,6 +38,15 @@ assert(!html.includes("in two days"), "launch copy must not use a stale relative
 assert(!html.includes("three independent AI reviewers"), "unconfigured reviewer independence must not be claimed");
 assert(js.includes("Protocol fee deducted from seller payout"), "funding summary must disclose the seller-side protocol deduction");
 assert(js.includes("reconcileApproval"), "confirmed allowance must survive a page reload");
+assert(js.includes("Buyer and seller must use different wallet addresses"), "browser must warn before a buyer uses the same seller wallet");
+assert(js.includes("new URLSearchParams(location.search)"), "role-specific landing links must select buyer or seller");
+assert(js.includes("No protocol fee is charged on this fallback"), "fallback must show a concrete payout example");
+assert(js.includes("fundingProgress"), "approval and funding must have a visible progress state");
+assert(landing.includes("Illustrative Buyer Review example"), "landing page must label its example as illustrative");
+assert(landing.includes("/mainnet?role=buyer#start") && landing.includes("/mainnet?role=seller#start"), "landing role links must open the matching workspace");
+assert(landing.includes("https://github.com/Doublecheese1/agent-notary"), "landing page must expose the verified public repository");
+assert(landing.includes("/assets/agentsolis-social-card.png") && fs.existsSync("static/agentsolis-social-card.png"), "social preview image must exist and be referenced");
+assert(founding.includes("Applications are not open yet"), "Founding 50 must not imply that a missing application path is open");
 assert(js.includes("prepare-review-action") && js.includes("Appeal AI ruling"), "deal UI must expose the AI appeal path");
 assert(!js.includes("Prepare seller-wins ruling") && !js.includes("Prepare buyer-wins ruling"), "ordinary users must not impersonate the resolver");
 assert(js.includes("if(sending)return"), "wallet send must block rapid duplicate clicks");
