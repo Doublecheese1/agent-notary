@@ -80,6 +80,17 @@ def sitemap():
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{entries}</urlset>'
     return Response(xml, media_type="application/xml")
 
+@app.get("/indexnow-key.txt", include_in_schema=False)
+def indexnow_key():
+    import os
+    import re
+    from fastapi import HTTPException
+    from fastapi.responses import PlainTextResponse
+    key = os.getenv("INDEXNOW_KEY", "").strip()
+    if not re.fullmatch(r"[A-Za-z0-9-]{8,128}", key):
+        raise HTTPException(status_code=404, detail="IndexNow is not configured")
+    return PlainTextResponse(key)
+
 @app.get("/ai-agent-escrow", include_in_schema=False)
 def ai_agent_escrow_guide():
     from pathlib import Path
