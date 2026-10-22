@@ -4,7 +4,12 @@ const path = require("path");
 const crypto = require("crypto");
 
 const root = path.resolve(__dirname, "..");
-const hash = file => crypto.createHash("sha256").update(fs.readFileSync(path.join(root, file))).digest("hex");
+// Release inputs are text files. Hash their canonical LF representation so
+// Windows and Linux checkouts produce the same manifest.
+const hash = file => {
+  const canonical = fs.readFileSync(path.join(root, file), "utf8").replace(/\r\n/g, "\n");
+  return crypto.createHash("sha256").update(canonical, "utf8").digest("hex");
+};
 const automatic = JSON.parse(fs.readFileSync(path.join(root, "policies/automatic-json-evidence-v1.json"), "utf8"));
 const review = JSON.parse(fs.readFileSync(path.join(root, "policies/buyer-review-v1.json"), "utf8"));
 const manifest = {

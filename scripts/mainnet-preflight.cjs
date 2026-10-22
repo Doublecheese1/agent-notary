@@ -34,7 +34,8 @@ for (const [key, path] of Object.entries(fileMap)) {
     failures.push(`Missing release file: ${path}`);
     continue;
   }
-  const actual = crypto.createHash("sha256").update(fs.readFileSync(path)).digest("hex");
+  const canonical = fs.readFileSync(path, "utf8").replace(/\r\n/g, "\n");
+  const actual = crypto.createHash("sha256").update(canonical, "utf8").digest("hex");
   requireValue(actual === release.files_sha256[key], `SHA-256 mismatch: ${path}`);
 }
 
