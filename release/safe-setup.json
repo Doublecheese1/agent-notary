@@ -1,0 +1,39 @@
+{
+  "product": "AgentSolis",
+  "network": "Arbitrum One",
+  "chain_id": 42161,
+  "status": "planned_not_created",
+  "threshold": 2,
+  "owners": [
+    {
+      "label": "Account 1",
+      "address": "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD"
+    },
+    {
+      "label": "Seller",
+      "address": "0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2"
+    },
+    {
+      "label": "Arbitrator",
+      "address": "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A"
+    }
+  ],
+  "safes": [
+    {
+      "name": "AgentSolis Treasury",
+      "purpose": "Receives protocol fees and authorizes treasury transfers.",
+      "address": ""
+    },
+    {
+      "name": "AgentSolis Operations",
+      "purpose": "Authorizes admissions, access, pause and future resolver changes.",
+      "address": ""
+    },
+    {
+      "name": "AgentSolis Human Review",
+      "purpose": "Authorizes escalated human-review rulings.",
+      "address": ""
+    }
+  ],
+  "public_launch_requirement": "Before public funds open, replace or supplement same-seed owners so at least one owner is independently controlled, while preserving a threshold of at least 2."
+}
