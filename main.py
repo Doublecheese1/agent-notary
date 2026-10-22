@@ -97,6 +97,24 @@ def privacy():
     from fastapi.responses import FileResponse
     return FileResponse(Path(__file__).resolve().parent / "static" / "privacy.html")
 
+@app.get("/assets/brand.css", include_in_schema=False)
+def brand_styles():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "brand.css", media_type="text/css")
+
+@app.get("/assets/fonts/Manrope-Variable.ttf", include_in_schema=False)
+def manrope_font():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "fonts" / "Manrope-Variable.ttf", media_type="font/ttf")
+
+@app.get("/assets/fonts/IBMPlexMono-Regular.ttf", include_in_schema=False)
+def plex_mono_font():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "fonts" / "IBMPlexMono-Regular.ttf", media_type="font/ttf")
+
 @app.get("/reports", include_in_schema=False)
 def founder_reports():
     from pathlib import Path

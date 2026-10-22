@@ -40,6 +40,18 @@ class SeoTest(unittest.TestCase):
         self.assertIn('rel="canonical" href="https://agent-notary-5.onrender.com/mainnet"', response.text)
         self.assertIn('type="application/ld+json"', response.text)
 
+    def test_public_pages_load_the_shared_brand_system(self):
+        for path in ("/", "/mainnet", "/mainnet/founding50", "/play", "/terms", "/privacy"):
+            response = self.client.get(path)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn('/assets/brand.css', response.text)
+
+        stylesheet = self.client.get("/assets/brand.css")
+        self.assertEqual(stylesheet.status_code, 200)
+        self.assertIn("font-family:Manrope", stylesheet.text)
+        self.assertEqual(self.client.get("/assets/fonts/Manrope-Variable.ttf").status_code, 200)
+        self.assertEqual(self.client.get("/assets/fonts/IBMPlexMono-Regular.ttf").status_code, 200)
+
     def test_private_deal_page_is_noindex(self):
         deal_id = "0x" + "11" * 32
         response = self.client.get(f"/mainnet/deal/{deal_id}")
