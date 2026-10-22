@@ -8,13 +8,13 @@ const hash = file => crypto.createHash("sha256").update(fs.readFileSync(path.joi
 const automatic = JSON.parse(fs.readFileSync(path.join(root, "policies/automatic-json-evidence-v1.json"), "utf8"));
 const review = JSON.parse(fs.readFileSync(path.join(root, "policies/buyer-review-v1.json"), "utf8"));
 const manifest = {
-  product: "AgentNotary",
+  product: "AgentSolis",
   release: "mainnet-candidate",
   chain_id: 42161,
   network: "Arbitrum One",
   native_usdc: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
   economics: {protocol_fee_bps: 150, protocol_fee_cap_usdc: 50, fixed_fee_usdc: 0},
-  limits: {automatic_min_usdc: 10, buyer_review_min_usdc: 100, deal_max_usdc: 1000, global_escrow_max_usdc: 10000},
+  limits: {automatic_min_usdc: 10, buyer_review_min_usdc: 100, deal_max_usdc: null, global_escrow_max_usdc: null},
   policies: {
     automatic_id: automatic.id,
     automatic_hash: "0xfc80263827b1f14bff464b89bebc2c5d237a1b355706054f47de87fd1e5bc556",

@@ -27,8 +27,6 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
     address public constant ARBITRUM_NATIVE_USDC = 0xaf88d065e77c8cC2239327C5EDb3A432268e5831;
     uint256 public constant MIN_AUTOMATIC_AMOUNT = 10e6;
     uint256 public constant MIN_REVIEW_AMOUNT = 100e6;
-    uint256 public constant MAX_AMOUNT = 1_000e6;
-    uint256 public constant MAX_TOTAL_ESCROWED = 10_000e6;
     uint256 public constant MIN_ARBITRATION_RESERVE = 5e6;
     uint256 public constant MAX_ARBITRATION_RESERVE = 100e6;
     uint256 public constant MAX_PROTOCOL_FEE = 50e6;
@@ -41,7 +39,6 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
     uint256 public constant MIN_REVIEW_WINDOW = 2 days;
     uint256 public constant MIN_REVIEW_ARBITRATION_WINDOW = 7 days;
     uint256 public constant MAX_INCONCLUSIVE_RESULTS = 3;
-    uint256 public constant MAX_ESCROWED_PER_BUYER = 1_100e6;
 
     bytes32 public constant VALIDATION_TYPEHASH = keccak256(
         "Validation(bytes32 dealId,bytes32 contentHash,bytes32 manifestHash,bytes32 policyHash,uint8 decision,bytes32 evidenceHash,uint256 nonce,uint256 signatureDeadline)"
@@ -269,7 +266,6 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
     function proposeDeal(DealRequest calldata request) external nonReentrant whenNotPaused returns (bytes32 id) {
         require(publicAccess || approvedBuyers[msg.sender], "buyer not admitted");
         require(request.seller != address(0) && request.seller != msg.sender, "bad seller");
-        require(request.amount <= MAX_AMOUNT, "amount too high");
         require(request.fallbackSellerBps <= BPS_DENOMINATOR, "bad fallback");
         require(request.manifestHash != bytes32(0) && request.policyHash != bytes32(0), "terms required");
         _requireWindow(request.acceptanceWindow);
@@ -291,8 +287,6 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
         }
 
         uint256 total = request.amount + request.arbitrationReserve;
-        require(totalEscrowed + total <= MAX_TOTAL_ESCROWED, "global escrow limit");
-        require(escrowedByBuyer[msg.sender] + total <= MAX_ESCROWED_PER_BUYER, "buyer escrow limit");
 
         id = keccak256(abi.encode(address(this), block.chainid, msg.sender, request.seller, request.salt));
         require(deals[id].state == State.None, "duplicate deal");
@@ -341,7 +335,6 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
         require(block.timestamp < d.acceptanceDeadline, "acceptance closed");
         if (d.mode == Mode.BuyerReview) {
             uint256 bond = d.arbitrationReserve;
-            require(totalEscrowed + bond <= MAX_TOTAL_ESCROWED, "global escrow limit");
             uint256 beforeBalance = token.balanceOf(address(this));
             token.safeTransferFrom(msg.sender, address(this), bond);
             require(token.balanceOf(address(this)) == beforeBalance + bond, "unsupported token transfer");

@@ -1,5 +1,5 @@
 {
-  "product": "AgentNotary",
+  "product": "AgentSolis",
   "release": "mainnet-candidate",
   "chain_id": 42161,
   "network": "Arbitrum One",
@@ -12,8 +12,8 @@
   "limits": {
     "automatic_min_usdc": 10,
     "buyer_review_min_usdc": 100,
-    "deal_max_usdc": 1000,
-    "global_escrow_max_usdc": 10000
+    "deal_max_usdc": null,
+    "global_escrow_max_usdc": null
   },
   "policies": {
     "automatic_id": "agentnotary.json-evidence.v1",
@@ -22,10 +22,10 @@
     "review_hash": "0x3f9234a62a913d1efc1882bc7c2b2bd289cbcb28c8dcf62f5f949c49c99b3014"
   },
   "files_sha256": {
-    "escrow_source": "ac51076a40d5245aee6f9bce789de8cabb8186bd82dec4ad60b2947c9555e480",
+    "escrow_source": "87a92740dd729f6d476e5f6207b3ff37489d0113a17c6b687d7e8a7d0a8d13d3",
     "quorum_source": "2da48b6ba0e3a5c2041635426f87007ca1eab226def07eb1996ef7030c3742c8",
     "ai_review_resolver_source": "6cdeb60641b89b38a826fc0130fb74e562fa178ede7c62d0b82269683765e88e",
-    "escrow_artifact": "a7800965e7c78809306356a2cc8a5150ae8ed8db12f11269c6ae82ab66a5f440",
+    "escrow_artifact": "410cdf98774018bfbc63b7ec4b3ed1c65889370cf1fa38eb2b718e1eb3857d5c",
     "quorum_artifact": "e47a10e4320f6ab5324fe169626a7b2b5c85391d240693cc972c7cb0f3071b6a",
     "ai_review_resolver_artifact": "1a51767231115d16d0b50dc96f58284cc38b1cee268d69fe59f676c566c7ae5f",
     "automatic_policy": "b2c8082346abc789c67670b80ef3fb4b8bfda71d7b8281a1befe465c8f745ffe",

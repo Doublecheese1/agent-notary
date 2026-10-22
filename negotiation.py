@@ -101,7 +101,7 @@ class Terms(BaseModel):
     deliverables: str = Field(min_length=3, max_length=5000)
     limitations: str = Field(default="None stated", min_length=1, max_length=3000)
     evidence: str = Field(min_length=3, max_length=3000)
-    amount_usdc: str = Field(pattern=r"^\d{1,4}(\.\d{1,6})?$")
+    amount_usdc: str = Field(min_length=1, max_length=80, pattern=r"^\d+(\.\d{1,6})?$")
     delivery_days: int = Field(ge=1, le=30)
 
 
@@ -125,15 +125,15 @@ class AcceptanceRequest(BaseModel):
 
 def canonical_terms(value: Terms) -> str:
     amount = Decimal(value.amount_usdc)
-    if amount < 100 or amount > 1000:
-        raise HTTPException(422, "Buyer Review negotiations must be between 100 and 1,000 USDC.")
+    if amount < 100:
+        raise HTTPException(422, "Buyer Review negotiations must be at least 100 USDC.")
     payload = {"settlement_mode": "buyer_review", **value.model_dump()}
     return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
 def acceptance_statement(row: sqlite3.Row, revision: sqlite3.Row) -> str:
     return (
-        "AgentNotary Final Terms Acceptance\n"
+        "AgentSolis Final Terms Acceptance\n"
         f"Negotiation: {row['id']}\n"
         f"Revision: {revision['revision']}\n"
         f"Terms hash: {revision['terms_hash']}\n"

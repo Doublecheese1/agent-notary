@@ -49,7 +49,7 @@ class MainnetEscrowTest(unittest.TestCase):
         self.initially_paused = self.escrow.functions.paused().call()
         self.escrow.functions.setBuyerAccess(self.buyer, True).transact({"from": self.ops})
         self.escrow.functions.resumeNewDeals().transact({"from": self.ops})
-        self.token.functions.approve(self.escrow.address, 2_000 * USDC).transact({"from": self.buyer})
+        self.token.functions.approve(self.escrow.address, 10_000 * USDC).transact({"from": self.buyer})
         self.token.functions.mint(self.seller, 500 * USDC).transact({"from": self.buyer})
         self.token.functions.approve(self.escrow.address, 500 * USDC).transact({"from": self.seller})
         self.counter = 0
@@ -134,6 +134,15 @@ class MainnetEscrowTest(unittest.TestCase):
 
     def test_deployment_starts_paused(self):
         self.assertTrue(self.initially_paused)
+
+    def test_amount_above_1000_is_allowed_and_fee_caps_at_50(self):
+        amount = 5_000 * USDC
+        deal_id = self._propose(self._request(amount=amount))
+        deal = self._deal(deal_id)
+        self.assertEqual(deal[5], amount)
+        self.assertEqual(deal[8], 50 * USDC)
+        self.escrow.functions.cancelProposal(deal_id).transact({"from": self.buyer})
+        self.assertEqual(self.escrow.functions.totalEscrowed().call(), 0)
 
     def test_buyer_review_rejects_short_decision_or_arbitration_windows(self):
         amount = 100 * USDC

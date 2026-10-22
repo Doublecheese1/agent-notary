@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 from main import app
-from mainnet import prepare_action, transaction
+from mainnet import mainnet_units, prepare_action, transaction
 
 
 class MainnetRouteTest(unittest.TestCase):
@@ -63,6 +63,9 @@ class MainnetRouteTest(unittest.TestCase):
         )
         self.assertEqual(prepared["chainId"], "0xa4b1")
         self.assertNotEqual(prepared["chainId"], "0x66eee")
+
+    def test_mainnet_amount_parser_has_no_1000_usdc_cap(self):
+        self.assertEqual(mainnet_units("5000"), 5_000_000_000)
 
     def test_public_mainnet_disclosures_are_available(self):
         self.assertEqual(self.client.get("/terms").status_code, 200)

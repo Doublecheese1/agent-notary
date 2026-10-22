@@ -54,6 +54,12 @@ class NegotiationTest(unittest.TestCase):
         with self.assertRaises(HTTPException):
             negotiation.read_negotiation(created["id"], "wrong-key")
 
+    def test_price_above_1000_is_allowed(self):
+        self.terms = self.terms.model_copy(update={"amount_usdc": "5000"})
+        created, buyer_key, _ = self.open()
+        buyer_view = negotiation.read_negotiation(created["id"], buyer_key)
+        self.assertEqual(buyer_view["terms"]["amount_usdc"], "5000")
+
     def test_new_revision_clears_acceptance_and_both_wallets_must_sign(self):
         created, buyer_key, seller_key = self.open()
         initial = negotiation.read_negotiation(created["id"], buyer_key)

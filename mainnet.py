@@ -1,6 +1,7 @@
 """Mainnet product routes. Read-only until explicit, verified production configuration."""
 import json
 import os
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 from eth_abi import encode
@@ -9,7 +10,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from web3 import Web3
 
-from payments import ROOT, address, digest, units
+from payments import ROOT, address, digest
 from ai_review import ready_for_signing, register_manifest, require_trigger as require_ai_trigger
 
 CHAIN = 42161
@@ -19,6 +20,20 @@ QUORUM_ARTIFACT = json.loads((ROOT / "artifacts/AgentNotaryValidatorQuorum.json"
 AI_REVIEW_ARTIFACT = json.loads((ROOT / "artifacts/AgentNotaryAIReviewResolver.json").read_text())
 router = APIRouter(prefix="/mainnet", tags=["Mainnet candidate"])
 STATES = ["NONE", "PROPOSED", "LOCKED", "DELIVERED", "DISPUTED", "PAID", "REFUNDED", "FINALIZED_SPLIT"]
+
+
+def mainnet_units(value: str) -> int:
+    """Convert an uncapped USDC amount while enforcing token precision and uint256 size."""
+    try:
+        decimal_value = Decimal(value)
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        raise HTTPException(422, "Enter a valid USDC amount.") from exc
+    if not decimal_value.is_finite() or decimal_value <= 0:
+        raise HTTPException(422, "Budget must be greater than zero.")
+    scaled = decimal_value * 1_000_000
+    if scaled != scaled.to_integral_value() or scaled >= 2**256:
+        raise HTTPException(422, "Use no more than 6 decimal places and a valid USDC amount.")
+    return int(scaled)
 
 
 def transaction(sender, target, data):
@@ -369,7 +384,7 @@ def prepare_proposal(req: Proposal):
     if buyer == seller:
         raise HTTPException(422, "Buyer and seller must be different wallets.")
     mode = 0 if req.mode == "automatic" else 1
-    amount = units(req.amount)
+    amount = mainnet_units(req.amount)
     if req.mode == "buyer_review" and req.decision_window < 2 * 24 * 60 * 60:
         raise HTTPException(422, "Buyer Review requires at least 2 days for the buyer decision window.")
     if req.mode == "buyer_review" and req.arbitration_window < 7 * 24 * 60 * 60:
