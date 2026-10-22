@@ -125,6 +125,11 @@ def script():
     return FileResponse(ROOT / "static/mainnet.js", media_type="text/javascript", headers={"Cache-Control": "no-store"})
 
 
+@router.get("/i18n.js", include_in_schema=False)
+def i18n_script():
+    return FileResponse(ROOT / "static/mainnet-i18n.js", media_type="text/javascript", headers={"Cache-Control": "no-store"})
+
+
 @router.get("/deal/{deal_id}", include_in_schema=False)
 def deal_page(deal_id: str):
     digest(deal_id)

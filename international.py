@@ -1,9 +1,4 @@
-"""Localized, crawlable introductions for AgentSolis.
-
-The money-moving workspace stays English until its financial and legal terms
-receive language-specific review. These pages explain the product and link to
-that authoritative workspace without pretending the full app is translated.
-"""
+"""Localized, crawlable introductions for AgentSolis."""
 from html import escape
 
 LOCALES = {
@@ -16,7 +11,7 @@ LOCALES = {
         "rules": "Ücret ve güvenlik", "fee": "Başarılı satıcı ödemesinde iş tutarının %1,5'i; en fazla 50 USDC.",
         "safety": "AgentSolis hiçbir zaman kurtarma kelimelerinizi veya özel anahtarınızı istemez.",
         "closed": "Şu anda para yatırma kapalıdır. Site incelemeye açıktır; halka açık gerçek para kabul edilmemektedir.",
-        "open": "İngilizce işlem ekranını aç", "notice": "Bu, ürünün Türkçe tanıtım sayfasıdır. Para, sözleşme, gizlilik ve itiraz metinleri halka açılmadan önce uzman dil kontrolünden geçirilecektir. İngilizce işlem ekranı şimdilik esas metindir.",
+        "open": "İşlem ekranını aç", "notice": "Bu çeviri kullanım kolaylığı sağlar. Akıllı sözleşme parametreleri, adresler ve cüzdanınızda gösterilen son işlem bilgileri teknik olarak esas alınır. İmzalamadan önce bunları kontrol edin.",
     },
     "es": {
         "lang": "es", "label": "Español", "flag": "🇪🇸",
@@ -27,7 +22,7 @@ LOCALES = {
         "rules": "Tarifas y seguridad", "fee": "1,5 % del importe del trabajo cuando el vendedor recibe el pago, con un máximo de 50 USDC.",
         "safety": "AgentSolis nunca solicita tu frase de recuperación ni tu clave privada.",
         "closed": "Los depósitos están cerrados. La interfaz está disponible para revisión, pero todavía no acepta fondos públicos reales.",
-        "open": "Abrir el espacio de trabajo en inglés", "notice": "Esta es una introducción en español. Los textos financieros, contractuales, de privacidad y de disputas se revisarán por especialistas antes de aceptar fondos. Por ahora, el espacio de trabajo en inglés es el texto oficial.",
+        "open": "Abrir el espacio de transacción", "notice": "Esta traducción facilita el uso. Los parámetros del contrato inteligente, las direcciones y los datos finales que muestra tu billetera constituyen la referencia técnica. Compruébalos antes de firmar.",
     },
     "pt-br": {
         "lang": "pt-BR", "label": "Português (Brasil)", "flag": "🇧🇷",
@@ -38,7 +33,7 @@ LOCALES = {
         "rules": "Taxas e segurança", "fee": "1,5% do valor do trabalho quando o vendedor recebe, limitado a 50 USDC.",
         "safety": "A AgentSolis nunca solicita sua frase de recuperação ou chave privada.",
         "closed": "Os depósitos estão fechados. A interface está aberta para avaliação, mas ainda não aceita fundos públicos reais.",
-        "open": "Abrir o espaço de trabalho em inglês", "notice": "Esta é uma introdução em português. Os textos financeiros, contratuais, de privacidade e de disputas passarão por revisão especializada antes da abertura para fundos. Por enquanto, o espaço de trabalho em inglês é o texto oficial.",
+        "open": "Abrir a área de transação", "notice": "Esta tradução facilita o uso. Os parâmetros do contrato inteligente, os endereços e os dados finais exibidos na carteira são a referência técnica. Confira-os antes de assinar.",
     },
     "ru": {
         "lang": "ru", "label": "Русский", "flag": "🇷🇺",
@@ -49,7 +44,7 @@ LOCALES = {
         "rules": "Комиссии и безопасность", "fee": "1,5% от стоимости работы при успешной выплате продавцу, но не более 50 USDC.",
         "safety": "AgentSolis никогда не запрашивает seed-фразу или приватный ключ.",
         "closed": "Пополнение сейчас закрыто. Интерфейс доступен для ознакомления, но публичные реальные средства ещё не принимаются.",
-        "open": "Открыть рабочее пространство на английском", "notice": "Это русскоязычная вводная страница. Финансовые, договорные, конфиденциальные и спорные формулировки пройдут экспертную проверку до приёма средств. Пока официальным считается английский интерфейс.",
+        "open": "Открыть экран сделки", "notice": "Этот перевод предназначен для удобства. Техническими исходными данными являются параметры смарт-контракта, адреса и окончательные сведения в кошельке. Проверьте их перед подписанием.",
     },
     "zh-cn": {
         "lang": "zh-CN", "label": "简体中文", "flag": "🇨🇳",
@@ -60,7 +55,7 @@ LOCALES = {
         "rules": "费用与安全", "fee": "卖方成功收款时收取工作金额的 1.5%，最高 50 USDC。",
         "safety": "AgentSolis 绝不会索取助记词或私钥。",
         "closed": "充值功能目前关闭。界面仅供查看，暂不接受公众真实资金。",
-        "open": "打开英文交易工作区", "notice": "这是中文产品介绍页。在接受资金之前，财务、合同、隐私和争议文本将由专业人员审核。目前英文交易工作区为正式文本。",
+        "open": "打开交易工作区", "notice": "本翻译旨在方便使用。智能合约参数、地址以及钱包显示的最终交易信息是技术依据。签名前请仔细核对。",
     },
 }
 
@@ -92,5 +87,5 @@ def localized_landing(locale: str) -> str:
     canonical = f"https://agentsolis.solists.com.tr/{locale}"
     return f'''<!doctype html><html lang="{data["lang"]}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(data["title"])} — AgentSolis</title><meta name="description" content="{escape(data["lead"])}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="{canonical}">{_alternate_links()}<link rel="stylesheet" href="/assets/brand.css"></head>
-<body class="landing"><header class="hero localized-hero"><div class="wrap"><nav><a class="brand" href="/" aria-label="AgentSolis home"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis</span></a><div class="language-switcher" aria-label="Language">{_language_links(locale)}</div></nav><div class="localized-copy"><p class="eyebrow">Arbitrum One · Native USDC · Non-custodial</p><h1>{escape(data["title"])}</h1><p class="lead">{escape(data["lead"])}</p><div class="notice localized-status"><strong>{escape(data["closed"])}</strong></div><a class="button" href="/mainnet">{escape(data["open"])} →</a></div></div></header>
+<body class="landing"><header class="hero localized-hero"><div class="wrap"><nav><a class="brand" href="/" aria-label="AgentSolis home"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis</span></a><div class="language-switcher" aria-label="Language">{_language_links(locale)}</div></nav><div class="localized-copy"><p class="eyebrow">Arbitrum One · Native USDC · Non-custodial</p><h1>{escape(data["title"])}</h1><p class="lead">{escape(data["lead"])}</p><div class="notice localized-status"><strong>{escape(data["closed"])}</strong></div><a class="button" href="/mainnet?lang={locale}">{escape(data["open"])} →</a></div></div></header>
 <main><section class="section"><div class="section-head"><div><p class="eyebrow">AgentSolis</p><h2>{escape(data["steps_title"])}</h2></div></div><div class="flow flow-rail">{steps}</div></section><section class="section trust-band"><div class="section-head"><div><h2>{escape(data["rules"])}</h2></div></div><div class="cards roles"><article class="card"><h3>1.5% / 50 USDC</h3><p>{escape(data["fee"])}</p></article><article class="card"><h3>Private keys stay private</h3><p>{escape(data["safety"])}</p></article></div><div class="translation-note">{escape(data["notice"])}</div></section></main><footer><div class="wrap"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis Protocol</span></a><span><a href="/terms">Terms &amp; risks</a> · <a href="/privacy">Privacy</a></span></div></footer><script src="/assets/launch-analytics.js" defer></script></body></html>'''
