@@ -89,6 +89,9 @@ class SeoTest(unittest.TestCase):
         stylesheet = self.client.get("/assets/brand.css")
         self.assertEqual(stylesheet.status_code, 200)
         self.assertIn("font-family:Manrope", stylesheet.text)
+        language_menu = self.client.get("/assets/language-menu.js")
+        self.assertEqual(language_menu.status_code, 200)
+        self.assertIn("closeFromOutside", language_menu.text)
         self.assertEqual(self.client.get("/assets/fonts/Manrope-Variable.ttf").status_code, 200)
         self.assertEqual(self.client.get("/assets/fonts/IBMPlexMono-Regular.ttf").status_code, 200)
 

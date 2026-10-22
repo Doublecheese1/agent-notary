@@ -152,6 +152,12 @@ def launch_analytics_script():
     from fastapi.responses import FileResponse
     return FileResponse(Path(__file__).resolve().parent / "static" / "launch-analytics.js", media_type="text/javascript")
 
+@app.get("/assets/language-menu.js", include_in_schema=False)
+def language_menu_script():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "language-menu.js", media_type="text/javascript")
+
 @app.get("/assets/agentsolis-social-card.png", include_in_schema=False)
 def social_card():
     from pathlib import Path
