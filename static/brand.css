@@ -92,6 +92,7 @@ button,input,textarea,select{font:inherit}
 .workspace input,.workspace textarea,.workspace select{width:100%;display:block;margin-top:6px;padding:12px;border:1px solid #c8bda8;border-radius:10px;background:#fffefb;color:var(--solis-ink)}
 .workspace button{background:var(--solis-pine);color:white;border:0;border-radius:10px;padding:12px 16px;margin:6px 7px 6px 0;font-weight:750;cursor:pointer;transition:transform .18s ease,background .18s ease}
 .workspace button:hover:not(:disabled){background:#104d3e;transform:translateY(-1px)}
+.workspace .role.selected,.workspace .role.selected:hover:not(:disabled){background:#e6f5ee;color:var(--solis-ink);border:2px solid var(--solis-pine)}
 .workspace button.secondary{background:var(--solis-paper);color:var(--solis-ink);border:1px solid var(--solis-line)}
 .workspace button.danger{background:var(--solis-bad)}.workspace button:disabled{opacity:.45;cursor:not-allowed}
 .hidden{display:none!important}.check{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid #e7dfd0}.pill{border-radius:99px;padding:3px 9px;background:#eee9df}.ok{color:var(--solis-good)}.bad{color:var(--solis-bad)}

@@ -7,6 +7,7 @@ const appSource = fs.readFileSync("static/mainnet.js", "utf8");
 const html = fs.readFileSync("static/mainnet.html", "utf8");
 const server = fs.readFileSync("mainnet.py", "utf8");
 const international = fs.readFileSync("international.py", "utf8");
+const css = fs.readFileSync("static/brand.css", "utf8");
 
 const sandbox = {
   window: {},
@@ -48,4 +49,5 @@ assert(!international.includes("workspace in English"), "stale English-only work
 assert(appSource.includes("localizedDealLink"), "shareable deal links must retain the selected language");
 assert(i18nSource.includes("🇹🇷") && i18nSource.includes("🇪🇸") && i18nSource.includes("🇧🇷") && i18nSource.includes("🇷🇺") && i18nSource.includes("🇨🇳"), "language selector must retain country flags");
 assert(appSource.includes('CHAIN="0xa4b1"') && appSource.includes('USDC="0xaf88'), "localization must not change chain or token identifiers");
+assert(css.includes(".role.selected:hover:not(:disabled)"), "selected role must remain readable after a sticky mobile hover");
 console.log("Mainnet localization guards passed for 6 languages, static and dynamic text, links and technical identifiers.");
