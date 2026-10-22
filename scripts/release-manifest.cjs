@@ -36,7 +36,16 @@ const manifest = {
     automatic_policy: hash("policies/automatic-json-evidence-v1.json"),
     review_policy: hash("policies/buyer-review-v1.json")
   },
-  deployment_inputs: {deployer: "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD", treasury_safe: "", operations_safe: "", human_review_safe: "", ai_review_resolver: "", validator_a: "", validator_b: "", validator_c: "", ai_reviewer_a: "", ai_reviewer_b: "", ai_reviewer_c: ""},
+  deployment_inputs: {
+    deployer: "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
+    treasury_safe: "", operations_safe: "", human_review_safe: "", ai_review_resolver: "",
+    validator_a: "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
+    validator_b: "0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2",
+    validator_c: "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A",
+    ai_reviewer_a: "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
+    ai_reviewer_b: "0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2",
+    ai_reviewer_c: "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A"
+  },
   gates: {mainnet_enabled: false, accepting_funds: false, deployment_ui: false, operations_ui: false},
   warning: "Not deployed and not independently audited. Verify every hash and address before funding."
 };
