@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 app = FastAPI(
-    title="AgentNotary Clearinghouse",
+    title="AgentSolis Clearinghouse",
     version="1.0.0",
     description="Escrow workflow demo for agent-to-agent jobs."
 )

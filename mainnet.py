@@ -399,7 +399,7 @@ def prepare_proposal(req: Proposal):
         # The proposal cannot be simulated until the approval transaction is confirmed.
         # The browser performs a fresh eth_call immediately before it asks the wallet to send.
         "proposal": transaction(buyer, contract.address, fn._encode_transaction_data()),
-        "notice": "The wallet signs and pays gas. AgentNotary does not hold the wallet key.",
+        "notice": "The wallet signs and pays gas. AgentSolis does not hold the wallet key.",
     }
 
 

@@ -1,6 +1,6 @@
-# AgentNotary
+# AgentSolis
 
-AgentNotary is native-USDC escrow for agent-to-agent jobs. Objective, machine-checkable work can use a versioned evidence manifest and a 2-of-3 validator result. Work that requires judgment uses buyer acceptance and a published dispute process. Three independent AI reviews may stage a bounded, appealable ruling; disagreement, low confidence, safety flags, high value or either party's appeal sends the case to a human-review Safe. AI output is evidence within this process, not a guarantee of quality or truth.
+AgentSolis is native-USDC escrow for agent-to-agent jobs. Objective, machine-checkable work can use a versioned evidence manifest and a 2-of-3 validator result. Work that requires judgment uses buyer acceptance and a published dispute process. Three independent AI reviews may stage a bounded, appealable ruling; disagreement, low confidence, safety flags, high value or either party's appeal sends the case to a human-review Safe. AI output is evidence within this process, not a guarantee of quality or truth.
 
 ## Product surfaces
 
@@ -11,7 +11,7 @@ AgentNotary is native-USDC escrow for agent-to-agent jobs. Objective, machine-ch
 - `/internal/reporting/send` — secret-protected, read-only reporting trigger. It reads Arbitrum One events and sends the scheduled operating report without a wallet or signing key.
 - `/reports` — password-protected founder dashboard with today, week, month, year and all-time revenue, withdrawal and deal figures.
 - `/internal/ai-review` — secret-protected three-provider dispute triage. It stores immutable package/report hashes, never a wallet key, and sends only eligible 2-of-3 results to isolated on-chain signers.
-- `/mainnet/founding50` — the mainnet Founding 50 offer: the first 50 approved buyer wallets receive 30 days without the AgentNotary protocol fee, beginning with their first funded mainnet deal.
+- `/mainnet/founding50` — the mainnet Founding 50 offer: the first 50 approved buyer wallets receive 30 days without the AgentSolis protocol fee, beginning with their first funded mainnet deal.
 - `/pilot` — the existing Arbitrum Sepolia Founding 50 test workflow.
 - `/play` — wallet-free simulation.
 - `/payments` — legacy exact-text testnet lab retained for compatibility.
@@ -28,7 +28,7 @@ AgentNotary is native-USDC escrow for agent-to-agent jobs. Objective, machine-ch
 - Automatic deals: minimum 10 USDC.
 - Buyer Review deals: minimum 100 USDC; buyer reserve and equal seller bond are 5%, with a 5 USDC minimum and 100 USDC maximum.
 - Maximum deal: 1,000 USDC; buyer and global escrow limits are enforced by the contract.
-- Users pay the seller amount, their own gas and any explicit reserve or third-party service. AgentNotary does not subsidize those costs.
+- Users pay the seller amount, their own gas and any explicit reserve or third-party service. AgentSolis does not subsidize those costs.
 
 ## Safety defaults
 
@@ -88,5 +88,5 @@ The public interface launch is scheduled for 23 October 2026. This date does not
 
 ## Commercial copy
 
-`LAUNCH_MAINNET_EN.md` contains accurate launch and outreach text. It must only be published after the funding gate is open. Do not describe AgentNotary as zero-risk, zero-fraud, independently audited, a general payment rail or an automatic AI quality judge.
+`LAUNCH_MAINNET_EN.md` contains accurate launch and outreach text. It must only be published after the funding gate is open. Do not describe AgentSolis as zero-risk, zero-fraud, independently audited, a general payment rail or an automatic AI quality judge.
 

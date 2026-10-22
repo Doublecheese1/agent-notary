@@ -16,7 +16,7 @@ PUBLIC_LAUNCH_DATE = "2026-10-23"
 def protocol_status() -> dict[str, Any]:
     """Facts safe to publish before external funds are accepted."""
     return {
-        "product": "AgentNotary",
+        "product": "AgentSolis",
         "description": "Deterministic settlement infrastructure for agent-to-agent jobs.",
         "public_launch_date": PUBLIC_LAUNCH_DATE,
         "production": {
@@ -63,7 +63,7 @@ def public_protocol_status():
 def agent_card():
     return JSONResponse(
         {
-            "name": "AgentNotary",
+            "name": "AgentSolis",
             "description": "Read-only discovery agent for deterministic agent-to-agent settlement infrastructure.",
             "version": "0.1.0",
             "documentationUrl": f"{ORIGIN}/docs",
@@ -76,10 +76,10 @@ def agent_card():
             "skills": [
                 {
                     "id": "protocol_status",
-                    "name": "AgentNotary protocol status",
+                    "name": "AgentSolis protocol status",
                     "description": "Returns supported networks, assets, safety gates and public integration URLs.",
                     "tags": ["escrow", "settlement", "status", "a2a"],
-                    "examples": ["Show AgentNotary protocol status", "Is AgentNotary accepting mainnet funds?"],
+                    "examples": ["Show AgentSolis protocol status", "Is AgentSolis accepting mainnet funds?"],
                     "inputModes": ["text/plain"],
                     "outputModes": ["application/json"],
                 },
@@ -88,7 +88,7 @@ def agent_card():
                     "name": "Wallet-free sandbox information",
                     "description": "Returns the no-wallet, no-real-money demo URL and its safety limits.",
                     "tags": ["sandbox", "demo", "safe-retry"],
-                    "examples": ["How can an agent try AgentNotary without a wallet?"],
+                    "examples": ["How can an agent try AgentSolis without a wallet?"],
                     "inputModes": ["text/plain"],
                     "outputModes": ["application/json"],
                 },
@@ -122,7 +122,7 @@ def a2a_send_message(body: dict[str, Any], a2a_version: str = Header(default="1.
                 "type": "https://a2a-protocol.org/errors/version-not-supported",
                 "title": "Protocol Version Not Supported",
                 "status": 400,
-                "detail": "AgentNotary currently supports A2A protocol version 1.0.",
+                "detail": "AgentSolis currently supports A2A protocol version 1.0.",
                 "supportedVersions": ["1.0"],
             },
             status_code=400,
@@ -136,7 +136,7 @@ def a2a_send_message(body: dict[str, Any], a2a_version: str = Header(default="1.
         summary = "The wallet-free sandbox is available and never moves real money."
     else:
         payload = {"skill": "protocol_status", **status}
-        summary = "AgentNotary public launch is planned for 23 October 2026; mainnet deposits remain closed during preparation."
+        summary = "AgentSolis public launch is planned for 23 October 2026; mainnet deposits remain closed during preparation."
     task_id = str(uuid.uuid4())
     context_id = body.get("message", {}).get("contextId") or str(uuid.uuid4())
     return JSONResponse(
@@ -162,7 +162,7 @@ def a2a_send_message(body: dict[str, Any], a2a_version: str = Header(default="1.
 @router.get("/llms.txt", include_in_schema=False)
 def llms_txt():
     return PlainTextResponse(
-        "# AgentNotary\n\n"
+        "# AgentSolis\n\n"
         "> Deterministic settlement infrastructure for agent-to-agent jobs.\n\n"
         "- Public launch: 23 October 2026.\n"
         "- Production network candidate: Arbitrum One with native USDC.\n"
@@ -172,6 +172,6 @@ def llms_txt():
         "- A2A Agent Card: https://agent-notary-5.onrender.com/.well-known/agent-card.json\n"
         "- OpenAPI: https://agent-notary-5.onrender.com/openapi.json\n"
         "- Source: https://github.com/Doublecheese1/agent-notary\n\n"
-        "AgentNotary does not request wallet private keys. Public mainnet money movement is not available yet.\n",
+        "AgentSolis does not request wallet private keys. Public mainnet money movement is not available yet.\n",
         headers={"Cache-Control": "public, max-age=300"},
     )

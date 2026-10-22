@@ -299,7 +299,7 @@ def render_text(report: dict) -> str:
         f"- {item['deal_id']} — {item['status']} — {item.get('reason') or 'Awaiting AI evaluations'}"
         for item in report["ai_attention"]
     )
-    return f"""AgentNotary Report
+    return f"""AgentSolis Report
 Period: {report['window_start']} — {report['window_end']}
 Blocks: {report['start_block']} — {report['end_block']}
 
@@ -344,7 +344,7 @@ def send_email(report: dict) -> None:
     if not recipient or not sender or not password:
         raise HTTPException(503, "Configure report recipient and SMTP credentials.")
     message = EmailMessage()
-    message["Subject"] = f"AgentNotary report — {report['window_end'][0:16]}"
+    message["Subject"] = f"AgentSolis report — {report['window_end'][0:16]}"
     message["From"], message["To"] = sender, recipient
     text = render_text(report)
     message.set_content(text)
