@@ -45,6 +45,10 @@ desktop.reopen();
 desktop.documentListeners.pointerdown({ target: desktop.summary });
 assert.equal(desktop.isOpen(), true, 'presses inside the menu keep it open');
 
+desktop.documentListeners.click({ target: {} });
+assert.equal(desktop.isOpen(), false, 'outside click closes the menu when pointer events are unavailable');
+
+desktop.reopen();
 desktop.documentListeners.keydown({ key: 'Escape' });
 assert.equal(desktop.isOpen(), false, 'Escape closes the menu');
 assert.equal(desktop.focusCount(), 1, 'Escape returns focus to the summary');

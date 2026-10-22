@@ -4,9 +4,11 @@
 
   const closeMenu = () => menu.removeAttribute('open');
 
-  document.addEventListener('pointerdown', event => {
+  const closeFromOutside = event => {
     if (menu.open && !menu.contains(event.target)) closeMenu();
-  });
+  };
+  document.addEventListener('pointerdown', closeFromOutside);
+  document.addEventListener('click', closeFromOutside);
 
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || !menu.open) return;
