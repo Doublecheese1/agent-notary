@@ -1,4 +1,4 @@
-name: AgentNotary scheduled reports
+name: AgentSolis scheduled reports
 
 on:
   schedule:

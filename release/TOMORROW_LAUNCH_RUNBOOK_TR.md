@@ -12,8 +12,8 @@ Eşik: **3 sahibin 2 onayı**
 Sahipler:
 
 1. Account 1 — `0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD`
-2. Seller — `0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2`
-3. Arbitrator — `0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A`
+2. AgentSolis B — `0x9c41A746c6649b36e548cf4D9C5CCe3Ef4648cbA`
+3. AgentSolis C — yarın ayrı kurtarma kelimeleriyle oluşturulacak; adres henüz beklemede.
 
 Safe adları:
 

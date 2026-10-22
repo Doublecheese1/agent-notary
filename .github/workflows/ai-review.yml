@@ -1,4 +1,4 @@
-name: AgentNotary AI review sync
+name: AgentSolis AI review sync
 
 on:
   schedule:

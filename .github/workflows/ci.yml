@@ -1,4 +1,4 @@
-name: AgentNotary verification
+name: AgentSolis verification
 
 on:
   push:

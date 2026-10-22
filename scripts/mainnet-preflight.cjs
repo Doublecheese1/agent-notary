@@ -43,7 +43,7 @@ for (const key of ["treasury_safe", "operations_safe", "human_review_safe", "val
   if (!address.test(release.deployment_inputs[key] || "")) pending.push(key);
 }
 
-console.log("AgentNotary mainnet preflight");
+console.log("AgentSolis mainnet preflight");
 console.log(`- Static release integrity: ${failures.length ? "FAILED" : "PASS"}`);
 console.log(`- Controlled deployer: ${release.deployment_inputs.deployer}`);
 console.log(`- Public funding gate: ${release.gates.accepting_funds ? "OPEN" : "CLOSED (safe)"}`);

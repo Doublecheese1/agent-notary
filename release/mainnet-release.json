@@ -38,11 +38,11 @@
     "human_review_safe": "",
     "ai_review_resolver": "",
     "validator_a": "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
-    "validator_b": "0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2",
-    "validator_c": "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A",
+    "validator_b": "0x9c41A746c6649b36e548cf4D9C5CCe3Ef4648cbA",
+    "validator_c": "",
     "ai_reviewer_a": "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
-    "ai_reviewer_b": "0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2",
-    "ai_reviewer_c": "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A"
+    "ai_reviewer_b": "0x9c41A746c6649b36e548cf4D9C5CCe3Ef4648cbA",
+    "ai_reviewer_c": ""
   },
   "gates": {
     "mainnet_enabled": false,
