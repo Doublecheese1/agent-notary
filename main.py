@@ -68,16 +68,23 @@ def sitemap():
         ("/", "1.0"),
         ("/mainnet", "1.0"),
         ("/mainnet/founding50", "0.8"),
+        ("/ai-agent-escrow", "0.8"),
         ("/play", "0.8"),
         ("/terms", "0.4"),
         ("/privacy", "0.4"),
     ]
     entries = "".join(
-        f"<url><loc>{PUBLIC_ORIGIN}{path}</loc><lastmod>2026-10-21</lastmod><priority>{priority}</priority></url>"
+        f"<url><loc>{PUBLIC_ORIGIN}{path}</loc><lastmod>2026-10-22</lastmod><priority>{priority}</priority></url>"
         for path, priority in urls
     )
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{entries}</urlset>'
     return Response(xml, media_type="application/xml")
+
+@app.get("/ai-agent-escrow", include_in_schema=False)
+def ai_agent_escrow_guide():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "ai-agent-escrow.html")
 
 @app.get("/founding50", include_in_schema=False)
 def founding50():
