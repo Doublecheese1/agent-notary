@@ -5,10 +5,11 @@
   const closeMenu = () => menu.removeAttribute('open');
 
   const closeFromOutside = event => {
-    if (menu.open && !menu.contains(event.target)) closeMenu();
+    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+    if (menu.open && !path.includes(menu) && !menu.contains(event.target)) closeMenu();
   };
-  document.addEventListener('pointerdown', closeFromOutside);
-  document.addEventListener('click', closeFromOutside);
+  window.addEventListener('pointerdown', closeFromOutside, true);
+  window.addEventListener('click', closeFromOutside, true);
 
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || !menu.open) return;

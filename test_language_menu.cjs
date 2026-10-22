@@ -21,15 +21,17 @@ function setup({ finePointer = true } = {}) {
     querySelector(selector) { return selector === '.language-menu' ? menu : null; },
     addEventListener(name, listener) { documentListeners[name] = listener; },
   };
+  const windowListeners = {};
   let timer;
   const window = {
     matchMedia() { return { matches: finePointer }; },
     setTimeout(listener, milliseconds) { timer = { listener, milliseconds }; return 1; },
     clearTimeout() { timer = undefined; },
+    addEventListener(name, listener) { windowListeners[name] = listener; },
   };
   vm.runInNewContext(source, { document, window });
   return {
-    summary, documentListeners, menuListeners,
+    summary, documentListeners, windowListeners, menuListeners,
     reopen() { open = true; },
     isOpen() { return open; },
     focusCount() { return focusCount; },
@@ -38,14 +40,14 @@ function setup({ finePointer = true } = {}) {
 }
 
 const desktop = setup();
-desktop.documentListeners.pointerdown({ target: {} });
+desktop.windowListeners.pointerdown({ target: {}, composedPath() { return []; } });
 assert.equal(desktop.isOpen(), false, 'outside pointer press closes the menu');
 
 desktop.reopen();
-desktop.documentListeners.pointerdown({ target: desktop.summary });
+desktop.windowListeners.pointerdown({ target: desktop.summary, composedPath() { return [desktop.summary]; } });
 assert.equal(desktop.isOpen(), true, 'presses inside the menu keep it open');
 
-desktop.documentListeners.click({ target: {} });
+desktop.windowListeners.click({ target: {}, composedPath() { return []; } });
 assert.equal(desktop.isOpen(), false, 'outside click closes the menu when pointer events are unavailable');
 
 desktop.reopen();
