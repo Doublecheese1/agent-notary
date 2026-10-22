@@ -12,7 +12,7 @@ class SeoTest(unittest.TestCase):
     def test_robots_points_to_public_sitemap_and_blocks_private_workspaces(self):
         response = self.client.get("/robots.txt")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Sitemap: https://agentsolis.onrender.com/sitemap.xml", response.text)
+        self.assertIn("Sitemap: https://agentsolis.solists.com.tr/sitemap.xml", response.text)
         self.assertIn("Disallow: /reports", response.text)
         self.assertIn("Disallow: /mainnet/deal/", response.text)
         self.assertIn("Disallow: /mainnet/negotiate/", response.text)
@@ -20,8 +20,8 @@ class SeoTest(unittest.TestCase):
     def test_sitemap_contains_only_public_product_pages(self):
         response = self.client.get("/sitemap.xml")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("https://agentsolis.onrender.com/mainnet", response.text)
-        self.assertIn("https://agentsolis.onrender.com/play", response.text)
+        self.assertIn("https://agentsolis.solists.com.tr/mainnet", response.text)
+        self.assertIn("https://agentsolis.solists.com.tr/play", response.text)
         self.assertNotIn("/reports", response.text)
         self.assertNotIn("/setup", response.text)
 
@@ -37,7 +37,7 @@ class SeoTest(unittest.TestCase):
     def test_mainnet_page_has_search_metadata(self):
         response = self.client.get("/mainnet")
         self.assertIn('name="description"', response.text)
-        self.assertIn('rel="canonical" href="https://agentsolis.onrender.com/mainnet"', response.text)
+        self.assertIn('rel="canonical" href="https://agentsolis.solists.com.tr/mainnet"', response.text)
         self.assertIn('type="application/ld+json"', response.text)
 
     def test_public_pages_load_the_shared_brand_system(self):

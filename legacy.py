@@ -19,7 +19,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[origin.strip() for origin in os.getenv(
-        "PUBLIC_CORS_ORIGINS", "https://agentsolis.onrender.com"
+        "PUBLIC_CORS_ORIGINS", "https://agentsolis.solists.com.tr"
     ).split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
