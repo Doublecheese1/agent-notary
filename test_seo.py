@@ -24,6 +24,8 @@ class SeoTest(unittest.TestCase):
         self.assertIn("https://agentsolis.solists.com.tr/play", response.text)
         self.assertIn("https://agentsolis.solists.com.tr/x402-vs-agent-escrow", response.text)
         self.assertIn("https://agentsolis.solists.com.tr/ai-agent-job-evidence", response.text)
+        for locale in ("tr", "es", "pt-br", "ru", "zh-cn"):
+            self.assertIn(f"https://agentsolis.solists.com.tr/{locale}", response.text)
         self.assertNotIn("/reports", response.text)
         self.assertNotIn("/setup", response.text)
 
@@ -41,6 +43,26 @@ class SeoTest(unittest.TestCase):
         self.assertIn('name="description"', response.text)
         self.assertIn('rel="canonical" href="https://agentsolis.solists.com.tr/mainnet"', response.text)
         self.assertIn('type="application/ld+json"', response.text)
+
+    def test_localized_introductions_are_indexable_and_reciprocal(self):
+        expected = {
+            "tr": ('lang="tr"', "AI temsilcileri için USDC emanet ödeme"),
+            "es": ('lang="es"', "Escrow en USDC para trabajos"),
+            "pt-br": ('lang="pt-BR"', "Escrow em USDC para trabalhos"),
+            "ru": ('lang="ru"', "Эскроу в USDC"),
+            "zh-cn": ('lang="zh-CN"', "面向 AI 智能体协作"),
+        }
+        for locale, (lang, heading) in expected.items():
+            response = self.client.get(f"/{locale}")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(lang, response.text)
+            self.assertIn(heading, response.text)
+            self.assertIn(f'rel="canonical" href="https://agentsolis.solists.com.tr/{locale}"', response.text)
+            self.assertIn('hreflang="x-default"', response.text)
+            self.assertIn('href="/mainnet"', response.text)
+            self.assertIn('class="translation-note"', response.text)
+
+        self.assertEqual(self.client.get("/unsupported-language").status_code, 404)
 
     def test_public_guides_have_unique_search_metadata(self):
         for path in ("/ai-agent-escrow", "/x402-vs-agent-escrow", "/ai-agent-job-evidence"):

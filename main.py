@@ -8,6 +8,7 @@ from reporting import router as reporting_router
 from negotiation import router as negotiation_router, page_router as negotiation_page_router
 from ai_review import router as ai_review_router
 from discovery import router as discovery_router
+from international import LOCALES, localized_landing
 
 app.include_router(router)
 app.include_router(payments_router)
@@ -75,6 +76,7 @@ def sitemap():
         ("/terms", "0.4"),
         ("/privacy", "0.4"),
     ]
+    urls.extend((f"/{locale}", "0.7") for locale in LOCALES)
     entries = "".join(
         f"<url><loc>{PUBLIC_ORIGIN}{path}</loc><lastmod>2026-10-22</lastmod><priority>{priority}</priority></url>"
         for path, priority in urls
@@ -164,6 +166,15 @@ def mainnet_founding50():
     from pathlib import Path
     from fastapi.responses import FileResponse
     return FileResponse(Path(__file__).resolve().parent / "static" / "founding50-mainnet.html")
+
+
+@app.get("/{locale}", include_in_schema=False)
+def international_landing(locale: str):
+    from fastapi import HTTPException
+    from fastapi.responses import HTMLResponse
+    if locale not in LOCALES:
+        raise HTTPException(status_code=404, detail="Language not found")
+    return HTMLResponse(localized_landing(locale))
 
 if __name__ == "__main__":
     import uvicorn
