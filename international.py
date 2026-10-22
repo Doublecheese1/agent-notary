@@ -74,7 +74,12 @@ def _alternate_links() -> str:
 
 def _language_links(current: str) -> str:
     items = ['<a href="/" hreflang="en">English</a>']
-    items.extend(f'<a href="/{slug}" hreflang="{data["lang"]}"{(" aria-current=\"page\"" if slug == current else "")}>{escape(data["label"])}</a>' for slug, data in LOCALES.items())
+    for slug, data in LOCALES.items():
+        current_attr = ' aria-current="page"' if slug == current else ""
+        items.append(
+            f'<a href="/{slug}" hreflang="{data["lang"]}"{current_attr}>'
+            f'{escape(data["label"])}</a>'
+        )
     return "".join(items)
 
 
