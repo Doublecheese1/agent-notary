@@ -50,6 +50,8 @@ assert(landing.includes("/mainnet?role=buyer#start") && landing.includes("/mainn
 assert(landing.includes("https://github.com/Doublecheese1/agent-notary"), "landing page must expose the verified public repository");
 assert(landing.includes("/assets/agentsolis-social-card.png") && fs.existsSync("static/agentsolis-social-card.png"), "social preview image must exist and be referenced");
 assert(founding.includes("Applications are not open yet"), "Founding 50 must not imply that a missing application path is open");
+assert(landing.includes("Automatic deals start at 10 USDC"), "Landing must show the Automatic deal minimum");
+assert(landing.includes("Buyer Review deals start at 100 USDC"), "Landing must show the Buyer Review deal minimum");
 assert(js.includes("prepare-review-action") && js.includes("Appeal AI ruling"), "deal UI must expose the AI appeal path");
 assert(!js.includes("Prepare seller-wins ruling") && !js.includes("Prepare buyer-wins ruling"), "ordinary users must not impersonate the resolver");
 assert(js.includes("if(sending)return"), "wallet send must block rapid duplicate clicks");

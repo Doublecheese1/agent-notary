@@ -38,6 +38,14 @@ class SeoTest(unittest.TestCase):
         self.assertEqual(response.headers.get("x-frame-options"), "DENY")
         self.assertIn("frame-ancestors 'none'", response.headers.get("content-security-policy", ""))
 
+    def test_old_render_hostname_redirects_to_canonical_domain(self):
+        response = self.client.get(
+            "https://agent-notary-5.onrender.com/es?source=legacy",
+            follow_redirects=False,
+        )
+        self.assertEqual(response.status_code, 308)
+        self.assertEqual(response.headers["location"], "https://agentsolis.solists.com.tr/es?source=legacy")
+
     def test_mainnet_page_has_search_metadata(self):
         response = self.client.get("/mainnet")
         self.assertIn('name="description"', response.text)

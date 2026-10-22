@@ -25,6 +25,12 @@ PUBLIC_ORIGIN = "https://agentsolis.solists.com.tr"
 
 @app.middleware("http")
 async def security_headers(request, call_next):
+    if request.url.hostname == "agent-notary-5.onrender.com":
+        from fastapi.responses import RedirectResponse
+        destination = f"{PUBLIC_ORIGIN}{request.url.path}"
+        if request.url.query:
+            destination += f"?{request.url.query}"
+        return RedirectResponse(destination, status_code=308)
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
