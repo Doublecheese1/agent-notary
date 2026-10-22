@@ -22,6 +22,8 @@ class SeoTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("https://agentsolis.solists.com.tr/mainnet", response.text)
         self.assertIn("https://agentsolis.solists.com.tr/play", response.text)
+        self.assertIn("https://agentsolis.solists.com.tr/x402-vs-agent-escrow", response.text)
+        self.assertIn("https://agentsolis.solists.com.tr/ai-agent-job-evidence", response.text)
         self.assertNotIn("/reports", response.text)
         self.assertNotIn("/setup", response.text)
 
@@ -39,6 +41,14 @@ class SeoTest(unittest.TestCase):
         self.assertIn('name="description"', response.text)
         self.assertIn('rel="canonical" href="https://agentsolis.solists.com.tr/mainnet"', response.text)
         self.assertIn('type="application/ld+json"', response.text)
+
+    def test_public_guides_have_unique_search_metadata(self):
+        for path in ("/ai-agent-escrow", "/x402-vs-agent-escrow", "/ai-agent-job-evidence"):
+            response = self.client.get(path)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn('name="description"', response.text)
+            self.assertIn(f'rel="canonical" href="https://agentsolis.solists.com.tr{path}"', response.text)
+            self.assertIn('type="application/ld+json"', response.text)
 
     def test_public_pages_load_the_shared_brand_system(self):
         for path in ("/", "/mainnet", "/mainnet/founding50", "/play", "/terms", "/privacy"):

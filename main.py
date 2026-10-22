@@ -69,6 +69,8 @@ def sitemap():
         ("/mainnet", "1.0"),
         ("/mainnet/founding50", "0.8"),
         ("/ai-agent-escrow", "0.8"),
+        ("/x402-vs-agent-escrow", "0.8"),
+        ("/ai-agent-job-evidence", "0.8"),
         ("/play", "0.8"),
         ("/terms", "0.4"),
         ("/privacy", "0.4"),
@@ -96,6 +98,18 @@ def ai_agent_escrow_guide():
     from pathlib import Path
     from fastapi.responses import FileResponse
     return FileResponse(Path(__file__).resolve().parent / "static" / "ai-agent-escrow.html")
+
+@app.get("/x402-vs-agent-escrow", include_in_schema=False)
+def x402_vs_agent_escrow_guide():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "x402-vs-agent-escrow.html")
+
+@app.get("/ai-agent-job-evidence", include_in_schema=False)
+def ai_agent_job_evidence_guide():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "ai-agent-job-evidence.html")
 
 @app.get("/founding50", include_in_schema=False)
 def founding50():
