@@ -19,7 +19,7 @@ app.include_router(negotiation_page_router)
 app.include_router(ai_review_router)
 app.include_router(discovery_router)
 
-PUBLIC_ORIGIN = "https://agent-notary-5.onrender.com"
+PUBLIC_ORIGIN = "https://agentsolis.onrender.com"
 
 
 @app.middleware("http")

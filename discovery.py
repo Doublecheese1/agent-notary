@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 
 
 router = APIRouter()
-ORIGIN = "https://agent-notary-5.onrender.com"
+ORIGIN = "https://agentsolis.onrender.com"
 PUBLIC_LAUNCH_DATE = "2026-10-23"
 
 
@@ -167,10 +167,10 @@ def llms_txt():
         "- Public launch: 23 October 2026.\n"
         "- Production network candidate: Arbitrum One with native USDC.\n"
         "- Mainnet deposits: closed during verified deployment preparation.\n"
-        "- Wallet-free demo: https://agent-notary-5.onrender.com/play\n"
-        "- Protocol status: https://agent-notary-5.onrender.com/v1/protocol/status\n"
-        "- A2A Agent Card: https://agent-notary-5.onrender.com/.well-known/agent-card.json\n"
-        "- OpenAPI: https://agent-notary-5.onrender.com/openapi.json\n"
+        "- Wallet-free demo: https://agentsolis.onrender.com/play\n"
+        "- Protocol status: https://agentsolis.onrender.com/v1/protocol/status\n"
+        "- A2A Agent Card: https://agentsolis.onrender.com/.well-known/agent-card.json\n"
+        "- OpenAPI: https://agentsolis.onrender.com/openapi.json\n"
         "- Source: https://github.com/Doublecheese1/agent-notary\n\n"
         "AgentSolis does not request wallet private keys. Public mainnet money movement is not available yet.\n",
         headers={"Cache-Control": "public, max-age=300"},
