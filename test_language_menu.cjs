@@ -11,6 +11,7 @@ function setup({ finePointer = true } = {}) {
   let focusCount = 0;
   const summary = { focus() { focusCount += 1; } };
   const menu = {
+    dataset: {},
     get open() { return open; },
     contains(target) { return target === this || target === summary; },
     removeAttribute(name) { if (name === 'open') open = false; },
@@ -19,6 +20,7 @@ function setup({ finePointer = true } = {}) {
   };
   const document = {
     querySelector(selector) { return selector === '.language-menu' ? menu : null; },
+    querySelectorAll() { return []; },
     addEventListener(name, listener) { documentListeners[name] = listener; },
   };
   const windowListeners = {};

@@ -1,6 +1,7 @@
 (() => {
   const menu = document.querySelector('.language-menu');
   if (!menu) return;
+  menu.dataset.dismissBehavior = 'ready';
 
   const closeMenu = () => menu.removeAttribute('open');
 
@@ -10,6 +11,9 @@
   };
   window.addEventListener('pointerdown', closeFromOutside, true);
   window.addEventListener('click', closeFromOutside, true);
+  document.querySelectorAll('.hero-grid, main, footer').forEach(area => {
+    area.addEventListener('click', closeMenu, true);
+  });
 
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || !menu.open) return;
