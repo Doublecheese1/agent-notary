@@ -11,6 +11,7 @@ const validatorHtml = fs.readFileSync("static/mainnet-validator.html", "utf8");
 const validatorJs = fs.readFileSync("static/mainnet-validator.js", "utf8");
 const setupHtml = fs.readFileSync("static/mainnet-setup.html", "utf8");
 const envExample = fs.readFileSync(".env.example", "utf8");
+const analyticsJs = fs.readFileSync("static/launch-analytics.js", "utf8");
 const release = JSON.parse(fs.readFileSync("release/mainnet-release.json", "utf8"));
 const APPROVED_DEPLOYER = "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD";
 const EXCHANGE_DEPOSIT = "0x21a7b51ffF1963C3EE530097B6A71a294a09c26D";
@@ -52,6 +53,11 @@ assert(landing.includes("/assets/agentsolis-social-card.png") && fs.existsSync("
 assert(founding.includes("Applications are not open yet"), "Founding 50 must not imply that a missing application path is open");
 assert(landing.includes("Automatic deals start at 10 USDC"), "Landing must show the Automatic deal minimum");
 assert(landing.includes("Buyer Review deals start at 100 USDC"), "Landing must show the Buyer Review deal minimum");
+for (const event of ["buyer_click", "seller_click", "demo_click", "founding_click", "language_click"]) {
+  assert(landing.includes(`data-event="${event}"`), `Landing must mark ${event} for launch measurement`);
+}
+assert(analyticsJs.includes("sendBeacon") && analyticsJs.includes("utm_campaign"), "Launch measurement must record allow-listed campaign events");
+assert(!analyticsJs.includes("localStorage") && !analyticsJs.includes("document.cookie"), "Launch measurement must not add tracking storage");
 assert(js.includes("prepare-review-action") && js.includes("Appeal AI ruling"), "deal UI must expose the AI appeal path");
 assert(!js.includes("Prepare seller-wins ruling") && !js.includes("Prepare buyer-wins ruling"), "ordinary users must not impersonate the resolver");
 assert(js.includes("if(sending)return"), "wallet send must block rapid duplicate clicks");

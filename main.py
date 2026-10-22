@@ -9,6 +9,7 @@ from negotiation import router as negotiation_router, page_router as negotiation
 from ai_review import router as ai_review_router
 from discovery import router as discovery_router
 from international import LOCALES, localized_landing
+from launch_analytics import router as launch_analytics_router
 
 app.include_router(router)
 app.include_router(payments_router)
@@ -19,6 +20,7 @@ app.include_router(negotiation_router)
 app.include_router(negotiation_page_router)
 app.include_router(ai_review_router)
 app.include_router(discovery_router)
+app.include_router(launch_analytics_router)
 
 PUBLIC_ORIGIN = "https://agentsolis.solists.com.tr"
 
@@ -142,6 +144,13 @@ def brand_styles():
     from pathlib import Path
     from fastapi.responses import FileResponse
     return FileResponse(Path(__file__).resolve().parent / "static" / "brand.css", media_type="text/css")
+
+
+@app.get("/assets/launch-analytics.js", include_in_schema=False)
+def launch_analytics_script():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "launch-analytics.js", media_type="text/javascript")
 
 @app.get("/assets/agentsolis-social-card.png", include_in_schema=False)
 def social_card():
