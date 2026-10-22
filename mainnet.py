@@ -165,7 +165,7 @@ def operations_script():
     return FileResponse(ROOT / "static/mainnet-operations.js", media_type="text/javascript", headers={"Cache-Control": "no-store"})
 
 
-@router.get("/operations-status")
+@router.get("/operations-status", include_in_schema=False)
 def operations_status():
     return {"enabled": operations_ui_enabled(), "chain_id": CHAIN, "network": "Arbitrum One"}
 
@@ -176,7 +176,7 @@ class OperationsRequest(BaseModel):
     allowed: bool = False
 
 
-@router.post("/prepare-operations-action")
+@router.post("/prepare-operations-action", include_in_schema=False)
 def prepare_operations_action(req: OperationsRequest):
     if not operations_ui_enabled():
         raise HTTPException(503, "The founder operations screen is closed.")
@@ -193,7 +193,7 @@ def prepare_operations_action(req: OperationsRequest):
     return {"transaction": simulated(contract, safe, fn), "safe": safe, "action": req.action}
 
 
-@router.get("/setup-status")
+@router.get("/setup-status", include_in_schema=False)
 def setup_status():
     configured = bool(os.getenv("MAINNET_DEPLOYER_ADDRESS", ""))
     deployer = expected_deployer() if configured else None
@@ -234,7 +234,7 @@ def require_deployment_ui():
         raise HTTPException(503, "The founder deployment screen is closed.")
 
 
-@router.post("/prepare-quorum-deployment")
+@router.post("/prepare-quorum-deployment", include_in_schema=False)
 def prepare_quorum_deployment(req: QuorumDeployment):
     require_deployment_ui()
     deployer = require_expected_deployer(req.deployer)
@@ -246,7 +246,7 @@ def prepare_quorum_deployment(req: QuorumDeployment):
                             "value": "0x0", "chainId": hex(CHAIN)}, "constructor": {"signers": signers}}
 
 
-@router.post("/prepare-escrow-deployment")
+@router.post("/prepare-escrow-deployment", include_in_schema=False)
 def prepare_escrow_deployment(req: EscrowDeployment):
     require_deployment_ui()
     deployer = require_expected_deployer(req.deployer)
@@ -262,7 +262,7 @@ def prepare_escrow_deployment(req: EscrowDeployment):
                             "automatic_validator": validator, "review_arbitrator": arbitrator}}
 
 
-@router.post("/prepare-ai-review-resolver-deployment")
+@router.post("/prepare-ai-review-resolver-deployment", include_in_schema=False)
 def prepare_ai_review_resolver_deployment(req: AIReviewResolverDeployment):
     require_deployment_ui()
     deployer = require_expected_deployer(req.deployer)
@@ -290,7 +290,7 @@ class BindReviewResolver(BaseModel):
     escrow: str
 
 
-@router.post("/prepare-bind-review-resolver")
+@router.post("/prepare-bind-review-resolver", include_in_schema=False)
 def prepare_bind_review_resolver(req: BindReviewResolver):
     if not operations_ui_enabled():
         raise HTTPException(503, "The founder operations screen is closed.")
@@ -306,7 +306,7 @@ class HumanReviewResolution(BaseModel):
     decision: str
 
 
-@router.post("/prepare-human-review-resolution")
+@router.post("/prepare-human-review-resolution", include_in_schema=False)
 def prepare_human_review_resolution(req: HumanReviewResolution):
     if not operations_ui_enabled():
         raise HTTPException(503, "The founder operations screen is closed.")
@@ -574,7 +574,7 @@ def _ai_signing_payload(case: dict, resolver, nonce: int, signature_deadline: in
     }
 
 
-@router.post("/ai-review/signing-payload")
+@router.post("/ai-review/signing-payload", include_in_schema=False)
 def ai_review_signing_payload(req: AIReviewSigningRequest, authorization: str | None = Header(default=None)):
     require_ai_trigger(authorization)
     w3, contract = connection()
@@ -591,7 +591,7 @@ class AIReviewRelayRequest(AIReviewSigningRequest):
     signatures: list[str] = Field(min_length=2, max_length=3)
 
 
-@router.post("/ai-review/prepare-relay")
+@router.post("/ai-review/prepare-relay", include_in_schema=False)
 def prepare_ai_review_relay(req: AIReviewRelayRequest, authorization: str | None = Header(default=None)):
     require_ai_trigger(authorization)
     _, contract = connection()

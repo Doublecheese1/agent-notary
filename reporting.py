@@ -360,7 +360,7 @@ def _authorize(token: str | None) -> None:
         raise HTTPException(404, "Not found")
 
 
-@router.post("/send")
+@router.post("/send", include_in_schema=False)
 def send_scheduled_report(x_agentnotary_report_token: str | None = Header(default=None)):
     _authorize(x_agentnotary_report_token)
     report = collect_report()
@@ -368,7 +368,7 @@ def send_scheduled_report(x_agentnotary_report_token: str | None = Header(defaul
     return {"sent": True, "window_start": report["window_start"], "window_end": report["window_end"]}
 
 
-@router.post("/login")
+@router.post("/login", include_in_schema=False)
 def dashboard_login(request: Request, response: Response, payload: dict = Body(...)):
     key = _login_key(request)
     _check_login_limit(key)
@@ -390,13 +390,13 @@ def dashboard_login(request: Request, response: Response, payload: dict = Body(.
     return {"signed_in": True}
 
 
-@router.post("/logout")
+@router.post("/logout", include_in_schema=False)
 def dashboard_logout(response: Response):
     response.delete_cookie("agentnotary_report_session", path="/")
     return {"signed_in": False}
 
 
-@router.get("/data")
+@router.get("/data", include_in_schema=False)
 def dashboard_data(agentnotary_report_session: str | None = Cookie(default=None)):
     _authorize_session(agentnotary_report_session)
     return collect_dashboard()

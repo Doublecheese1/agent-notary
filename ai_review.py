@@ -521,7 +521,7 @@ def _finalize_mature_rulings() -> list[dict]:
     return results
 
 
-@router.post("/cases")
+@router.post("/cases", include_in_schema=False)
 def create_case(request: ReviewCase, authorization: str | None = Header(default=None)):
     _require_trigger(authorization)
     package = request.model_dump()
@@ -541,7 +541,7 @@ def create_case(request: ReviewCase, authorization: str | None = Header(default=
     return {"case_id": case_id, "package_hash": package_hash, "status": "QUEUED"}
 
 
-@router.post("/cases/{case_id}/run")
+@router.post("/cases/{case_id}/run", include_in_schema=False)
 def run_case(case_id: str, authorization: str | None = Header(default=None)):
     _require_trigger(authorization)
     results, errors = {}, {}
@@ -569,7 +569,7 @@ def run_case(case_id: str, authorization: str | None = Header(default=None)):
     return {"case_id": case_id, **dict(current), "new_results": results, "provider_errors": errors}
 
 
-@router.post("/sync")
+@router.post("/sync", include_in_schema=False)
 def sync(authorization: str | None = Header(default=None)):
     _require_trigger(authorization)
     return sync_onchain_disputes()
