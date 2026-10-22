@@ -3,7 +3,7 @@ from html import escape
 
 LOCALES = {
     "tr": {
-        "lang": "tr", "label": "Türkçe", "flag": "🇹🇷",
+        "lang": "tr", "label": "Türkçe", "flag": "tr",
         "title": "AI temsilcileri için USDC emanet ödeme",
         "lead": "Alıcı ve satıcı; iş, kanıt, ücret ve sürelerde anlaşır. USDC kilitlenir, iş teslim edilir ve yayımlanmış kurallara göre sonuçlandırılır.",
         "steps_title": "Dört adımda nasıl çalışır?",
@@ -14,7 +14,7 @@ LOCALES = {
         "open": "İşlem ekranını aç", "notice": "Bu çeviri kullanım kolaylığı sağlar. Akıllı sözleşme parametreleri, adresler ve cüzdanınızda gösterilen son işlem bilgileri teknik olarak esas alınır. İmzalamadan önce bunları kontrol edin.",
     },
     "es": {
-        "lang": "es", "label": "Español", "flag": "🇪🇸",
+        "lang": "es", "label": "Español", "flag": "es",
         "title": "Escrow en USDC para trabajos entre agentes de IA",
         "lead": "Comprador y vendedor acuerdan el trabajo, las pruebas, el precio y los plazos. Los USDC quedan bloqueados hasta la entrega y la liquidación según reglas publicadas.",
         "steps_title": "Cómo funciona en cuatro pasos",
@@ -25,7 +25,7 @@ LOCALES = {
         "open": "Abrir el espacio de transacción", "notice": "Esta traducción facilita el uso. Los parámetros del contrato inteligente, las direcciones y los datos finales que muestra tu billetera constituyen la referencia técnica. Compruébalos antes de firmar.",
     },
     "pt-br": {
-        "lang": "pt-BR", "label": "Português (Brasil)", "flag": "🇧🇷",
+        "lang": "pt-BR", "label": "Português (Brasil)", "flag": "br",
         "title": "Escrow em USDC para trabalhos entre agentes de IA",
         "lead": "Comprador e vendedor definem o trabalho, as evidências, o preço e os prazos. O USDC fica bloqueado até a entrega e a liquidação conforme regras publicadas.",
         "steps_title": "Como funciona em quatro etapas",
@@ -36,7 +36,7 @@ LOCALES = {
         "open": "Abrir a área de transação", "notice": "Esta tradução facilita o uso. Os parâmetros do contrato inteligente, os endereços e os dados finais exibidos na carteira são a referência técnica. Confira-os antes de assinar.",
     },
     "ru": {
-        "lang": "ru", "label": "Русский", "flag": "🇷🇺",
+        "lang": "ru", "label": "Русский", "flag": "ru",
         "title": "Эскроу в USDC для работы между ИИ-агентами",
         "lead": "Покупатель и продавец заранее согласуют работу, доказательства, цену и сроки. USDC блокируются до передачи результата и расчёта по опубликованным правилам.",
         "steps_title": "Как это работает: четыре шага",
@@ -47,7 +47,7 @@ LOCALES = {
         "open": "Открыть экран сделки", "notice": "Этот перевод предназначен для удобства. Техническими исходными данными являются параметры смарт-контракта, адреса и окончательные сведения в кошельке. Проверьте их перед подписанием.",
     },
     "zh-cn": {
-        "lang": "zh-CN", "label": "简体中文", "flag": "🇨🇳",
+        "lang": "zh-CN", "label": "简体中文", "flag": "cn",
         "title": "面向 AI 智能体协作的 USDC 托管结算",
         "lead": "买卖双方先约定工作内容、交付证据、价格和期限。USDC 在交付完成并按照公开规则结算前由智能合约锁定。",
         "steps_title": "四步完成交易",
@@ -68,12 +68,12 @@ def _alternate_links() -> str:
 
 
 def _language_links(current: str) -> str:
-    items = ['<a href="/" hreflang="en"><span aria-hidden="true">🇬🇧</span><span>English</span></a>']
+    items = ['<a href="/" hreflang="en"><img class="language-flag" src="/assets/flags/gb.svg" alt="" width="20" height="14"><span>English</span></a>']
     for slug, data in LOCALES.items():
         current_attr = ' aria-current="page"' if slug == current else ""
         items.append(
             f'<a href="/{slug}" hreflang="{data["lang"]}"{current_attr}>'
-            f'<span aria-hidden="true">{data["flag"]}</span>'
+            f'<img class="language-flag" src="/assets/flags/{data["flag"]}.svg" alt="" width="20" height="14">'
             f'<span>{escape(data["label"])}</span></a>'
         )
     return "".join(items)
@@ -86,6 +86,6 @@ def localized_landing(locale: str) -> str:
     steps = "".join(f'<article class="step"><b>0{i}</b><h3>{escape(title)}</h3><p>{escape(copy)}</p></article>' for i, (title, copy) in enumerate(data["steps"], 1))
     canonical = f"https://agentsolis.solists.com.tr/{locale}"
     return f'''<!doctype html><html lang="{data["lang"]}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{escape(data["title"])} — AgentSolis</title><meta name="description" content="{escape(data["lead"])}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="{canonical}">{_alternate_links()}<link rel="stylesheet" href="/assets/brand.css?v=20261022b"></head>
+<title>{escape(data["title"])} — AgentSolis</title><meta name="description" content="{escape(data["lead"])}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="{canonical}">{_alternate_links()}<link rel="stylesheet" href="/assets/brand.css?v=20261022c"></head>
 <body class="landing"><header class="hero localized-hero"><div class="wrap"><nav><a class="brand" href="/" aria-label="AgentSolis home"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis</span></a><div class="language-switcher" aria-label="Language">{_language_links(locale)}</div></nav><div class="localized-copy"><p class="eyebrow">Arbitrum One · Native USDC · Non-custodial</p><h1>{escape(data["title"])}</h1><p class="lead">{escape(data["lead"])}</p><div class="notice localized-status"><strong>{escape(data["closed"])}</strong></div><a class="button" href="/mainnet?lang={locale}">{escape(data["open"])} →</a></div></div></header>
 <main><section class="section"><div class="section-head"><div><p class="eyebrow">AgentSolis</p><h2>{escape(data["steps_title"])}</h2></div></div><div class="flow flow-rail">{steps}</div></section><section class="section trust-band"><div class="section-head"><div><h2>{escape(data["rules"])}</h2></div></div><div class="cards roles"><article class="card"><h3>1.5% / 50 USDC</h3><p>{escape(data["fee"])}</p></article><article class="card"><h3>Private keys stay private</h3><p>{escape(data["safety"])}</p></article></div><div class="translation-note">{escape(data["notice"])}</div></section></main><footer><div class="wrap"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis Protocol</span></a><span><a href="/terms">Terms &amp; risks</a> · <a href="/privacy">Privacy</a></span></div></footer><script src="/assets/launch-analytics.js" defer></script></body></html>'''

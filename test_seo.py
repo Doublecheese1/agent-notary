@@ -92,6 +92,11 @@ class SeoTest(unittest.TestCase):
         language_menu = self.client.get("/assets/language-menu.js")
         self.assertEqual(language_menu.status_code, 200)
         self.assertIn("closeFromOutside", language_menu.text)
+        for code in ("gb", "tr", "es", "br", "ru", "cn"):
+            flag = self.client.get(f"/assets/flags/{code}.svg")
+            self.assertEqual(flag.status_code, 200)
+            self.assertTrue(flag.headers["content-type"].startswith("image/svg+xml"))
+        self.assertEqual(self.client.get("/assets/flags/unknown.svg").status_code, 404)
         self.assertEqual(self.client.get("/assets/fonts/Manrope-Variable.ttf").status_code, 200)
         self.assertEqual(self.client.get("/assets/fonts/IBMPlexMono-Regular.ttf").status_code, 200)
 

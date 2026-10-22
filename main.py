@@ -158,6 +158,20 @@ def language_menu_script():
     from fastapi.responses import FileResponse
     return FileResponse(Path(__file__).resolve().parent / "static" / "language-menu.js", media_type="text/javascript")
 
+
+@app.get("/assets/flags/{code}.svg", include_in_schema=False)
+def language_flag(code: str):
+    from pathlib import Path
+    from fastapi import HTTPException
+    from fastapi.responses import FileResponse
+    if code not in {"gb", "tr", "es", "br", "ru", "cn"}:
+        raise HTTPException(status_code=404, detail="Flag not found")
+    return FileResponse(
+        Path(__file__).resolve().parent / "static" / "flags" / f"{code}.svg",
+        media_type="image/svg+xml",
+        headers={"Cache-Control": "public, max-age=31536000, immutable"},
+    )
+
 @app.get("/assets/agentsolis-social-card.png", include_in_schema=False)
 def social_card():
     from pathlib import Path
