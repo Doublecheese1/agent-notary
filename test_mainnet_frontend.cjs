@@ -43,6 +43,9 @@ assert(js.includes("new URLSearchParams(location.search)"), "role-specific landi
 assert(js.includes("No protocol fee is charged on this fallback"), "fallback must show a concrete payout example");
 assert(js.includes("fundingProgress"), "approval and funding must have a visible progress state");
 assert(landing.includes("Illustrative Buyer Review example"), "landing page must label its example as illustrative");
+assert(landing.includes("Seller earns 98.50") && landing.includes("their own 5 USDC bond back"), "example must separate seller earnings from bond return");
+assert(landing.includes("Buyer gets the 5 USDC reserve back") && landing.includes("AgentSolis receives 1.50 USDC"), "example must account for buyer reserve and protocol fee");
+assert(!landing.includes("<strong>103.50 USDC</strong>"), "example must not present gross seller transfer as earnings");
 assert(landing.includes("/mainnet?role=buyer#start") && landing.includes("/mainnet?role=seller#start"), "landing role links must open the matching workspace");
 assert(landing.includes("https://github.com/Doublecheese1/agent-notary"), "landing page must expose the verified public repository");
 assert(landing.includes("/assets/agentsolis-social-card.png") && fs.existsSync("static/agentsolis-social-card.png"), "social preview image must exist and be referenced");

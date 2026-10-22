@@ -57,6 +57,7 @@ button,input,textarea,select{font:inherit}
 .example-section{padding-top:30px!important}.example-deal{overflow:hidden;background:var(--solis-paper);border:1px solid var(--solis-line);border-radius:20px;box-shadow:var(--shadow-sm)}
 .example-title{display:flex;justify-content:space-between;gap:20px;padding:18px 22px;background:#e5f5ef;border-bottom:1px solid var(--solis-line)}
 .example-grid{display:grid;grid-template-columns:repeat(4,1fr)}.example-grid>div{display:flex;flex-direction:column;gap:4px;padding:22px;border-right:1px solid var(--solis-line)}.example-grid>div:last-child{border-right:0}.example-grid small{color:var(--solis-muted)}.example-grid strong{font-size:20px;color:var(--solis-navy)}.example-grid span{font-size:13px;color:var(--solis-muted)}
+.example-grid .example-result{background:#eef8f3}.example-total{margin:0;padding:16px 22px;border-top:1px solid var(--solis-line);background:#f8f4e9;color:var(--solis-muted);font-size:14px}.example-total strong{color:var(--solis-ink)}
 .landing .roles{grid-template-columns:1fr 1fr}.landing .facts{grid-template-columns:repeat(3,1fr)}
 .landing .role-card{min-height:190px;display:flex;flex-direction:column}.landing .role-card a{margin-top:auto;font-weight:750}
 .landing .role-symbol{font-size:30px;margin-bottom:20px;color:var(--solis-pine)}
