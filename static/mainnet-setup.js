@@ -4,6 +4,11 @@ const $ = id => document.getElementById(id);
 const CHAIN = "0xa4b1";
 const PENDING_KEY = "agentnotary.deploymentPending";
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
+const DEFAULT_SIGNERS = [
+  "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
+  "0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2",
+  "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A",
+];
 let account = null, gate = false, expectedDeployer = null, prepared = null, sending = false;
 let unresolved = JSON.parse(localStorage.getItem(PENDING_KEY) || "null");
 
@@ -68,7 +73,7 @@ async function prepareEscrow() {
   await Promise.all([verifySafe(treasury, "Treasury Safe"), verifySafe(operations, "Operations Safe")]);
   if (!ADDRESS.test(quorum) || await provider().request({method: "eth_getCode", params: [quorum, "latest"]}) === "0x") throw Error("Deploy the validator quorum first.");
   if (!ADDRESS.test(arbitrator) || await provider().request({method: "eth_getCode", params: [arbitrator, "latest"]}) === "0x") throw Error("Deploy the AI review resolver first.");
-  stage(await api("/prepare-escrow-deployment", {deployer: await wallet(), treasury_safe: treasury, operations_safe: operations, automatic_validator: quorum, review_arbitrator: arbitrator}), "escrow", "Deploy AgentNotary escrow");
+  stage(await api("/prepare-escrow-deployment", {deployer: await wallet(), treasury_safe: treasury, operations_safe: operations, automatic_validator: quorum, review_arbitrator: arbitrator}), "escrow", "Deploy AgentSolis escrow");
 }
 async function checkSaved() {
   if (!unresolved) return show("result", "No unresolved deployment.");
@@ -119,5 +124,9 @@ $("checkDeployment").onclick = () => checkSaved().catch(e => show("status", e.me
 $("knownTxHash").onchange = () => { const hash = $("knownTxHash").value.trim(); if (unresolved && !unresolved.hash && /^0x[0-9a-fA-F]{64}$/.test(hash)) { saveUnresolved({...unresolved, hash}); checkSaved().catch(e => show("status", e.message)); } };
 const savedQuorum = localStorage.getItem("agentnotary.quorumAddress"); if (savedQuorum) $("quorum").value = savedQuorum;
 const savedResolver = localStorage.getItem("agentnotary.resolverAddress"); if (savedResolver) $("arbitrator").value = savedResolver;
+["signerA", "signerB", "signerC"].forEach((id, i) => $(id).value = DEFAULT_SIGNERS[i]);
+["reviewerA", "reviewerB", "reviewerC"].forEach((id, i) => $(id).value = DEFAULT_SIGNERS[i]);
+$("operations").addEventListener("input", () => { $("escrowOperations").value = $("operations").value; });
+$("feeRecipient").addEventListener("input", () => { $("treasury").value = $("feeRecipient").value; });
 if (unresolved) show("result", "Unresolved deployment from " + unresolved.from + (unresolved.hash ? "\nTransaction: " + unresolved.hash : "\nNo transaction hash received") + "\nCheck it before continuing.");
 api("/setup-status").then(d => { expectedDeployer = d.deployer; gate = d.enabled; show("status", gate ? "Founder deployment gate is open. Approved deployer: " + expectedDeployer : "Founder deployment gate is closed. Configure MAINNET_DEPLOYER_ADDRESS and open MAINNET_DEPLOYMENT_UI only for the deployment session."); }).catch(e => show("status", e.message));

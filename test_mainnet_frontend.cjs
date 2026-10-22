@@ -27,6 +27,8 @@ assert(/CHAIN\s*=\s*"0xa4b1"/.test(setup), "deployment UI must use Arbitrum One"
 assert(!setup.includes("privateKey"), "deployment UI must not contain a private-key field");
 assert(setup.includes("getThreshold()") && setup.includes("0xe75235b8"), "deployment must check Safe multisig thresholds");
 assert(setup.includes("agentnotary.deploymentPending") && setup.includes("Check the saved deployment"), "deployment must retain uncertain writes across reloads");
+assert(setup.includes("DEFAULT_SIGNERS") && setup.includes(APPROVED_DEPLOYER), "deployment must prefill the approved private-canary signers");
+assert(setup.includes('$("escrowOperations").value = $("operations").value') && setup.includes('$("treasury").value = $("feeRecipient").value'), "deployment must mirror repeated Safe addresses to reduce entry errors");
 assert(operations.includes("prepare-operations-action") && !operations.includes("eth_sendTransaction"), "founder operations must be prepared for Safe execution, not sent from browser");
 for (const id of ["arbitrationWindow", "reasonHash", "evidenceUri", "dealLink", "checkTx", "fallbackExample", "approvalStep", "fundingStep", "sellerError"]) {
   assert(html.includes(`id="${id}"`), `missing mainnet UI element: ${id}`);

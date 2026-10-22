@@ -1,0 +1,18 @@
+{
+  "measured_at": "2026-10-22T21:32:42+03:00",
+  "rpc": "https://arb1.arbitrum.io/rpc",
+  "chain_id": 42161,
+  "gas_price_gwei": 0.02,
+  "deployer": "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
+  "deployer_balance_eth": 0,
+  "estimates": {
+    "validator_quorum_gas": 482245,
+    "ai_review_resolver_gas": 2009818,
+    "subtotal_known_contract_gas": 2492063,
+    "escrow_gas": null,
+    "three_safe_creations_gas": null,
+    "resolver_bind_gas": null
+  },
+  "initial_funding_plan_eth": 0.003,
+  "rule": "Re-run wallet eth_estimateGas after all three Safe addresses and dependency contracts exist. Top up only if the complete estimate plus buffer exceeds the remaining balance."
+}

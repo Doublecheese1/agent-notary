@@ -12,6 +12,10 @@ const hash = file => {
 };
 const automatic = JSON.parse(fs.readFileSync(path.join(root, "policies/automatic-json-evidence-v1.json"), "utf8"));
 const review = JSON.parse(fs.readFileSync(path.join(root, "policies/buyer-review-v1.json"), "utf8"));
+const releasePath = path.join(root, "release/mainnet-release.json");
+const existing = fs.existsSync(releasePath) ? JSON.parse(fs.readFileSync(releasePath, "utf8")) : {};
+const recorded = existing.deployment_inputs || {};
+const publicAddress = value => /^0x[0-9a-fA-F]{40}$/.test(value || "") ? value : "";
 const manifest = {
   product: "AgentSolis",
   release: "mainnet-candidate",
@@ -38,7 +42,10 @@ const manifest = {
   },
   deployment_inputs: {
     deployer: "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
-    treasury_safe: "", operations_safe: "", human_review_safe: "", ai_review_resolver: "",
+    treasury_safe: publicAddress(recorded.treasury_safe),
+    operations_safe: publicAddress(recorded.operations_safe),
+    human_review_safe: publicAddress(recorded.human_review_safe),
+    ai_review_resolver: publicAddress(recorded.ai_review_resolver),
     validator_a: "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
     validator_b: "0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2",
     validator_c: "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A",
@@ -50,5 +57,5 @@ const manifest = {
   warning: "Not deployed and not independently audited. Verify every hash and address before funding."
 };
 fs.mkdirSync(path.join(root, "release"), {recursive: true});
-fs.writeFileSync(path.join(root, "release/mainnet-release.json"), JSON.stringify(manifest, null, 2) + "\n");
+fs.writeFileSync(releasePath, JSON.stringify(manifest, null, 2) + "\n");
 console.log("Wrote release/mainnet-release.json");

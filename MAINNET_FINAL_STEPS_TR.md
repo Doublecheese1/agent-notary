@@ -1,12 +1,12 @@
-# AgentNotary — ETH gelmeden önce tamamlananlar ve son açılış
+# AgentSolis — ETH gelmeden önce tamamlananlar ve son açılış
 
-Tarih: 16 Eylül 2026
+Güncelleme: 22 Ekim 2026
 
 ## Hazır olanlar
 
 - Arbitrum One ve Circle native USDC sabitlenmiş ana ağ kontratı.
 - Otomatik kanıt kontrolü ve Buyer Review anlaşmazlık akışları.
-- Başarı ödemesinde %1,5 protokol ücreti, 50 USDC tavan, sabit ücret yok.
+- Başarı ödemesinde iş tutarının %1,5'i kadar protokol ücreti, 50 USDC tavan, sabit ücret yok. Anlaşma başına üst sınır kaldırılmıştır.
 - İlk 50 kabul edilen buyer cüzdanına ilk fonlanan ana ağ anlaşmasından itibaren 30 gün protokol ücreti muafiyeti.
 - Yeni anlaşmaları durdurma; mevcut anlaşmaların iade/sonuç yollarını açık bırakma.
 - İşlem, buyer ve kontrat toplam limitleri.
