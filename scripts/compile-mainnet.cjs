@@ -5,7 +5,9 @@ const root = path.resolve(__dirname, '..');
 
 const sources = {};
 for (const name of ['AgentNotaryMainnetEscrow.sol', 'AgentNotaryValidatorQuorum.sol', 'AgentNotaryAIReviewResolver.sol', 'TestUSDC.sol']) {
-  sources[name] = { content: fs.readFileSync(path.join(root, 'contracts', name), 'utf8') };
+  // Feed solc canonical LF text so bytecode metadata and generated artifacts
+  // are identical on Windows and Linux runners.
+  sources[name] = { content: fs.readFileSync(path.join(root, 'contracts', name), 'utf8').replace(/\r\n/g, '\n') };
 }
 
 const output = JSON.parse(solc.compile(JSON.stringify({
@@ -17,7 +19,7 @@ const output = JSON.parse(solc.compile(JSON.stringify({
     viaIR: true,
     outputSelection: { '*': { '*': ['abi', 'evm.bytecode.object', 'evm.deployedBytecode.object', 'metadata'] } }
   }
-}), { import: name => ({ contents: fs.readFileSync(require.resolve(name), 'utf8') }) }));
+}), { import: name => ({ contents: fs.readFileSync(require.resolve(name), 'utf8').replace(/\r\n/g, '\n') }) }));
 
 for (const error of output.errors || []) {
   const line = error.formattedMessage || error.message;

@@ -25,9 +25,9 @@
     "escrow_source": "87a92740dd729f6d476e5f6207b3ff37489d0113a17c6b687d7e8a7d0a8d13d3",
     "quorum_source": "2da48b6ba0e3a5c2041635426f87007ca1eab226def07eb1996ef7030c3742c8",
     "ai_review_resolver_source": "6cdeb60641b89b38a826fc0130fb74e562fa178ede7c62d0b82269683765e88e",
-    "escrow_artifact": "0e862a456c24f01d8056c06b67d22af122c9baf267ca380fdc409c2242942305",
-    "quorum_artifact": "6c79ef0d3e3702ddce6a8f61be5ab4084c72b503eb992fcf4885188f4c438f0b",
-    "ai_review_resolver_artifact": "803f3ac688a35d1ee1d030f1fb71f8185645ecd18a04a9623a02a7604551687d",
+    "escrow_artifact": "410cdf98774018bfbc63b7ec4b3ed1c65889370cf1fa38eb2b718e1eb3857d5c",
+    "quorum_artifact": "e47a10e4320f6ab5324fe169626a7b2b5c85391d240693cc972c7cb0f3071b6a",
+    "ai_review_resolver_artifact": "1a51767231115d16d0b50dc96f58284cc38b1cee268d69fe59f676c566c7ae5f",
     "automatic_policy": "b2c8082346abc789c67670b80ef3fb4b8bfda71d7b8281a1befe465c8f745ffe",
     "review_policy": "6658bf875da1826ebd8393db68405e422bd929fcd7504ef8a3267ac048a53da7"
   },
