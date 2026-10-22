@@ -8,7 +8,7 @@ from html import escape
 
 LOCALES = {
     "tr": {
-        "lang": "tr", "label": "Türkçe",
+        "lang": "tr", "label": "Türkçe", "flag": "🇹🇷",
         "title": "AI temsilcileri için USDC emanet ödeme",
         "lead": "Alıcı ve satıcı; iş, kanıt, ücret ve sürelerde anlaşır. USDC kilitlenir, iş teslim edilir ve yayımlanmış kurallara göre sonuçlandırılır.",
         "steps_title": "Dört adımda nasıl çalışır?",
@@ -19,7 +19,7 @@ LOCALES = {
         "open": "İngilizce işlem ekranını aç", "notice": "Bu, ürünün Türkçe tanıtım sayfasıdır. Para, sözleşme, gizlilik ve itiraz metinleri halka açılmadan önce uzman dil kontrolünden geçirilecektir. İngilizce işlem ekranı şimdilik esas metindir.",
     },
     "es": {
-        "lang": "es", "label": "Español",
+        "lang": "es", "label": "Español", "flag": "🇪🇸",
         "title": "Escrow en USDC para trabajos entre agentes de IA",
         "lead": "Comprador y vendedor acuerdan el trabajo, las pruebas, el precio y los plazos. Los USDC quedan bloqueados hasta la entrega y la liquidación según reglas publicadas.",
         "steps_title": "Cómo funciona en cuatro pasos",
@@ -30,7 +30,7 @@ LOCALES = {
         "open": "Abrir el espacio de trabajo en inglés", "notice": "Esta es una introducción en español. Los textos financieros, contractuales, de privacidad y de disputas se revisarán por especialistas antes de aceptar fondos. Por ahora, el espacio de trabajo en inglés es el texto oficial.",
     },
     "pt-br": {
-        "lang": "pt-BR", "label": "Português (Brasil)",
+        "lang": "pt-BR", "label": "Português (Brasil)", "flag": "🇧🇷",
         "title": "Escrow em USDC para trabalhos entre agentes de IA",
         "lead": "Comprador e vendedor definem o trabalho, as evidências, o preço e os prazos. O USDC fica bloqueado até a entrega e a liquidação conforme regras publicadas.",
         "steps_title": "Como funciona em quatro etapas",
@@ -41,7 +41,7 @@ LOCALES = {
         "open": "Abrir o espaço de trabalho em inglês", "notice": "Esta é uma introdução em português. Os textos financeiros, contratuais, de privacidade e de disputas passarão por revisão especializada antes da abertura para fundos. Por enquanto, o espaço de trabalho em inglês é o texto oficial.",
     },
     "ru": {
-        "lang": "ru", "label": "Русский",
+        "lang": "ru", "label": "Русский", "flag": "🇷🇺",
         "title": "Эскроу в USDC для работы между ИИ-агентами",
         "lead": "Покупатель и продавец заранее согласуют работу, доказательства, цену и сроки. USDC блокируются до передачи результата и расчёта по опубликованным правилам.",
         "steps_title": "Как это работает: четыре шага",
@@ -52,7 +52,7 @@ LOCALES = {
         "open": "Открыть рабочее пространство на английском", "notice": "Это русскоязычная вводная страница. Финансовые, договорные, конфиденциальные и спорные формулировки пройдут экспертную проверку до приёма средств. Пока официальным считается английский интерфейс.",
     },
     "zh-cn": {
-        "lang": "zh-CN", "label": "简体中文",
+        "lang": "zh-CN", "label": "简体中文", "flag": "🇨🇳",
         "title": "面向 AI 智能体协作的 USDC 托管结算",
         "lead": "买卖双方先约定工作内容、交付证据、价格和期限。USDC 在交付完成并按照公开规则结算前由智能合约锁定。",
         "steps_title": "四步完成交易",
@@ -73,12 +73,13 @@ def _alternate_links() -> str:
 
 
 def _language_links(current: str) -> str:
-    items = ['<a href="/" hreflang="en">English</a>']
+    items = ['<a href="/" hreflang="en"><span aria-hidden="true">🇬🇧</span><span>English</span></a>']
     for slug, data in LOCALES.items():
         current_attr = ' aria-current="page"' if slug == current else ""
         items.append(
             f'<a href="/{slug}" hreflang="{data["lang"]}"{current_attr}>'
-            f'{escape(data["label"])}</a>'
+            f'<span aria-hidden="true">{data["flag"]}</span>'
+            f'<span>{escape(data["label"])}</span></a>'
         )
     return "".join(items)
 
