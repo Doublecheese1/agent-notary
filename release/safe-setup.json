@@ -2,7 +2,7 @@
   "product": "AgentSolis",
   "network": "Arbitrum One",
   "chain_id": 42161,
-  "status": "planned_not_created",
+  "status": "three_safes_verified_duplicate_operations_safe_recorded_unused",
   "threshold": 2,
   "owners": [
     {
@@ -22,17 +22,23 @@
     {
       "name": "AgentSolis Treasury",
       "purpose": "Receives protocol fees and authorizes treasury transfers.",
-      "address": ""
+      "address": "0xeeAB450ef8A9F4596A1D95A7F0B451Dc0059c21C"
     },
     {
       "name": "AgentSolis Operations",
       "purpose": "Authorizes admissions, access, pause and future resolver changes.",
-      "address": ""
+      "address": "0xc62DeAc99156D19F762A249bab2Df99cE7c0Bc0f"
     },
     {
       "name": "AgentSolis Human Review",
       "purpose": "Authorizes escalated human-review rulings.",
-      "address": ""
+      "address": "0xb3d52A5Cf6d8862C18c274AfE5c43C0006b38Cd7"
+    }
+  ],
+  "unused_safes": [
+    {
+      "address": "0x9eE7aB864061DB12E770B7271dBF4C64178494AB",
+      "reason": "Late completion of the earlier Operations activation that the Safe UI reported as Transaction not found. It is empty and must not be configured or funded."
     }
   ],
   "public_launch_requirement": "Before public funds open, replace the temporary C owner with a separately controlled signer and preserve a threshold of at least 2. Closed deployment and founder canary may use the temporary C while MAINNET_ACCEPTING_FUNDS remains false."
