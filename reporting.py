@@ -384,7 +384,7 @@ def collect_report(now: datetime | None = None) -> dict:
     open_ids = {log["args"]["id"] for log in all_proposed} - {log["args"]["id"] for log in all_closed}
     unresolved_disputes = []
     for deal_id in open_ids:
-        deal = contract.functions.deals(deal_id).call(block_identifier=end_block)
+        deal = contract.functions.deals(deal_id).call(block_identifier=latest)
         if int(deal[4]) == 4:
             unresolved_disputes.append(Web3.to_hex(deal_id))
 
@@ -395,7 +395,7 @@ def collect_report(now: datetime | None = None) -> dict:
     lifetime_fees = sum(int(log["args"]["treasuryAmount"]) for log in all_closed)
     proposed_volume = sum(int(log["args"]["amount"]) for log in proposed)
     token = _token_contract(w3, contract)
-    treasury = contract.functions.treasurySafe().call(block_identifier=end_block)
+    treasury = contract.functions.treasurySafe().call(block_identifier=latest)
     owner = _owner_payout_address()
     period_withdrawals = _withdrawal_logs(token, treasury, owner, start_block, end_block)
     lifetime_withdrawals = _withdrawal_logs(token, treasury, owner, deployment_block, end_block)
@@ -414,8 +414,8 @@ def collect_report(now: datetime | None = None) -> dict:
         "owner_withdrawn": _amount(sum(int(log["args"]["value"]) for log in period_withdrawals)),
         "lifetime_owner_withdrawn": _amount(sum(int(log["args"]["value"]) for log in lifetime_withdrawals)),
         "owner_payout_configured": owner is not None,
-        "total_escrowed": _amount(int(contract.functions.totalEscrowed().call(block_identifier=end_block))),
-        "treasury_balance": _amount(int(token.functions.balanceOf(treasury).call(block_identifier=end_block))),
+        "total_escrowed": _amount(int(contract.functions.totalEscrowed().call(block_identifier=latest))),
+        "treasury_balance": _amount(int(token.functions.balanceOf(treasury).call(block_identifier=latest))),
         "escrow": contract.address, "treasury": treasury,
     }
 
