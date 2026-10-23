@@ -67,7 +67,9 @@ class SeoTest(unittest.TestCase):
             self.assertIn(heading, response.text)
             self.assertIn(f'rel="canonical" href="https://agentsolis.solists.com.tr/{locale}"', response.text)
             self.assertIn('hreflang="x-default"', response.text)
-            self.assertIn(f'href="/mainnet?lang={locale}"', response.text)
+            self.assertIn(f'href="/mainnet?lang={locale}#guide"', response.text)
+            self.assertIn('href="/mainnet/founding50"', response.text)
+            self.assertIn('data-event="founding_click"', response.text)
             self.assertIn('class="translation-note"', response.text)
 
         self.assertEqual(self.client.get("/unsupported-language").status_code, 404)
