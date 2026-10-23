@@ -2,7 +2,7 @@
 import json
 import os
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel, Field
 from web3 import Web3
 from eth_abi import encode
@@ -34,7 +34,10 @@ def connection():
 
 @router.get('', include_in_schema=False)
 def page():
-    return FileResponse(ROOT/'static/pilot.html', headers={'Cache-Control':'no-store'})
+    return RedirectResponse('/play', status_code=307, headers={
+        'Cache-Control':'no-store',
+        'X-Robots-Tag':'noindex, nofollow, noarchive',
+    })
 
 @router.get('/app.js', include_in_schema=False)
 def script():

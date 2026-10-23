@@ -81,7 +81,10 @@ class PilotTests(unittest.TestCase):
             c=self.client.get('/pilot/config').json()
             self.assertFalse(c['enabled']); self.assertIsNone(c['remaining']); self.assertIsNone(c['member'])
         deal_id='0x'+'11'*32
-        for path in ['/pilot','/pilot/app.js','/pilot/deal/'+deal_id,'/pilot/admin','/pilot/admin.js','/founding50']:
+        response = self.client.get('/pilot', follow_redirects=False)
+        self.assertEqual(response.status_code, 307)
+        self.assertEqual(response.headers['location'], '/play')
+        for path in ['/pilot/app.js','/pilot/deal/'+deal_id,'/pilot/admin','/pilot/admin.js','/founding50']:
             self.assertEqual(self.client.get(path).status_code,200)
 
     def test_deployment_is_unsigned_and_testnet_only(self):
