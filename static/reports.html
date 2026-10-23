@@ -34,6 +34,7 @@
     <div id="payoutNotice" class="notice hidden">Owner payout wallet is not configured yet. Withdrawals will appear after REPORT_OWNER_PAYOUT_ADDRESS is set.</div>
     <section id="periods" class="periods"></section>
     <section class="attention"><h3>Needs human attention</h3><p id="attentionText" class="muted"></p><div id="attentionDeals"></div></section>
+    <section class="attention"><h3>Founding 50 applications</h3><p class="muted">Review each use case. To approve a wallet, copy it into <a href="/mainnet/operations" target="_blank" rel="noopener">Founder operations</a>, choose “Admit Founding buyer”, then execute the prepared transaction through the Operations Safe.</p><div id="foundingApplications"></div></section>
   </main>
   <dialog id="login" open>
     <h2>Founder access</h2><p class="muted">Enter the private reports password. This page cannot move funds or sign transactions.</p>
@@ -55,6 +56,7 @@
       for(const key of order){const value=data.periods[key];const card=document.createElement('article');card.className=`period ${key==='all'?'all':''}`;const h=document.createElement('h3');h.textContent=labels[key];card.append(h,line('Earned',value.earned,' USDC'),line('Withdrawn',value.withdrawn,' USDC'),line('Deal volume',value.volume,' USDC'),line('New deals',value.deals),line('Closed',value.closed),line('Disputes',value.disputes));periods.append(card)}
       const chainAttention=data.unresolved_disputes||[],aiAttention=data.ai_attention||[];document.querySelector('#attentionText').textContent=(chainAttention.length||aiAttention.length)?`${chainAttention.length} unresolved on-chain dispute(s); ${aiAttention.length} AI case(s) need attention.`:'Nothing requires human review.';
       const deals=document.querySelector('#attentionDeals');deals.replaceChildren();for(const id of chainAttention){const item=document.createElement('div');item.className='deal';item.textContent=`On-chain dispute · ${id}`;deals.append(item)}for(const review of aiAttention){const item=document.createElement('div');item.className='deal';item.textContent=`AI ${review.status} · ${review.deal_id} · ${review.reason||'Awaiting evaluations'}`;deals.append(item)}
+      const applications=document.querySelector('#foundingApplications');applications.replaceChildren();for(const application of data.founding50_applications||[]){const item=document.createElement('div');item.className='deal';const title=document.createElement('strong');title.textContent=`${application.status.toUpperCase()} · ${application.wallet}`;const use=document.createElement('div');use.textContent=application.use_case;const time=document.createElement('small');time.textContent=new Date(application.created_at*1000).toLocaleString();item.append(title,use,time);applications.append(item)}if(!applications.children.length)applications.textContent='No applications yet.';
       login.close();dashboard.classList.remove('hidden');
     }
     async function load(){const response=await fetch('/internal/reporting/data',{credentials:'same-origin'});if(!response.ok)throw new Error('Sign in required');render(await response.json())}

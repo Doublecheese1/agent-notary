@@ -5,6 +5,8 @@ const html = fs.readFileSync("static/mainnet.html", "utf8");
 const js = fs.readFileSync("static/mainnet.js", "utf8");
 const landing = fs.readFileSync("static/index.html", "utf8");
 const founding = fs.readFileSync("static/founding50-mainnet.html", "utf8");
+const foundingJs = fs.readFileSync("static/founding50-mainnet.js", "utf8");
+const guideJs = fs.readFileSync("static/mainnet-guide.js", "utf8");
 const setup = fs.readFileSync("static/mainnet-setup.js", "utf8");
 const operations = fs.readFileSync("static/mainnet-operations.js", "utf8");
 const validatorHtml = fs.readFileSync("static/mainnet-validator.html", "utf8");
@@ -55,7 +57,12 @@ assert(!landing.includes("<strong>103.50 USDC</strong>"), "example must not pres
 assert(landing.includes("/mainnet?role=buyer#start") && landing.includes("/mainnet?role=seller#start"), "landing role links must open the matching workspace");
 assert(landing.includes("https://github.com/Doublecheese1/agent-notary"), "landing page must expose the verified public repository");
 assert(landing.includes("/assets/agentsolis-social-card.png") && fs.existsSync("static/agentsolis-social-card.png"), "social preview image must exist and be referenced");
-assert(founding.includes("Applications are not open yet"), "Founding 50 must not imply that a missing application path is open");
+assert(founding.includes('id="connectFounding"') && founding.includes('id="applicationForm"'), "Founding 50 must provide a real wallet application path");
+assert(founding.includes("Applying does not move money") && founding.includes("Operations Safe"), "Founding 50 must explain signature safety and manual approval");
+assert(html.includes('id="guide"') && html.includes('/mainnet/guide.js'), "mainnet workspace must include the beginner guide");
+assert(foundingJs.includes('personal_sign') && !foundingJs.includes('eth_sendTransaction'), "Founding application must prove wallet control without sending a transaction");
+assert(foundingJs.includes('accepted_terms:true'), "Founding application must record explicit terms acceptance");
+for (const locale of ['en','tr','es','pt-br','ru','zh-cn']) assert(guideJs.includes(`${JSON.stringify(locale)}:`) || guideJs.includes(`${locale}:`), `beginner guide must include ${locale}`);
 assert(landing.includes("Automatic deals start at 10 USDC"), "Landing must show the Automatic deal minimum");
 assert(landing.includes("Buyer Review deals start at 100 USDC"), "Landing must show the Buyer Review deal minimum");
 for (const event of ["buyer_click", "seller_click", "demo_click", "founding_click", "language_click"]) {

@@ -17,6 +17,7 @@ from web3 import Web3
 
 from mainnet import connection
 from ai_review import attention_queue as ai_attention_queue
+from founding50 import application_list as founding50_application_list
 
 router = APIRouter(prefix="/internal/reporting", tags=["Internal reporting"])
 _LOGIN_ATTEMPTS: dict[str, list[float]] = {}
@@ -232,6 +233,7 @@ def collect_dashboard(now: datetime | None = None) -> dict:
         "open_deals": len(open_ids),
         "unresolved_disputes": unresolved,
         "ai_attention": ai_attention_queue(),
+        "founding50_applications": founding50_application_list(),
         "periods": {name: period(first_block) for name, first_block in starts.items()},
     }
 

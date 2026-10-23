@@ -10,6 +10,7 @@ from ai_review import router as ai_review_router
 from discovery import router as discovery_router
 from international import LOCALES, localized_landing
 from launch_analytics import router as launch_analytics_router
+from founding50 import router as founding50_router
 
 app.include_router(router)
 app.include_router(payments_router)
@@ -21,6 +22,7 @@ app.include_router(negotiation_page_router)
 app.include_router(ai_review_router)
 app.include_router(discovery_router)
 app.include_router(launch_analytics_router)
+app.include_router(founding50_router)
 
 PUBLIC_ORIGIN = "https://agentsolis.solists.com.tr"
 
@@ -195,13 +197,6 @@ def founder_reports():
     from pathlib import Path
     from fastapi.responses import FileResponse
     return FileResponse(Path(__file__).resolve().parent / "static" / "reports.html")
-
-@app.get("/mainnet/founding50", include_in_schema=False)
-def mainnet_founding50():
-    from pathlib import Path
-    from fastapi.responses import FileResponse
-    return FileResponse(Path(__file__).resolve().parent / "static" / "founding50-mainnet.html")
-
 
 @app.get("/{locale}", include_in_schema=False)
 def international_landing(locale: str):
