@@ -11,7 +11,7 @@ import founding50
 
 class Founding50ApplicationsTest(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(dir=".test-tmp")
+        self.temp = tempfile.TemporaryDirectory()
         self.db_path = os.path.join(self.temp.name, "founding.sqlite3")
         self.env = patch.dict(os.environ, {
             "FOUNDING50_APPLICATIONS_OPEN": "true",
