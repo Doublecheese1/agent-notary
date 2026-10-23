@@ -62,10 +62,21 @@ assert(founding.includes("Applying does not move money") && founding.includes("O
 assert(html.includes('id="guide"') && html.includes('/mainnet/guide.js'), "mainnet workspace must include the beginner guide");
 assert(foundingJs.includes('personal_sign') && !foundingJs.includes('eth_sendTransaction'), "Founding application must prove wallet control without sending a transaction");
 assert(foundingJs.includes('accepted_terms:true'), "Founding application must record explicit terms acceptance");
-for (const locale of ['en','tr','es','pt-br','ru','zh-cn']) assert(guideJs.includes(`${JSON.stringify(locale)}:`) || guideJs.includes(`${locale}:`), `beginner guide must include ${locale}`);
+const guideStart = guideJs.indexOf("const G=") + "const G=".length;
+const guideEnd = guideJs.indexOf(";\nfunction init", guideStart);
+assert(guideStart > "const G=".length && guideEnd > guideStart, "beginner guide catalog must be readable");
+const guideCatalog = require("vm").runInNewContext(`(${guideJs.slice(guideStart, guideEnd)})`);
+for (const locale of ['en','tr','es','pt-br','ru','zh-cn']) {
+  assert(guideCatalog[locale], `beginner guide must include ${locale}`);
+  assert.deepStrictEqual(Object.keys(guideCatalog[locale]).sort(), Object.keys(guideCatalog.en).sort(), `beginner guide keys differ for ${locale}`);
+  for (const key of ["checklist","buyerSteps","sellerSteps","disputeSteps"]) assert(guideCatalog[locale][key].length >= 3, `${locale} must provide complete ${key}`);
+}
+for (const id of ["guideWalletTitle","guideWalletBody","guideChecklist","guideDisputeTitle","guideDisputeSteps","guideReviewNote"]) assert(html.includes(`id="${id}"`), `missing beginner guide section: ${id}`);
+assert(html.includes("https://metamask.io/download/") && html.includes('href="/play"'), "guide must link to official MetaMask setup and the wallet-free demo");
+assert(landing.includes('/mainnet#guide') && landing.includes("New to crypto wallets?"), "English landing must expose the step-by-step guide");
 assert(landing.includes("Automatic deals start at 10 USDC"), "Landing must show the Automatic deal minimum");
 assert(landing.includes("Buyer Review deals start at 100 USDC"), "Landing must show the Buyer Review deal minimum");
-for (const event of ["buyer_click", "seller_click", "demo_click", "founding_click", "language_click"]) {
+for (const event of ["buyer_click", "seller_click", "demo_click", "founding_click", "language_click", "guide_click"]) {
   assert(landing.includes(`data-event="${event}"`), `Landing must mark ${event} for launch measurement`);
 }
 assert(analyticsJs.includes("sendBeacon") && analyticsJs.includes("utm_campaign"), "Launch measurement must record allow-listed campaign events");

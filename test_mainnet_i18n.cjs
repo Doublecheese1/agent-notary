@@ -20,6 +20,16 @@ vm.runInNewContext(i18nSource, sandbox);
 const api = sandbox.window.AgentSolisI18n;
 const locales = ["en", "tr", "es", "pt-br", "ru", "zh-cn"];
 assert.strictEqual(api.lang, "tr", "query string must select the workspace language");
+const staleSandbox = {
+  window: {},
+  location: {search: "", href: "https://agentsolis.solists.com.tr/mainnet?role=buyer#guide", pathname: "/mainnet"},
+  localStorage: {getItem: () => "tr", setItem: () => {throw new Error("default language must not be written to browser storage")}},
+  document: {readyState: "loading", addEventListener: () => {}},
+  URL, URLSearchParams,
+};
+vm.runInNewContext(i18nSource, staleSandbox);
+assert.strictEqual(staleSandbox.window.AgentSolisI18n.lang, "en", "a URL without lang must always open in English even after an earlier Turkish visit");
+assert.match(staleSandbox.window.AgentSolisI18n.languageUrl("en"), /[?&]lang=en(?:&|#|$)/, "choosing English must keep an explicit language in the URL");
 for (const locale of locales) {
   assert(api.catalog[locale], `missing static catalog: ${locale}`);
   for (const key of Object.keys(api.catalog.en)) {
@@ -42,8 +52,9 @@ for (const locale of locales) {
 assert(html.indexOf('/mainnet/i18n.js') < html.indexOf('/mainnet/app.js'), "translation script must load before transaction logic");
 assert(server.includes('@router.get("/i18n.js"'), "server must expose the translation script");
 for (const locale of locales.slice(1)) {
-  assert(international.includes(`href="/mainnet?lang={locale}"`), "localized landing must preserve its language in the transaction link");
+  assert(international.includes(`href="/mainnet?lang={locale}#guide"`), "localized landing must preserve its language in the guided transaction link");
 }
+assert(international.includes('data-event="guide_click"') && international.includes('data["guide"]'), "every localized landing must expose its translated guide link");
 assert(!international.includes("İngilizce işlem ekranını aç"), "Turkish call to action must not claim that the workspace is English-only");
 assert(!international.includes("workspace in English"), "stale English-only workspace wording must be removed");
 assert(appSource.includes("localizedDealLink"), "shareable deal links must retain the selected language");

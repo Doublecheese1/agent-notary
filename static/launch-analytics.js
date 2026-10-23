@@ -1,5 +1,5 @@
 (()=>{
-  const allowed=new Set(["buyer_click","seller_click","demo_click","founding_click","language_click"]);
+  const allowed=new Set(["buyer_click","seller_click","demo_click","founding_click","language_click","guide_click"]);
   const params=new URLSearchParams(location.search);
   const campaign=(params.get("utm_campaign")||"").replace(/[^A-Za-z0-9._-]/g,"").slice(0,80);
   function send(event){

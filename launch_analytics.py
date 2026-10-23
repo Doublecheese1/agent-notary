@@ -19,7 +19,7 @@ _ATTEMPTS: dict[str, list[float]] = {}
 class LaunchEvent(BaseModel):
     event: Literal[
         "landing_view", "buyer_click", "seller_click", "demo_click",
-        "founding_click", "language_click",
+        "founding_click", "language_click", "guide_click",
     ]
     path: str = Field(default="/", max_length=120, pattern=r"^/[A-Za-z0-9/_-]*$")
     language: str = Field(default="en", max_length=12, pattern=r"^[A-Za-z-]+$")
