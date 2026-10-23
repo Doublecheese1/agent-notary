@@ -304,6 +304,16 @@ def collect_dashboard(now: datetime | None = None) -> dict:
 
     windows = _dashboard_windows(now_local)
     periods = {name: period(window) for name, window in windows.items()}
+    deployment_local = datetime.fromtimestamp(
+        int(w3.eth.get_block(deployment_block)["timestamp"]), timezone.utc
+    ).astimezone(zone)
+    period_ranges = {
+        name: {
+            "start": (start or deployment_local).isoformat(),
+            "end": end.isoformat(),
+        }
+        for name, (start, end) in windows.items()
+    }
     month = _month_start(now_local)
     monthly_history = []
     for offset in range(0, -12, -1):
@@ -350,6 +360,7 @@ def collect_dashboard(now: datetime | None = None) -> dict:
         "ai_attention": ai_attention_queue(),
         "founding50_applications": founding50_application_list(),
         "periods": periods,
+        "period_ranges": period_ranges,
         "monthly_history": monthly_history,
         "revenue_sources": revenue_sources[:100],
         "chain_status": {
