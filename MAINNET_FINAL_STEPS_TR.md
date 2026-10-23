@@ -22,7 +22,7 @@ Güncelleme: 22 Ekim 2026
 - Resolver değişikliğinde yeni validator quorum veya AI review resolver'ın incelenmiş mevcut uygulamayla aynı runtime kodunu taşımasını zorunlu kılan rotasyon koruması.
 - Üç bağımsız AI değerlendirmesini 2/3 ve en az %85 güven eşiğiyle birleştiren; düşük güven, ayrışma, kritik bayrak, yüksek tutar veya taraf itirazında Human Review Safe'e geçen AI-öncelikli uyuşmazlık katmanı.
 - AI kararını doğrudan ödeme yerine zincirde 24 saat bekleten ve alıcı/satıcı itirazını otomatik kesinleşmeden önce kabul eden resolver.
-- Arbitrum One olaylarını ve bakiyelerini yalnızca okuyarak her gün İstanbul saatiyle 09.00 ve 20.00'de operasyon raporu gönderen, gizli anahtarla korunan raporlama uç noktası ve GitHub zamanlayıcısı. Rapor para taşımaz ve işlem imzalamaz.
+- Arbitrum One olaylarını ve bakiyelerini yalnızca okuyarak her gün İstanbul saatiyle 08.00 ve 00.00'da operasyon raporu gönderen, gizli anahtarla korunan raporlama uç noktası ve GitHub zamanlayıcısı. Rapor para taşımaz ve işlem imzalamaz.
 - Buyer ve seller'ın fonlama öncesinde özel bağlantılarla konuştuğu, karşı teklif verdiği, aynı nihai revision'ı kendi cüzdanlarıyla imzaladığı ve yalnızca çift imzalı şartları escrow formuna aktardığı `/mainnet/negotiate` akışı. Mesajlar bağlayıcı değildir; çift imzalı revision değiştirilemez.
 
 ## ETH alınmadan yapılacak son organizasyon
@@ -49,7 +49,7 @@ Safe ve kontratların zincirde oluşturulması gas harcadığı için ETH adım�
 4. Native USDC, treasury Safe, operations Safe, validator quorum ve AI review resolver adresleriyle `AgentNotaryMainnetEscrow` dağıt; Operations Safe ile resolver'ın `bindEscrow` işlemini bir kez yap.
 5. Kaynak kodu Arbiscan'de doğrula; constructor adreslerini ve sabit ücret/limitleri zincirden karşılaştır.
 6. Render'a RPC, kontrat ve Safe adreslerini ekle; önce `MAINNET_ENABLED=true`, `MAINNET_ACCEPTING_FUNDS=false` kullan.
-7. Deployment block, güçlü dashboard parolası, oturum sırrı ve owner ödeme adresini Render'a ekle; `/reports` sayfasının Bugün/Hafta/Ay/Yıl/Tüm zamanlar değerlerini okuduğunu doğrula. E-posta da istenirse `REPORT_RECIPIENT=yguler1@gmail.com`, SMTP uygulama parolası ve rapor token'ını Render'a; endpoint URL'si ile aynı token'ı GitHub Actions secrets alanına ekleyip 09.00/20.00 gönderimini bir kez elle doğrula.
+7. Deployment block, gizli dashboard adres anahtarı, güçlü dashboard parolası, oturum sırrı ve owner ödeme adresini Render'a ekle; özel rapor sayfasının günlük/7 günlük/21 günlük/aylık/yıllık/tüm zamanlar değerlerini okuduğunu doğrula. E-posta da istenirse `REPORT_RECIPIENT=yguler1@gmail.com`, SMTP uygulama parolası ve rapor token'ını Render'a; endpoint URL'si ile aynı token'ı GitHub Actions secrets alanına ekleyip 08.00/00.00 gönderimini bir kez elle doğrula.
 8. Görüşme ve AI review veritabanlarını kalıcı diske bağla. Üç ayrı AI sağlayıcı hesabını ve üç izole signer/KMS servisini secrets ile yapılandır; hiçbir cüzdan anahtarını Render uygulamasına yazma.
 9. GitHub CI'ın tam derleme ve test paketini yeşil tamamladığını doğrula.
 10. `/mainnet/validator` üzerinden iki bağımsız validator imzasıyla 10 USDC Automatic canary anlaşmasını tamamla ve tüm bakiyeleri/olayları kontrol et.

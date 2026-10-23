@@ -51,6 +51,11 @@ assert(js.includes("Buyer and seller must use different wallet addresses"), "bro
 assert(js.includes("new URLSearchParams(location.search)"), "role-specific landing links must select buyer or seller");
 assert(js.includes("No protocol fee is charged on this fallback"), "fallback must show a concrete payout example");
 assert(js.includes("fundingProgress"), "approval and funding must have a visible progress state");
+assert(js.includes("validatePreparedTransaction(pending.transaction,a)"), "wallet sends must validate target, selector, chain and value locally");
+assert(js.includes("BigInt(expected)") && js.includes("draft?.buyer_total_units") && js.includes("current?.seller_bond_units"), "USDC approval must match the exact buyer total or seller bond");
+assert(js.includes("PROPOSE_SELECTOR") && js.includes("draft?._intent") && js.includes("normHash(expected[7])"), "proposal calldata must match the buyer's canonical UI intent and production policy");
+assert(js.includes("abiString(tx.data,2)") && js.includes("normHash(current.deal_id)"), "deal actions must match the displayed deal and delivery or dispute evidence");
+assert(js.includes('selector!=="0x095ea7b3"') && js.includes("same(spender,cfg.escrow)"), "USDC approvals must be limited to the configured escrow spender");
 assert(landing.includes("Illustrative Buyer Review example"), "landing page must label its example as illustrative");
 assert(landing.includes("Seller earns 98.50") && landing.includes("their own 5 USDC bond back"), "example must separate seller earnings from bond return");
 assert(landing.includes("Buyer gets the 5 USDC reserve back") && landing.includes("AgentSolis receives 1.50 USDC"), "example must account for buyer reserve and protocol fee");
@@ -85,6 +90,7 @@ for (const event of ["buyer_click", "seller_click", "demo_click", "founding_clic
 }
 assert(analyticsJs.includes("sendBeacon") && analyticsJs.includes("utm_campaign"), "Launch measurement must record allow-listed campaign events");
 assert(!analyticsJs.includes("localStorage") && !analyticsJs.includes("document.cookie"), "Launch measurement must not add tracking storage");
+assert(analyticsJs.includes('replace(/\\/[^/]+$/,"/id")'), "Analytics must remove deal and negotiation identifiers from paths");
 assert(js.includes("prepare-review-action") && js.includes("Appeal AI ruling"), "deal UI must expose the AI appeal path");
 assert(html.includes('id="reasonHash"') && html.includes("hash created automatically"), "dispute form must accept a plain-language reason and explain automatic hashing");
 assert(js.includes('crypto.subtle.digest("SHA-256"') && js.includes('action==="disputeDelivery"?await disputeReasonHash'), "dispute submission must hash the plain-language reason before preparing the on-chain action");

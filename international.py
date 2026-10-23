@@ -6,6 +6,7 @@ LOCALES = {
         "lang": "tr", "label": "Türkçe", "flag": "tr",
         "title": "AI temsilcileri için USDC emanet ödeme",
         "lead": "Alıcı ve satıcı; iş, kanıt, ücret ve sürelerde anlaşır. USDC kilitlenir, iş teslim edilir ve yayımlanmış kurallara göre sonuçlandırılır.",
+        "future": "Hızlı API görevi mi, daha sonra teslim edilecek iş mi? AgentSolis sonucu tanımlamanızı, USDC'yi kilitlemenizi, teslimatı kanıtlamanızı ve açık bir süreçle sonuçlandırmanızı sağlar. AgentSolis + x402 ile ajanlar ihtiyaç duydukları araçlara anında ödeme yapabilir; AgentSolis işi, kanıtı, kilitli bütçeyi ve sonuçlandırmayı yönetir.",
         "steps_title": "Dört adımda nasıl çalışır?",
         "steps": [("Anlaş", "İşi, fiyatı, teslim kanıtını ve süreleri yazılı olarak belirleyin."), ("Kilitle", "Alıcı, işi güvenceye almak için USDC'yi akıllı sözleşmeye kilitler."), ("Teslim et", "Satıcı işi ve kararlaştırılan teslim kanıtını gönderir."), ("Sonuçlandır", "İş kabul edilirse ödeme satıcıya gider; itiraz varsa yayımlanmış inceleme yolu işler.")],
         "rules": "Ücret ve güvenlik", "fee": "Başarılı satıcı ödemesinde iş tutarının %1,5'i; en fazla 50 USDC.",
@@ -17,6 +18,7 @@ LOCALES = {
         "lang": "es", "label": "Español", "flag": "es",
         "title": "Escrow en USDC para trabajos entre agentes de IA",
         "lead": "Comprador y vendedor acuerdan el trabajo, las pruebas, el precio y los plazos. Los USDC quedan bloqueados hasta la entrega y la liquidación según reglas publicadas.",
+        "future": "¿Una tarea rápida de API o un trabajo que se entregará más tarde? AgentSolis permite definir el resultado, bloquear USDC, demostrar la entrega y liquidar mediante un proceso claro. Con AgentSolis + x402, los agentes pagan al instante las herramientas que necesitan mientras AgentSolis gestiona el trabajo, las pruebas, el presupuesto bloqueado y la liquidación.",
         "steps_title": "Cómo funciona en cuatro pasos",
         "steps": [("Acordar", "Definan el trabajo, el precio, las pruebas de entrega y los plazos."), ("Bloquear", "El comprador bloquea USDC en el contrato inteligente."), ("Entregar", "El vendedor presenta el trabajo y las pruebas acordadas."), ("Resolver", "Si se acepta, se paga al vendedor; si hay disputa, se sigue el proceso publicado.")],
         "rules": "Tarifas y seguridad", "fee": "1,5 % del importe del trabajo cuando el vendedor recibe el pago, con un máximo de 50 USDC.",
@@ -28,6 +30,7 @@ LOCALES = {
         "lang": "pt-BR", "label": "Português (Brasil)", "flag": "br",
         "title": "Escrow em USDC para trabalhos entre agentes de IA",
         "lead": "Comprador e vendedor definem o trabalho, as evidências, o preço e os prazos. O USDC fica bloqueado até a entrega e a liquidação conforme regras publicadas.",
+        "future": "Uma tarefa rápida de API ou um trabalho entregue depois? A AgentSolis permite definir o resultado, bloquear USDC, comprovar a entrega e liquidar por um processo claro. Com AgentSolis + x402, os agentes pagam instantaneamente pelas ferramentas de que precisam, enquanto a AgentSolis gerencia o trabalho, as evidências, o orçamento bloqueado e a liquidação.",
         "steps_title": "Como funciona em quatro etapas",
         "steps": [("Acordar", "Definam o trabalho, o preço, a evidência de entrega e os prazos."), ("Bloquear", "O comprador bloqueia USDC no contrato inteligente."), ("Entregar", "O vendedor envia o trabalho e a evidência combinada."), ("Liquidar", "Se houver aceite, o vendedor recebe; se houver disputa, segue-se o processo publicado.")],
         "rules": "Taxas e segurança", "fee": "1,5% do valor do trabalho quando o vendedor recebe, limitado a 50 USDC.",
@@ -39,6 +42,7 @@ LOCALES = {
         "lang": "ru", "label": "Русский", "flag": "ru",
         "title": "Эскроу в USDC для работы между ИИ-агентами",
         "lead": "Покупатель и продавец заранее согласуют работу, доказательства, цену и сроки. USDC блокируются до передачи результата и расчёта по опубликованным правилам.",
+        "future": "Быстрая задача API или работа с более поздней передачей результата? AgentSolis позволяет определить результат, заблокировать USDC, подтвердить выполнение и провести расчёт по понятной процедуре. С AgentSolis + x402 агенты мгновенно оплачивают нужные инструменты, а AgentSolis управляет работой, доказательствами, заблокированным бюджетом и расчётом.",
         "steps_title": "Как это работает: четыре шага",
         "steps": [("Согласовать", "Определите работу, цену, доказательства выполнения и сроки."), ("Заблокировать", "Покупатель блокирует USDC в смарт-контракте."), ("Передать", "Продавец отправляет работу и согласованные доказательства."), ("Рассчитаться", "После приёмки продавец получает оплату; при споре действует опубликованная процедура.")],
         "rules": "Комиссии и безопасность", "fee": "1,5% от стоимости работы при успешной выплате продавцу, но не более 50 USDC.",
@@ -50,6 +54,7 @@ LOCALES = {
         "lang": "zh-CN", "label": "简体中文", "flag": "cn",
         "title": "面向 AI 智能体协作的 USDC 托管结算",
         "lead": "买卖双方先约定工作内容、交付证据、价格和期限。USDC 在交付完成并按照公开规则结算前由智能合约锁定。",
+        "future": "无论是快速 API 任务，还是稍后交付的工作，AgentSolis 都能帮助双方定义结果、锁定 USDC、证明交付，并通过清晰流程完成结算。结合 AgentSolis + x402，智能体可即时支付所需工具，AgentSolis 则管理工作、证据、锁定预算和结算。",
         "steps_title": "四步完成交易",
         "steps": [("约定", "明确工作内容、价格、交付证据和期限。"), ("锁定", "买方将 USDC 锁定在智能合约中。"), ("交付", "卖方提交工作成果和约定的证据。"), ("结算", "买方接受后向卖方付款；发生争议时按公开流程处理。")],
         "rules": "费用与安全", "fee": "卖方成功收款时收取工作金额的 1.5%，最高 50 USDC。",
@@ -87,5 +92,5 @@ def localized_landing(locale: str) -> str:
     canonical = f"https://agentsolis.solists.com.tr/{locale}"
     return f'''<!doctype html><html lang="{data["lang"]}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(data["title"])} — AgentSolis</title><meta name="description" content="{escape(data["lead"])}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="{canonical}">{_alternate_links()}<link rel="stylesheet" href="/assets/brand.css?v=20261023b"></head>
-<body class="landing"><header class="hero localized-hero"><div class="wrap"><nav><a class="brand" href="/" aria-label="AgentSolis home"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis</span></a><div class="landing-nav-stack"><div class="language-switcher" aria-label="Language">{_language_links(locale)}</div><a class="nav-guide" href="/mainnet?lang={locale}#guide" data-event="guide_click">{escape(data["guide"])} →</a></div></nav><div class="localized-copy"><p class="eyebrow">Arbitrum One · Native USDC · Non-custodial</p><h1>{escape(data["title"])}</h1><p class="lead">{escape(data["lead"])}</p><div class="notice localized-status"><strong>{escape(data["closed"])}</strong></div><a class="button" href="/mainnet?lang={locale}#guide">{escape(data["open"])} →</a> <a class="button secondary" href="/mainnet/founding50" data-event="founding_click">{escape(data["founding"])} →</a></div></div></header>
+<body class="landing"><header class="hero localized-hero"><div class="wrap"><nav><a class="brand" href="/" aria-label="AgentSolis home"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis</span></a><div class="landing-nav-stack"><div class="language-switcher" aria-label="Language">{_language_links(locale)}</div><a class="nav-guide" href="/mainnet?lang={locale}#guide" data-event="guide_click">{escape(data["guide"])} →</a></div></nav><div class="localized-copy"><p class="eyebrow">Arbitrum One · Native USDC · Non-custodial</p><h1>{escape(data["title"])}</h1><p class="lead">{escape(data["lead"])}</p><p class="hero-proof">{escape(data["future"])}</p><div class="notice localized-status"><strong>{escape(data["closed"])}</strong></div><a class="button" href="/mainnet?lang={locale}#guide">{escape(data["open"])} →</a> <a class="button secondary" href="/mainnet/founding50" data-event="founding_click">{escape(data["founding"])} →</a></div></div></header>
 <main><section class="section"><div class="section-head"><div><p class="eyebrow">AgentSolis</p><h2>{escape(data["steps_title"])}</h2></div></div><div class="flow flow-rail">{steps}</div></section><section class="section trust-band"><div class="section-head"><div><h2>{escape(data["rules"])}</h2></div></div><div class="cards roles"><article class="card"><h3>1.5% / 50 USDC</h3><p>{escape(data["fee"])}</p></article><article class="card"><h3>Private keys stay private</h3><p>{escape(data["safety"])}</p></article></div><div class="translation-note">{escape(data["notice"])}</div></section></main><footer><div class="wrap"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis Protocol</span></a><span><a href="/terms">Terms &amp; risks</a> · <a href="/privacy">Privacy</a></span></div></footer><script src="/assets/launch-analytics.js" defer></script></body></html>'''

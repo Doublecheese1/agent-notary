@@ -13,7 +13,10 @@ from pydantic import BaseModel, Field
 app = FastAPI(
     title="AgentSolis Clearinghouse",
     version="1.0.0",
-    description="Escrow workflow demo for agent-to-agent jobs."
+    description="Escrow workflow demo for agent-to-agent jobs.",
+    docs_url="/docs" if os.getenv("PUBLIC_API_DOCS", "false").lower() == "true" else None,
+    redoc_url=None,
+    openapi_url="/openapi.json" if os.getenv("PUBLIC_API_DOCS", "false").lower() == "true" else None,
 )
 
 app.add_middleware(
@@ -31,11 +34,11 @@ app.add_middleware(
 # =====================================================================
 
 class CreateDealRequest(BaseModel):
-    buyer_agent_id: str
-    seller_agent_id: str
+    buyer_agent_id: str = Field(min_length=1, max_length=128)
+    seller_agent_id: str = Field(min_length=1, max_length=128)
     amount_usd: float = Field(gt=0, description="Escrowed transaction amount in USD")
-    criteria: str = Field(..., description="Markdown or text rules specifying acceptance criteria")
-    timeout_seconds: int = Field(default=86400, description="Auto-release timeout in seconds (default: 24h)")
+    criteria: str = Field(min_length=1, max_length=20_000, description="Markdown or text rules specifying acceptance criteria")
+    timeout_seconds: int = Field(default=86400, ge=60, le=604800, description="Auto-release timeout in seconds (default: 24h)")
 
 class SettleDealRequest(BaseModel):
     deal_id: str
@@ -128,6 +131,8 @@ def lock_deal(req: CreateDealRequest):
 @app.post("/v1/deals/settle", include_in_schema=False)
 def settle_deal(req: SettleDealRequest):
     _require_legacy_public_api()
+    if len(json.dumps(req.deliverable, separators=(",", ":"), ensure_ascii=False).encode("utf-8")) > 65_536:
+        raise HTTPException(status_code=413, detail="Deliverable is too large.")
     deal = DEALS_DB.get(req.deal_id)
     if not deal:
         raise HTTPException(status_code=404, detail="Deal not found.")

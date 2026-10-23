@@ -9,7 +9,7 @@ AgentSolis is native-USDC escrow for agent-to-agent jobs. Objective, machine-che
 - `/mainnet/validator` — private validator/relay console. Independent validator wallets sign the same scoped EIP-712 result; the console combines at least two signatures without receiving private keys.
 - `/mainnet/operations` — closed founder console that prepares Founding 50 admission, access and pause transactions for review and execution by the Operations Safe.
 - `/internal/reporting/send` — secret-protected, read-only reporting trigger. It reads Arbitrum One events and sends the scheduled operating report without a wallet or signing key.
-- `/reports` — password-protected founder dashboard with today, week, month, year and all-time revenue, withdrawal and deal figures.
+- `/private-report/<secret path>` — unlinked, password-protected founder dashboard with live comparison, revenue, withdrawal and deal figures.
 - `/internal/ai-review` — secret-protected three-provider dispute triage. It stores immutable package/report hashes, never a wallet key, and sends only eligible 2-of-3 results to isolated on-chain signers.
 - `/mainnet/founding50` — the mainnet Founding 50 offer: the first 50 approved buyer wallets receive 30 days without the AgentSolis protocol fee, beginning with their first funded mainnet deal.
 - `/pilot` — the existing Arbitrum Sepolia Founding 50 test workflow.
@@ -54,9 +54,9 @@ See `MAINNET_FINAL_STEPS_TR.md` for the exact Turkish launch checklist.
 
 ## Operational reports
 
-`.github/workflows/daily-report.yml` triggers the protected reporting endpoint at 09:00 and 20:00 Europe/Istanbul. The report includes deal counts, volume, seller and buyer payments, protocol fees, escrow and treasury balances, and unresolved disputes requiring attention. SMTP credentials and the recipient stay in Render secrets; the repository contains no email password. See `REPORTING_SETUP_TR.md`.
+`.github/workflows/daily-report.yml` triggers the protected reporting endpoint at 08:00 and 00:00 Europe/Istanbul. The report includes deal counts, volume, seller and buyer payments, protocol fees, escrow and treasury balances, and unresolved disputes requiring attention. SMTP credentials and the recipient stay in Render secrets; the repository contains no email password. See `REPORTING_SETUP_TR.md`.
 
-The private `/reports` dashboard calculates confirmed protocol revenue from `DealClosed` events. Owner withdrawals are native USDC transfers from the Treasury Safe to the explicitly configured `REPORT_OWNER_PAYOUT_ADDRESS`; other treasury outflows are not labeled as personal withdrawals. It also lists AI reviews waiting for evidence, lacking agreement or requiring a human ruling.
+The private dashboard path is set through `REPORT_DASHBOARD_PATH` and is never linked from the public site. It calculates confirmed protocol revenue from `DealClosed` events. Owner withdrawals are native USDC transfers from the Treasury Safe to the explicitly configured `REPORT_OWNER_PAYOUT_ADDRESS`; other treasury outflows are not labeled as personal withdrawals. It also lists AI reviews waiting for evidence, lacking agreement or requiring a human ruling.
 
 ## Build and verification
 

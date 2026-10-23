@@ -4,7 +4,7 @@ from playground import router
 from payments import router as payments_router
 from pilot import router as pilot_router
 from mainnet import router as mainnet_router
-from reporting import router as reporting_router
+from reporting import router as reporting_router, reporting_enabled
 from negotiation import router as negotiation_router, page_router as negotiation_page_router
 from ai_review import router as ai_review_router
 from discovery import router as discovery_router
@@ -27,6 +27,44 @@ app.include_router(founding50_router)
 PUBLIC_ORIGIN = "https://agentsolis.solists.com.tr"
 
 
+class BodySizeLimitMiddleware:
+    """Reject oversized request bodies even when Content-Length is absent."""
+    def __init__(self, app, max_bytes: int = 1_048_576):
+        self.app, self.max_bytes = app, max_bytes
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http" or scope.get("method") not in {"POST", "PUT", "PATCH"}:
+            return await self.app(scope, receive, send)
+        chunks, total = [], 0
+        while True:
+            message = await receive()
+            if message["type"] == "http.disconnect":
+                return
+            body = message.get("body", b"")
+            total += len(body)
+            if total > self.max_bytes:
+                from fastapi.responses import JSONResponse
+                response = JSONResponse({"detail": "Request body is too large."}, status_code=413)
+                return await response(scope, receive, send)
+            chunks.append(body)
+            if not message.get("more_body", False):
+                break
+        complete = b"".join(chunks)
+        delivered = False
+
+        async def replay():
+            nonlocal delivered
+            if delivered:
+                return {"type": "http.request", "body": b"", "more_body": False}
+            delivered = True
+            return {"type": "http.request", "body": complete, "more_body": False}
+
+        return await self.app(scope, replay, send)
+
+
+app.add_middleware(BodySizeLimitMiddleware)
+
+
 @app.middleware("http")
 async def security_headers(request, call_next):
     if request.url.hostname == "agent-notary-5.onrender.com":
@@ -35,6 +73,16 @@ async def security_headers(request, call_next):
         if request.url.query:
             destination += f"?{request.url.query}"
         return RedirectResponse(destination, status_code=308)
+    if request.method in {"POST", "PUT", "PATCH"}:
+        content_length = request.headers.get("content-length")
+        if content_length:
+            try:
+                if int(content_length) > 1_048_576:
+                    from fastapi.responses import JSONResponse
+                    return JSONResponse({"detail": "Request body is too large."}, status_code=413)
+            except ValueError:
+                from fastapi.responses import JSONResponse
+                return JSONResponse({"detail": "Invalid Content-Length header."}, status_code=400)
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -55,7 +103,6 @@ def robots():
     body = "\n".join([
         "User-agent: *",
         "Allow: /",
-        "Disallow: /reports",
         "Disallow: /internal/",
         "Disallow: /mainnet/setup",
         "Disallow: /mainnet/operations",
@@ -192,11 +239,29 @@ def plex_mono_font():
     from fastapi.responses import FileResponse
     return FileResponse(Path(__file__).resolve().parent / "static" / "fonts" / "IBMPlexMono-Regular.ttf", media_type="font/ttf")
 
-@app.get("/reports", include_in_schema=False)
-def founder_reports():
+@app.get("/private-report/{access_key}", include_in_schema=False)
+def founder_reports(access_key: str):
+    import os
+    import secrets
     from pathlib import Path
+    from fastapi import HTTPException
     from fastapi.responses import FileResponse
-    return FileResponse(Path(__file__).resolve().parent / "static" / "reports.html")
+    expected = os.getenv("REPORT_DASHBOARD_PATH", "").strip()
+    if (
+        not reporting_enabled()
+        or len(expected) < 24
+        or not secrets.compare_digest(access_key, expected)
+    ):
+        raise HTTPException(404, "Not found")
+    return FileResponse(
+        Path(__file__).resolve().parent / "static" / "reports.html",
+        headers={
+            "Cache-Control": "no-store",
+            "Pragma": "no-cache",
+            "Referrer-Policy": "no-referrer",
+            "X-Robots-Tag": "noindex, nofollow, noarchive",
+        },
+    )
 
 @app.get("/{locale}", include_in_schema=False)
 def international_landing(locale: str):

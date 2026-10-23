@@ -1,10 +1,13 @@
-"""Minimal, cookie-free launch events written to application logs."""
+"""Privacy-light product analytics with no IP, wallet, email or fingerprint storage."""
 from __future__ import annotations
 
-import json
-import logging
+import os
+import re
+import sqlite3
+import threading
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request, Response
@@ -12,22 +15,71 @@ from pydantic import BaseModel, Field
 
 
 router = APIRouter(prefix="/internal/analytics", tags=["Internal analytics"])
-logger = logging.getLogger("agentsolis.launch")
 _ATTEMPTS: dict[str, list[float]] = {}
+_LOCK = threading.RLock()
+
+
+def analytics_enabled() -> bool:
+    return os.getenv("ANALYTICS_ENABLED", "false").lower() == "true"
+
+
+def _database_path() -> Path:
+    return Path(os.getenv("ANALYTICS_DB_PATH", "/var/data/agentnotary/analytics.sqlite3"))
+
+
+def _retention_days() -> int:
+    try:
+        value = int(os.getenv("ANALYTICS_RETENTION_DAYS", "760"))
+    except ValueError:
+        value = 760
+    return min(1095, max(30, value))
+
+
+def _connect() -> sqlite3.Connection:
+    path = _database_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    db = sqlite3.connect(path, timeout=10)
+    db.execute("PRAGMA journal_mode=WAL")
+    db.execute(
+        """CREATE TABLE IF NOT EXISTS analytics_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        session_id TEXT NOT NULL, event TEXT NOT NULL, path TEXT NOT NULL,
+        language TEXT NOT NULL, campaign TEXT NOT NULL, country TEXT,
+        duration_seconds INTEGER NOT NULL, recorded_at INTEGER NOT NULL
+        )"""
+    )
+    db.execute("CREATE INDEX IF NOT EXISTS idx_analytics_time ON analytics_events(recorded_at)")
+    db.execute("CREATE INDEX IF NOT EXISTS idx_analytics_session ON analytics_events(session_id)")
+    return db
 
 
 class LaunchEvent(BaseModel):
     event: Literal[
-        "landing_view", "buyer_click", "seller_click", "demo_click",
+        "landing_view", "page_view", "page_exit", "heartbeat",
+        "buyer_click", "seller_click", "demo_click",
         "founding_click", "language_click", "guide_click",
     ]
-    path: str = Field(default="/", max_length=120, pattern=r"^/[A-Za-z0-9/_-]*$")
+    path: str = Field(default="/", max_length=160, pattern=r"^/[A-Za-z0-9/_.-]*$")
     language: str = Field(default="en", max_length=12, pattern=r"^[A-Za-z-]+$")
     campaign: str = Field(default="", max_length=80, pattern=r"^[A-Za-z0-9._-]*$")
+    session_id: str = Field(default="anonymous", min_length=8, max_length=64, pattern=r"^[A-Za-z0-9_-]+$")
+    duration_seconds: int = Field(default=0, ge=0, le=86_400)
+
+
+def _country(request: Request) -> str | None:
+    header = os.getenv("ANALYTICS_COUNTRY_HEADER", "").strip().lower()
+    if header not in {"cf-ipcountry", "x-vercel-ip-country", "x-country-code"}:
+        return None
+    value = request.headers.get(header, "").upper()
+    if re.fullmatch(r"[A-Z]{2}", value) and value not in {"XX", "T1"}:
+        return value
+    return None
 
 
 @router.post("/event", include_in_schema=False, status_code=204)
 def record_launch_event(item: LaunchEvent, request: Request) -> Response:
+    if not analytics_enabled():
+        return Response(status_code=204)
     key = request.client.host if request.client else "unknown"
     now = time.monotonic()
     recent = [stamp for stamp in _ATTEMPTS.get(key, []) if now - stamp < 60]
@@ -35,17 +87,72 @@ def record_launch_event(item: LaunchEvent, request: Request) -> Response:
         raise HTTPException(status_code=429, detail="Too many analytics events")
     recent.append(now)
     _ATTEMPTS[key] = recent
-    logger.info(
-        "AGENTSOLIS_EVENT %s",
-        json.dumps(
-            {
-                "event": item.event,
-                "path": item.path,
-                "language": item.language,
-                "campaign": item.campaign,
-                "recorded_at": datetime.now(timezone.utc).isoformat(),
-            },
-            separators=(",", ":"),
-        ),
-    )
+    data = {
+        "session_id": item.session_id, "event": item.event, "path": item.path,
+        "language": item.language, "campaign": item.campaign,
+        "country": _country(request), "duration_seconds": item.duration_seconds,
+        "recorded_at": int(time.time()),
+    }
+    with _LOCK:
+        db = _connect()
+        try:
+            db.execute(
+                """INSERT INTO analytics_events
+                (session_id,event,path,language,campaign,country,duration_seconds,recorded_at)
+                VALUES (:session_id,:event,:path,:language,:campaign,:country,:duration_seconds,:recorded_at)""",
+                data,
+            )
+            cutoff = data["recorded_at"] - _retention_days() * 86_400
+            db.execute("DELETE FROM analytics_events WHERE recorded_at < ?", (cutoff,))
+            db.commit()
+        finally:
+            db.close()
     return Response(status_code=204)
+
+
+def analytics_summary(now: datetime | None = None) -> dict:
+    if not analytics_enabled() or not _database_path().exists():
+        return {"available": False, "message": "Ziyaretçi analitiği etkin değil veya henüz veri oluşmadı."}
+    current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    day = current.replace(hour=0, minute=0, second=0, microsecond=0)
+    starts = {
+        "today": day, "last_7_days": current - timedelta(days=7),
+        "last_21_days": current - timedelta(days=21),
+        "month": datetime(current.year, current.month, 1, tzinfo=timezone.utc),
+        "year": datetime(current.year, 1, 1, tzinfo=timezone.utc), "all": None,
+    }
+
+    def metrics(db: sqlite3.Connection, start: datetime | None) -> dict:
+        where = "WHERE recorded_at >= ?" if start else ""
+        args = (int(start.timestamp()),) if start else ()
+        row = db.execute(
+            f"""SELECT COUNT(DISTINCT session_id),
+            SUM(CASE WHEN event IN ('landing_view','page_view') THEN 1 ELSE 0 END), COUNT(*)
+            FROM analytics_events {where}""", args,
+        ).fetchone()
+        dwell = db.execute(
+            f"""SELECT AVG(max_duration) FROM (SELECT session_id, path,
+            MAX(duration_seconds) AS max_duration FROM analytics_events {where}
+            GROUP BY session_id, path)""", args,
+        ).fetchone()[0]
+        return {"visitors": int(row[0] or 0), "page_views": int(row[1] or 0),
+                "events": int(row[2] or 0), "average_session_seconds": round(float(dwell or 0), 1)}
+
+    with _LOCK:
+        db = _connect()
+        try:
+            periods = {name: metrics(db, start) for name, start in starts.items()}
+            top_pages = [{"path": row[0], "views": int(row[1]), "visitors": int(row[2])} for row in db.execute(
+                """SELECT path, COUNT(*), COUNT(DISTINCT session_id) FROM analytics_events
+                WHERE event IN ('landing_view','page_view') GROUP BY path ORDER BY COUNT(*) DESC LIMIT 20""").fetchall()]
+            countries = [{"country": row[0], "visitors": int(row[1])} for row in db.execute(
+                """SELECT COALESCE(country,'Unknown'), COUNT(DISTINCT session_id) FROM analytics_events
+                GROUP BY COALESCE(country,'Unknown') ORDER BY COUNT(DISTINCT session_id) DESC LIMIT 30""").fetchall()]
+            actions = [{"event": row[0], "count": int(row[1])} for row in db.execute(
+                """SELECT event, COUNT(*) FROM analytics_events
+                WHERE event NOT IN ('landing_view','page_view','heartbeat','page_exit')
+                GROUP BY event ORDER BY COUNT(*) DESC""").fetchall()]
+        finally:
+            db.close()
+    return {"available": True, "message": "Yaklaşık ürün analitiğidir; bot ve test trafiği içerebilir. Ziyaretçi sayısı tarayıcı sekmesi oturumudur. Ülke yalnız güvenilir ağ başlığı yapılandırılmışsa gösterilir. IP adresi, cüzdan, e-posta ve cihaz parmak izi saklanmaz.",
+            "periods": periods, "top_pages": top_pages, "countries": countries, "actions": actions}

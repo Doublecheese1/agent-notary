@@ -8,11 +8,14 @@ from main import app
 from mainnet import (
     BindReviewResolver,
     HumanReviewResolution,
+    Proposal,
     _review_resolver,
+    config,
     mainnet_units,
     prepare_action,
     prepare_bind_review_resolver,
     prepare_human_review_resolution,
+    prepare_proposal,
     transaction,
 )
 
@@ -48,10 +51,35 @@ class MainnetRouteTest(unittest.TestCase):
         self.assertEqual(response.status_code, 503)
         self.assertEqual(response.json()["detail"], "Mainnet deposits are not open yet.")
 
+    def test_config_requires_live_contract_access_before_accepting_funds(self):
+        wallet = "0x0000000000000000000000000000000000000001"
+        w3, contract = MagicMock(), MagicMock()
+        w3.eth.block_number = 123
+        contract.address = "0x0000000000000000000000000000000000000009"
+        contract.functions.publicAccess.return_value.call.return_value = False
+        contract.functions.paused.return_value.call.return_value = False
+        contract.functions.approvedBuyers.return_value.call.return_value = False
+        with patch.dict(os.environ, {
+            "MAINNET_ENABLED": "true", "MAINNET_ACCEPTING_FUNDS": "true",
+        }), patch("mainnet.connection", return_value=(w3, contract)):
+            closed = config(wallet)
+            contract.functions.approvedBuyers.return_value.call.return_value = True
+            approved = config(wallet)
+            contract.functions.paused.return_value.call.return_value = True
+            paused = config(wallet)
+        self.assertTrue(closed["funding_gate_configured"])
+        self.assertFalse(closed["accepting_funds"])
+        self.assertTrue(approved["accepting_funds"])
+        self.assertFalse(paused["accepting_funds"])
+
     def test_browser_code_never_contains_a_private_key_field(self):
         response = self.client.get("/mainnet/app.js")
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("privateKey", response.text)
+
+    def test_public_api_documentation_is_closed_by_default(self):
+        self.assertEqual(self.client.get("/docs").status_code, 404)
+        self.assertEqual(self.client.get("/openapi.json").status_code, 404)
 
     def test_validator_console_uses_wallet_signatures_without_private_keys(self):
         page = self.client.get("/mainnet/validator")
@@ -75,6 +103,21 @@ class MainnetRouteTest(unittest.TestCase):
 
     def test_mainnet_amount_parser_has_no_1000_usdc_cap(self):
         self.assertEqual(mainnet_units("5000"), 5_000_000_000)
+
+    def test_proposal_rejects_a_policy_hash_outside_production_configuration(self):
+        request = Proposal(
+            buyer="0x0000000000000000000000000000000000000001",
+            seller="0x0000000000000000000000000000000000000002",
+            mode="automatic", amount="10", salt="0x" + "11" * 32,
+            manifest="{}", policy_hash="0x" + "22" * 32,
+            fallback_seller_bps=0, acceptance_window=3600, delivery_window=3600,
+            decision_window=3600, arbitration_window=3600,
+        )
+        with patch.dict(os.environ, {"MAINNET_AUTOMATIC_POLICY_HASH": "0x" + "33" * 32}), \
+                patch("mainnet.require_accepting"), patch("mainnet.connection", return_value=(MagicMock(), MagicMock())):
+            with self.assertRaises(Exception) as rejected:
+                prepare_proposal(request)
+        self.assertEqual(getattr(rejected.exception, "status_code", None), 422)
 
     def test_public_mainnet_disclosures_are_available(self):
         self.assertEqual(self.client.get("/terms").status_code, 200)
@@ -121,8 +164,9 @@ class MainnetRouteTest(unittest.TestCase):
         self.assertEqual(correct.json()["transaction"]["from"], approved)
 
     def test_founder_operations_gate_is_closed_by_default(self):
-        self.assertEqual(self.client.get("/mainnet/operations").status_code, 200)
         with patch.dict(os.environ, {"MAINNET_OPERATIONS_UI": "false"}):
+            self.assertEqual(self.client.get("/mainnet/operations").status_code, 404)
+            self.assertEqual(self.client.get("/mainnet/operations.js").status_code, 404)
             status = self.client.get("/mainnet/operations-status")
             prepared = self.client.post("/mainnet/prepare-operations-action", json={
                 "action": "admitFoundingBuyer",
@@ -130,6 +174,10 @@ class MainnetRouteTest(unittest.TestCase):
             })
         self.assertFalse(status.json()["enabled"])
         self.assertEqual(prepared.status_code, 503)
+
+        with patch.dict(os.environ, {"MAINNET_OPERATIONS_UI": "true"}):
+            self.assertEqual(self.client.get("/mainnet/operations").status_code, 200)
+            self.assertEqual(self.client.get("/mainnet/operations.js").status_code, 200)
 
     def test_review_resolver_binding_uses_configured_mainnet_provider(self):
         w3, resolver = MagicMock(), MagicMock()

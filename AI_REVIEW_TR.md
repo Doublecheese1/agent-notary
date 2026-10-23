@@ -25,7 +25,7 @@ Bu katman, “AI çoğu vakayı incelesin; yalnızca zor vakalar kurucuya gelsin
 - anlaşma otomatik inceleme üst sınırını aşarsa,
 - alıcı veya satıcı AI kararına itiraz ederse.
 
-Bu vakalar özel `/reports` ekranındaki **Needs human attention** alanında görünür. Günlük 09:00 ve 20:00 raporlarında da listelenir.
+Bu vakalar yalnız gizli adres ve parola ile açılan özel rapor ekranındaki **İnsan müdahalesi bekleyenler** alanında görünür. Günlük 08:00 ve 00:00 raporlarında da listelenir.
 
 ## Para güvenliği
 

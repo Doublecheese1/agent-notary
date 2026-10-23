@@ -13,11 +13,13 @@ from email.message import EmailMessage
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Body, Cookie, Header, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
 from web3 import Web3
 
 from mainnet import connection
 from ai_review import attention_queue as ai_attention_queue
 from founding50 import application_list as founding50_application_list
+from launch_analytics import analytics_summary
 
 router = APIRouter(prefix="/internal/reporting", tags=["Internal reporting"])
 _LOGIN_ATTEMPTS: dict[str, list[float]] = {}
@@ -48,17 +50,15 @@ def reporting_enabled() -> bool:
 
 
 def scheduled_window(now: datetime | None = None) -> tuple[datetime, datetime]:
-    """Return the last completed 09:00/20:00 Europe/Istanbul report interval."""
+    """Return the last completed 00:00/08:00 Europe/Istanbul report interval."""
     zone = ZoneInfo(os.getenv("REPORT_TIMEZONE", "Europe/Istanbul"))
     local = (now or datetime.now(timezone.utc)).astimezone(zone)
     today = local.date()
-    nine = datetime.combine(today, time(9), zone)
-    twenty = datetime.combine(today, time(20), zone)
-    if local >= twenty:
-        return nine, twenty
-    if local >= nine:
-        return datetime.combine(today - timedelta(days=1), time(20), zone), nine
-    return datetime.combine(today - timedelta(days=1), time(9), zone), datetime.combine(today - timedelta(days=1), time(20), zone)
+    midnight = datetime.combine(today, time.min, zone)
+    eight = datetime.combine(today, time(8), zone)
+    if local >= eight:
+        return midnight, eight
+    return datetime.combine(today - timedelta(days=1), time(8), zone), midnight
 
 
 def _first_block_at_or_after(w3: Web3, timestamp: int, floor: int, ceiling: int) -> int:
@@ -128,6 +128,11 @@ def _session_secret() -> bytes:
     return value.encode("utf-8")
 
 
+def _dashboard_path_matches(value: str) -> bool:
+    expected = os.getenv("REPORT_DASHBOARD_PATH", "").strip()
+    return len(expected) >= 24 and secrets.compare_digest(value, expected)
+
+
 def _make_session(now: int | None = None) -> str:
     expires = int(now or clock.time()) + 12 * 60 * 60
     payload = str(expires)
@@ -187,14 +192,54 @@ def _period_start_blocks(w3: Web3, deployment_block: int, latest: int, now_local
     return result
 
 
+def _month_start(value: datetime) -> datetime:
+    return datetime(value.year, value.month, 1, tzinfo=value.tzinfo)
+
+
+def _shift_month(value: datetime, months: int) -> datetime:
+    absolute = value.year * 12 + value.month - 1 + months
+    return datetime(absolute // 12, absolute % 12 + 1, 1, tzinfo=value.tzinfo)
+
+
+def _same_time_previous_year(value: datetime) -> datetime:
+    try:
+        return value.replace(year=value.year - 1)
+    except ValueError:  # 29 February
+        return value.replace(year=value.year - 1, day=28)
+
+
+def _dashboard_windows(now_local: datetime) -> dict[str, tuple[datetime | None, datetime]]:
+    day = datetime.combine(now_local.date(), time.min, now_local.tzinfo)
+    week = datetime.combine(now_local.date() - timedelta(days=now_local.weekday()), time.min, now_local.tzinfo)
+    month = _month_start(now_local)
+    year = datetime(now_local.year, 1, 1, tzinfo=now_local.tzinfo)
+    previous_year_end = _same_time_previous_year(now_local)
+    return {
+        "today": (day, now_local),
+        "yesterday": (day - timedelta(days=1), day),
+        "week": (week, now_local),
+        "previous_week": (week - timedelta(days=7), week),
+        "last_7_days": (now_local - timedelta(days=7), now_local),
+        "previous_7_days": (now_local - timedelta(days=14), now_local - timedelta(days=7)),
+        "last_21_days": (now_local - timedelta(days=21), now_local),
+        "previous_21_days": (now_local - timedelta(days=42), now_local - timedelta(days=21)),
+        "month": (month, now_local),
+        "previous_month": (_shift_month(month, -1), month),
+        "year": (year, now_local),
+        "previous_year_same_period": (datetime(now_local.year - 1, 1, 1, tzinfo=now_local.tzinfo), previous_year_end),
+        "all": (None, now_local),
+    }
+
+
 def collect_dashboard(now: datetime | None = None) -> dict:
     w3, contract = connection()
     deployment_block = _deployment_block()
     latest = w3.eth.block_number
     zone = ZoneInfo(os.getenv("REPORT_TIMEZONE", "Europe/Istanbul"))
     now_local = (now or datetime.now(timezone.utc)).astimezone(zone)
-    starts = _period_start_blocks(w3, deployment_block, latest, now_local)
     proposed = _logs(contract.events.DealProposed(), deployment_block, latest)
+    accepted = _logs(contract.events.DealAccepted(), deployment_block, latest)
+    delivered = _logs(contract.events.DealDelivered(), deployment_block, latest)
     disputed = _logs(contract.events.DealDisputed(), deployment_block, latest)
     closed = _logs(contract.events.DealClosed(), deployment_block, latest)
     treasury = contract.functions.treasurySafe().call(block_identifier=latest)
@@ -202,16 +247,50 @@ def collect_dashboard(now: datetime | None = None) -> dict:
     owner = _owner_payout_address()
     withdrawals = _withdrawal_logs(token, treasury, owner, deployment_block, latest)
 
-    def period(first_block: int) -> dict:
-        period_proposed = [item for item in proposed if int(item["blockNumber"]) >= first_block]
-        period_disputed = [item for item in disputed if int(item["blockNumber"]) >= first_block]
-        period_closed = [item for item in closed if int(item["blockNumber"]) >= first_block]
-        period_withdrawals = [item for item in withdrawals if int(item["blockNumber"]) >= first_block]
+    event_groups = (proposed, accepted, delivered, disputed, closed, withdrawals)
+    block_numbers = {int(item["blockNumber"]) for group in event_groups for item in group}
+    block_times = {number: int(w3.eth.get_block(number)["timestamp"]) for number in block_numbers}
+
+    def in_window(item, start: datetime | None, end: datetime) -> bool:
+        observed = block_times[int(item["blockNumber"])]
+        return (start is None or observed >= int(start.timestamp())) and observed < int(end.timestamp())
+
+    deal_cache = {}
+
+    def deal_for(deal_id):
+        key = Web3.to_hex(deal_id)
+        if key not in deal_cache:
+            deal_cache[key] = contract.functions.deals(deal_id).call(block_identifier=latest)
+        return deal_cache[key]
+
+    def period(window: tuple[datetime | None, datetime]) -> dict:
+        start, end = window
+        period_proposed = [item for item in proposed if in_window(item, start, end)]
+        period_accepted = [item for item in accepted if in_window(item, start, end)]
+        period_delivered = [item for item in delivered if in_window(item, start, end)]
+        period_disputed = [item for item in disputed if in_window(item, start, end)]
+        period_closed = [item for item in closed if in_window(item, start, end)]
+        period_withdrawals = [item for item in withdrawals if in_window(item, start, end)]
+        transaction_hashes = {
+            item["transactionHash"].hex()
+            for group in (period_proposed, period_accepted, period_delivered, period_disputed, period_closed)
+            for item in group
+        }
         return {
             "volume": _amount(sum(int(item["args"]["amount"]) for item in period_proposed)),
+            "funded": _amount(sum(
+                int(item["args"]["amount"]) + int(item["args"]["arbitrationReserve"])
+                for item in period_proposed
+            )),
             "earned": _amount(sum(int(item["args"]["treasuryAmount"]) for item in period_closed)),
             "withdrawn": _amount(sum(int(item["args"]["value"]) for item in period_withdrawals)),
+            "seller_paid": _amount(sum(int(item["args"]["sellerAmount"]) for item in period_closed)),
+            "buyer_refunded": _amount(sum(int(item["args"]["buyerAmount"]) for item in period_closed)),
+            "resolver_paid": _amount(sum(int(item["args"]["resolverAmount"]) for item in period_closed)),
+            "transactions": len(transaction_hashes),
             "deals": len(period_proposed),
+            "accepted": len(period_accepted),
+            "delivered": len(period_delivered),
             "closed": len(period_closed),
             "disputes": len(period_disputed),
         }
@@ -219,13 +298,49 @@ def collect_dashboard(now: datetime | None = None) -> dict:
     open_ids = {log["args"]["id"] for log in proposed} - {log["args"]["id"] for log in closed}
     unresolved = []
     for deal_id in open_ids:
-        deal = contract.functions.deals(deal_id).call(block_identifier=latest)
+        deal = deal_for(deal_id)
         if int(deal[4]) == 4:
             unresolved.append(Web3.to_hex(deal_id))
+
+    windows = _dashboard_windows(now_local)
+    periods = {name: period(window) for name, window in windows.items()}
+    month = _month_start(now_local)
+    monthly_history = []
+    for offset in range(0, -12, -1):
+        start = _shift_month(month, offset)
+        end = now_local if offset == 0 else _shift_month(start, 1)
+        monthly_history.append({"month": start.strftime("%Y-%m"), **period((start, end))})
+
+    proposal_by_id = {Web3.to_hex(item["args"]["id"]): item for item in proposed}
+    revenue_sources = []
+    for item in sorted(closed, key=lambda value: block_times[int(value["blockNumber"])], reverse=True):
+        fee = int(item["args"]["treasuryAmount"])
+        if fee <= 0:
+            continue
+        deal_id = Web3.to_hex(item["args"]["id"])
+        proposal = proposal_by_id.get(deal_id)
+        block_time = block_times[int(item["blockNumber"])]
+        revenue_sources.append({
+            "deal_id": deal_id,
+            "transaction_hash": item["transactionHash"].hex(),
+            "closed_at": datetime.fromtimestamp(block_time, timezone.utc).astimezone(zone).isoformat(),
+            "fee": _amount(fee),
+            "deal_amount": _amount(int(proposal["args"]["amount"])) if proposal else None,
+            "mode": ("Automatic" if int(proposal["args"]["mode"]) == 0 else "Buyer Review") if proposal else "Unknown",
+            "buyer": proposal["args"]["buyer"] if proposal else None,
+            "customer_name": None,
+            "country": None,
+        })
+
+    paused = bool(contract.functions.paused().call(block_identifier=latest))
+    public_access = bool(contract.functions.publicAccess().call(block_identifier=latest))
+    operations = contract.functions.operationsSafe().call(block_identifier=latest)
     return {
         "generated_at": now_local.isoformat(),
+        "observed_block": latest,
         "escrow": contract.address,
         "treasury": treasury,
+        "operations": operations,
         "owner_payout": owner,
         "owner_payout_configured": owner is not None,
         "treasury_balance": _amount(int(token.functions.balanceOf(treasury).call(block_identifier=latest))),
@@ -234,7 +349,17 @@ def collect_dashboard(now: datetime | None = None) -> dict:
         "unresolved_disputes": unresolved,
         "ai_attention": ai_attention_queue(),
         "founding50_applications": founding50_application_list(),
-        "periods": {name: period(first_block) for name, first_block in starts.items()},
+        "periods": periods,
+        "monthly_history": monthly_history,
+        "revenue_sources": revenue_sources[:100],
+        "chain_status": {
+            "paused": paused,
+            "public_access": public_access,
+            "api_accepting_funds": os.getenv("MAINNET_ACCEPTING_FUNDS", "false").lower() == "true",
+            "treasury_eth": str(Web3.from_wei(w3.eth.get_balance(treasury), "ether")),
+            "operations_eth": str(Web3.from_wei(w3.eth.get_balance(operations), "ether")),
+        },
+        "visitor_analytics": analytics_summary(now),
     }
 
 
@@ -376,7 +501,13 @@ def dashboard_login(request: Request, response: Response, payload: dict = Body(.
     _check_login_limit(key)
     expected = os.getenv("REPORT_DASHBOARD_PASSWORD", "")
     supplied = str(payload.get("password", ""))
-    if not reporting_enabled() or len(expected) < 12 or not secrets.compare_digest(supplied, expected):
+    path_key = str(payload.get("access_key", ""))
+    if (
+        not reporting_enabled()
+        or len(expected) < 12
+        or not secrets.compare_digest(supplied, expected)
+        or not _dashboard_path_matches(path_key)
+    ):
         _record_login_failure(key)
         raise HTTPException(401, "Wrong password")
     _LOGIN_ATTEMPTS.pop(key, None)
@@ -401,4 +532,4 @@ def dashboard_logout(response: Response):
 @router.get("/data", include_in_schema=False)
 def dashboard_data(agentnotary_report_session: str | None = Cookie(default=None)):
     _authorize_session(agentnotary_report_session)
-    return collect_dashboard()
+    return JSONResponse(collect_dashboard(), headers={"Cache-Control": "no-store", "Pragma": "no-cache"})

@@ -39,6 +39,10 @@ def page():
         'X-Robots-Tag':'noindex, nofollow, noarchive',
     })
 
+
+def admin_ui_enabled() -> bool:
+    return os.getenv('PILOT_ADMIN_UI', 'false').lower() == 'true'
+
 @router.get('/app.js', include_in_schema=False)
 def script():
     return FileResponse(ROOT/'static/pilot.js', media_type='text/javascript', headers={'Cache-Control':'no-store'})
@@ -50,10 +54,14 @@ def deal_page(deal_id: str):
 
 @router.get('/admin', include_in_schema=False)
 def admin_page():
+    if not admin_ui_enabled():
+        raise HTTPException(404, 'Not found')
     return FileResponse(ROOT/'static/pilot-admin.html', headers={'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow, noarchive'})
 
 @router.get('/admin.js', include_in_schema=False)
 def admin_script():
+    if not admin_ui_enabled():
+        raise HTTPException(404, 'Not found')
     return FileResponse(ROOT/'static/pilot-admin.js', media_type='text/javascript', headers={'Cache-Control':'no-store'})
 
 @router.get('/config')

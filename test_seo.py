@@ -13,7 +13,7 @@ class SeoTest(unittest.TestCase):
         response = self.client.get("/robots.txt")
         self.assertEqual(response.status_code, 200)
         self.assertIn("Sitemap: https://agentsolis.solists.com.tr/sitemap.xml", response.text)
-        self.assertIn("Disallow: /reports", response.text)
+        self.assertIn("Disallow: /internal/", response.text)
         self.assertIn("Disallow: /mainnet/deal/", response.text)
         self.assertIn("Disallow: /mainnet/negotiate/", response.text)
 
@@ -26,7 +26,7 @@ class SeoTest(unittest.TestCase):
         self.assertIn("https://agentsolis.solists.com.tr/ai-agent-job-evidence", response.text)
         for locale in ("tr", "es", "pt-br", "ru", "zh-cn"):
             self.assertIn(f"https://agentsolis.solists.com.tr/{locale}", response.text)
-        self.assertNotIn("/reports", response.text)
+        self.assertNotIn("/private-report/", response.text)
         self.assertNotIn("/setup", response.text)
 
     def test_root_is_public_landing_page_with_security_headers(self):

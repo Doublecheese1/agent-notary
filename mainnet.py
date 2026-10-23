@@ -1,6 +1,8 @@
 """Mainnet product routes. Read-only until explicit, verified production configuration."""
 import json
 import os
+import re
+import secrets
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
@@ -167,11 +169,15 @@ def validator_script():
 
 @router.get("/operations", include_in_schema=False)
 def operations_page():
+    if not operations_ui_enabled():
+        raise HTTPException(404, "Not found")
     return FileResponse(ROOT / "static/mainnet-operations.html", headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow, noarchive"})
 
 
 @router.get("/operations.js", include_in_schema=False)
 def operations_script():
+    if not operations_ui_enabled():
+        raise HTTPException(404, "Not found")
     return FileResponse(ROOT / "static/mainnet-operations.js", media_type="text/javascript", headers={"Cache-Control": "no-store"})
 
 
@@ -352,15 +358,22 @@ def config(wallet: str | None = None):
     w3, contract = connection()
     block = w3.eth.block_number
     who = address(wallet) if wallet else None
+    public_access = bool(contract.functions.publicAccess().call(block_identifier=block))
+    paused = bool(contract.functions.paused().call(block_identifier=block))
+    approved_buyer = contract.functions.approvedBuyers(who).call(block_identifier=block) if who else None
+    effective_access = public_access or approved_buyer is True
     return {
-        **base, "enabled": True, "accepting_funds": accepting(), "escrow": contract.address,
+        **base, "enabled": True,
+        "accepting_funds": accepting() and not paused and effective_access,
+        "funding_gate_configured": accepting(),
+        "escrow": contract.address,
         "treasury_safe": contract.functions.treasurySafe().call(block_identifier=block),
         "operations_safe": contract.functions.operationsSafe().call(block_identifier=block),
         "validator_quorum": contract.functions.automaticValidator().call(block_identifier=block),
         "review_arbitrator": contract.functions.reviewArbitrator().call(block_identifier=block),
-        "public_access": contract.functions.publicAccess().call(block_identifier=block),
-        "paused": contract.functions.paused().call(block_identifier=block),
-        "approved_buyer": contract.functions.approvedBuyers(who).call(block_identifier=block) if who else None,
+        "public_access": public_access,
+        "paused": paused,
+        "approved_buyer": approved_buyer,
         "founding_state": contract.functions.foundingSeats(who).call(block_identifier=block) if who else None,
         "fee_waiver_until": contract.functions.feeWaiverUntil(who).call(block_identifier=block) if who else None,
         "observed_block": block,
@@ -398,6 +411,14 @@ def prepare_proposal(req: Proposal):
     if buyer == seller:
         raise HTTPException(422, "Buyer and seller must be different wallets.")
     mode = 0 if req.mode == "automatic" else 1
+    expected_policy = os.getenv(
+        "MAINNET_AUTOMATIC_POLICY_HASH" if req.mode == "automatic" else "MAINNET_REVIEW_POLICY_HASH",
+        "",
+    ).strip()
+    if not re.fullmatch(r"0x[0-9a-fA-F]{64}", expected_policy):
+        raise HTTPException(503, "The selected production policy is not configured.")
+    if not secrets.compare_digest(req.policy_hash.lower(), expected_policy.lower()):
+        raise HTTPException(422, "Policy hash does not match the configured production policy.")
     amount = mainnet_units(req.amount)
     if req.mode == "buyer_review" and req.decision_window < 2 * 24 * 60 * 60:
         raise HTTPException(422, "Buyer Review requires at least 2 days for the buyer decision window.")

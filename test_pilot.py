@@ -84,8 +84,13 @@ class PilotTests(unittest.TestCase):
         response = self.client.get('/pilot', follow_redirects=False)
         self.assertEqual(response.status_code, 307)
         self.assertEqual(response.headers['location'], '/play')
-        for path in ['/pilot/app.js','/pilot/deal/'+deal_id,'/pilot/admin','/pilot/admin.js','/founding50']:
+        for path in ['/pilot/app.js','/pilot/deal/'+deal_id,'/founding50']:
             self.assertEqual(self.client.get(path).status_code,200)
+        for path in ['/pilot/admin','/pilot/admin.js']:
+            self.assertEqual(self.client.get(path).status_code,404)
+        with patch.dict('os.environ', {'PILOT_ADMIN_UI':'true'}):
+            self.assertEqual(self.client.get('/pilot/admin').status_code,200)
+            self.assertEqual(self.client.get('/pilot/admin.js').status_code,200)
 
     def test_deployment_is_unsigned_and_testnet_only(self):
         d=self.post('/prepare-deployment',{'deployer':self.buyer,'treasury':self.treasury})

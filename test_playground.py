@@ -1,6 +1,7 @@
 import copy
 import hashlib
 import json
+import os
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
@@ -81,6 +82,31 @@ class PlaygroundTests(unittest.TestCase):
             self.assertEqual(self.lock(amount_usd=amount).status_code, 422)
         self.assertEqual(self.client.post("/sandbox/v1/deals/lock", json={}).status_code, 422)
         self.assertEqual(self.client.post("/sandbox/v1/deals/settle", json={}).status_code, 422)
+
+    def test_text_and_payload_size_limits(self):
+        self.assertEqual(self.lock(criteria="x" * 20_001).status_code, 422)
+        deal = self.lock().json()["deal_id"]
+        oversized = self.settle(deal, {"result": "x" * 65_536})
+        self.assertEqual(oversized.status_code, 413)
+        request = b'{"criteria":"' + (b"x" * 1_048_577) + b'"}'
+        response = self.client.post(
+            "/sandbox/v1/deals/lock",
+            content=request,
+            headers={"Content-Type": "application/json"},
+        )
+        self.assertEqual(response.status_code, 413)
+
+    def test_private_report_page_requires_unlisted_path_key(self):
+        key = "test-private-report-path-key-123456"
+        with patch.dict(os.environ, {
+            "REPORTING_ENABLED": "true",
+            "REPORT_DASHBOARD_PATH": key,
+        }, clear=False):
+            self.assertEqual(self.client.get("/reports").status_code, 404)
+            self.assertEqual(self.client.get("/private-report/wrong-key").status_code, 404)
+            response = self.client.get(f"/private-report/{key}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["x-robots-tag"], "noindex, nofollow, noarchive")
 
     def test_retention_and_capacity(self):
         deal = self.lock().json()["deal_id"]
