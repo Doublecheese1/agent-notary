@@ -14,8 +14,8 @@
       "address": "0x9c41A746c6649b36e548cf4D9C5CCe3Ef4648cbA"
     },
     {
-      "label": "AgentSolis C (pending)",
-      "address": ""
+      "label": "ARBITRATOR (temporary C for closed canary)",
+      "address": "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A"
     }
   ],
   "safes": [
@@ -35,5 +35,5 @@
       "address": ""
     }
   ],
-  "public_launch_requirement": "Before public funds open, replace or supplement same-seed owners so at least one owner is independently controlled, while preserving a threshold of at least 2."
+  "public_launch_requirement": "Before public funds open, replace the temporary C owner with a separately controlled signer and preserve a threshold of at least 2. Closed deployment and founder canary may use the temporary C while MAINNET_ACCEPTING_FUNDS remains false."
 }

@@ -13,7 +13,9 @@ Sahipler:
 
 1. Account 1 — `0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD`
 2. AgentSolis B — `0x9c41A746c6649b36e548cf4D9C5CCe3Ef4648cbA`
-3. AgentSolis C — yarın ayrı kurtarma kelimeleriyle oluşturulacak; adres henüz beklemede.
+3. ARBITRATOR — `0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A` (yalnız kapalı dağıtım ve kurucu canary için geçici C)
+
+Halka açık para açılmadan önce bu geçici C, ayrı kontrol edilen gerçek AgentSolis C ile değiştirilir. Yeni C oluşturulduğunda gelecekteki anlaşmalar için validator quorum ve AI resolver yeniden dağıtılıp escrow'da döndürülür.
 
 Safe adları:
 
