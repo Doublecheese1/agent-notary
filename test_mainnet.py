@@ -1,11 +1,11 @@
 import os
 import inspect
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
 from main import app
-from mainnet import mainnet_units, prepare_action, transaction
+from mainnet import BindReviewResolver, mainnet_units, prepare_action, prepare_bind_review_resolver, transaction
 
 
 class MainnetRouteTest(unittest.TestCase):
@@ -121,6 +121,22 @@ class MainnetRouteTest(unittest.TestCase):
             })
         self.assertFalse(status.json()["enabled"])
         self.assertEqual(prepared.status_code, 503)
+
+    def test_review_resolver_binding_uses_configured_mainnet_provider(self):
+        w3, resolver = MagicMock(), MagicMock()
+        w3.eth.contract.return_value = resolver
+        resolver.address = "0x0000000000000000000000000000000000000002"
+        resolver.functions.operationsSafe.return_value.call.return_value = "0x0000000000000000000000000000000000000003"
+        resolver.functions.bindEscrow.return_value._encode_transaction_data.return_value = "0x1234"
+        with patch.dict(os.environ, {"MAINNET_OPERATIONS_UI": "true"}), patch("mainnet.connection", return_value=(w3, MagicMock())) as configured:
+            result = prepare_bind_review_resolver(BindReviewResolver(
+                resolver="0x0000000000000000000000000000000000000002",
+                escrow="0x0000000000000000000000000000000000000004",
+            ))
+        configured.assert_called_once_with()
+        w3.eth.contract.assert_called_once()
+        self.assertEqual(result["safe"], "0x0000000000000000000000000000000000000003")
+        self.assertEqual(result["transaction"]["data"], "0x1234")
 
 
 if __name__ == "__main__":

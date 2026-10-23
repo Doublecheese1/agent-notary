@@ -299,7 +299,11 @@ class BindReviewResolver(BaseModel):
 def prepare_bind_review_resolver(req: BindReviewResolver):
     if not operations_ui_enabled():
         raise HTTPException(503, "The founder operations screen is closed.")
-    resolver = Web3().eth.contract(address=address(req.resolver), abi=AI_REVIEW_ARTIFACT["abi"])
+    # Use the verified Arbitrum provider. A provider-less Web3 instance can
+    # encode calls, but it cannot read operationsSafe() from the deployed
+    # resolver and therefore turns this preparation endpoint into a 500.
+    w3, _ = connection()
+    resolver = w3.eth.contract(address=address(req.resolver), abi=AI_REVIEW_ARTIFACT["abi"])
     operations = resolver.functions.operationsSafe().call()
     fn = resolver.functions.bindEscrow(address(req.escrow))
     return {"transaction": transaction(operations, resolver.address, fn._encode_transaction_data()),
