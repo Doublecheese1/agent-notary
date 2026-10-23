@@ -9,7 +9,7 @@ Güncelleme: 22 Ekim 2026
 - Başarı ödemesinde iş tutarının %1,5'i kadar protokol ücreti, 50 USDC tavan, sabit ücret yok. Anlaşma başına üst sınır kaldırılmıştır.
 - İlk 50 kabul edilen buyer cüzdanına ilk fonlanan ana ağ anlaşmasından itibaren 30 gün protokol ücreti muafiyeti.
 - Yeni anlaşmaları durdurma; mevcut anlaşmaların iade/sonuç yollarını açık bırakma.
-- İşlem, buyer ve kontrat toplam limitleri.
+- Automatic anlaşmalar için 10 USDC, Buyer Review için 100 USDC minimum uygulanır; kullanıcı talebi doğrultusunda anlaşma veya toplam escrow üst sınırı yoktur.
 - Sunucuda private key/seed phrase bulunmayan cüzdan akışı.
 - Arbitrum One ağ kimliğiyle hazırlanan işlemler ve onay işlemi kesinleşmeden fonlama adımını açmayan arayüz.
 - Kaybolan cevap/yenileme durumunda işlem hash'ini tarayıcıda koruyan ve tekrar göndermeden önce sonucu kontrol eden akış.

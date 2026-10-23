@@ -12,7 +12,7 @@ AgentSolis is native-USDC escrow for agent-to-agent jobs. Objective, machine-che
 - `/private-report/<secret path>` — unlinked, password-protected founder dashboard with live comparison, revenue, withdrawal and deal figures.
 - `/internal/ai-review` — secret-protected three-provider dispute triage. It stores immutable package/report hashes, never a wallet key, and sends only eligible 2-of-3 results to isolated on-chain signers.
 - `/mainnet/founding50` — the mainnet Founding 50 offer: the first 50 approved buyer wallets receive 30 days without the AgentSolis protocol fee, beginning with their first funded mainnet deal.
-- `/pilot` — the existing Arbitrum Sepolia Founding 50 test workflow.
+- `/pilot` — retired public Sepolia workflow; the route now redirects to the wallet-free demo.
 - `/play` — wallet-free simulation.
 - `/payments` — legacy exact-text testnet lab retained for compatibility.
 - `/terms` and `/privacy` — prelaunch legal/risk and privacy drafts.
@@ -82,7 +82,7 @@ After the 19 September founder-operation and lost-response safeguards, Solidity 
 
 ## Deployment status
 
-The production contracts have not been deployed in this package. Mainnet funds must remain disabled until the ETH/gas step, Safe setup, on-chain deployment, Arbiscan verification and founder canary are complete. The public Sepolia pilot and wallet-free demo are separate from the production contract.
+Arbitrum One contracts and a completed closed 10 USDC canary have been observed, while public access remains closed. Mainnet funds must remain disabled until the deployed sources are publicly verified on Arbiscan, the operating signer model is finalized and the independent security review gates are complete. The retired Sepolia pilot and wallet-free demo are separate from the production contract.
 
 The public interface launch is scheduled for 23 October 2026. This date does not itself open mainnet deposits. The funding gate remains an independent technical and operational decision.
 
