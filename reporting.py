@@ -383,6 +383,9 @@ def collect_report(now: datetime | None = None) -> dict:
     all_closed = _logs(contract.events.DealClosed(), deployment_block, end_block)
     open_ids = {log["args"]["id"] for log in all_proposed} - {log["args"]["id"] for log in all_closed}
     unresolved_disputes = []
+    # Period totals come from events bounded by end_block.  Read the live
+    # contract snapshot from the latest block so reports work with standard
+    # (non-archive) RPC providers as well.
     for deal_id in open_ids:
         deal = contract.functions.deals(deal_id).call(block_identifier=latest)
         if int(deal[4]) == 4:
@@ -476,7 +479,10 @@ def send_email(report: dict) -> None:
     text = render_text(report)
     message.set_content(text)
     message.add_alternative(f"<html><body><pre style='font:14px/1.5 system-ui;white-space:pre-wrap'>{html.escape(text)}</pre></body></html>", subtype="html")
-
+    smtp_client = smtplib.SMTP_SSL if port == 465 else smtplib.SMTP
+    with smtp_client(host, port, timeout=20) as smtp:
+        if port != 465:
+            smtp.starttls()
         smtp.login(sender, password)
         smtp.send_message(message)
 
