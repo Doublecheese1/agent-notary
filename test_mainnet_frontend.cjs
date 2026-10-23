@@ -14,6 +14,7 @@ const validatorJs = fs.readFileSync("static/mainnet-validator.js", "utf8");
 const setupHtml = fs.readFileSync("static/mainnet-setup.html", "utf8");
 const envExample = fs.readFileSync(".env.example", "utf8");
 const analyticsJs = fs.readFileSync("static/launch-analytics.js", "utf8");
+const css = fs.readFileSync("static/brand.css", "utf8");
 const release = JSON.parse(fs.readFileSync("release/mainnet-release.json", "utf8"));
 const APPROVED_DEPLOYER = "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD";
 const EXCHANGE_DEPOSIT = "0x21a7b51ffF1963C3EE530097B6A71a294a09c26D";
@@ -74,6 +75,9 @@ for (const locale of ['en','tr','es','pt-br','ru','zh-cn']) {
 for (const id of ["guideWalletTitle","guideWalletBody","guideChecklist","guideDisputeTitle","guideDisputeSteps","guideReviewNote"]) assert(html.includes(`id="${id}"`), `missing beginner guide section: ${id}`);
 assert(html.includes("https://metamask.io/download/") && html.includes('href="/play"'), "guide must link to official MetaMask setup and the wallet-free demo");
 assert(landing.includes('/mainnet#guide') && landing.includes("New to crypto wallets?"), "English landing must expose the step-by-step guide");
+assert(landing.includes('class="landing-nav-stack"') && landing.includes('class="nav-guide"') && landing.indexOf('class="nav-guide"') < landing.indexOf('class="hero-grid"'), "English guide CTA must be a full-width navigation button above the hero content");
+assert(!landing.includes('class="guided-entry"'), "English guide CTA must not remain duplicated inside the hero copy");
+assert(css.includes(".landing-nav-stack") && css.includes(".landing-nav-row") && css.includes(".nav-guide"), "guide navigation button must have desktop and mobile layout styles");
 assert(landing.includes("Automatic deals start at 10 USDC"), "Landing must show the Automatic deal minimum");
 assert(landing.includes("Buyer Review deals start at 100 USDC"), "Landing must show the Buyer Review deal minimum");
 for (const event of ["buyer_click", "seller_click", "demo_click", "founding_click", "language_click", "guide_click"]) {
@@ -82,6 +86,9 @@ for (const event of ["buyer_click", "seller_click", "demo_click", "founding_clic
 assert(analyticsJs.includes("sendBeacon") && analyticsJs.includes("utm_campaign"), "Launch measurement must record allow-listed campaign events");
 assert(!analyticsJs.includes("localStorage") && !analyticsJs.includes("document.cookie"), "Launch measurement must not add tracking storage");
 assert(js.includes("prepare-review-action") && js.includes("Appeal AI ruling"), "deal UI must expose the AI appeal path");
+assert(html.includes('id="reasonHash"') && html.includes("hash created automatically"), "dispute form must accept a plain-language reason and explain automatic hashing");
+assert(js.includes('crypto.subtle.digest("SHA-256"') && js.includes('action==="disputeDelivery"?await disputeReasonHash'), "dispute submission must hash the plain-language reason before preparing the on-chain action");
+assert(!guideJs.includes("reason fingerprint") && !guideJs.includes("parmak izini") && guideJs.includes("creates the required hash automatically"), "beginner guide must not ask users to manufacture a dispute hash");
 assert(!js.includes("Prepare seller-wins ruling") && !js.includes("Prepare buyer-wins ruling"), "ordinary users must not impersonate the resolver");
 assert(js.includes("if(sending)return"), "wallet send must block rapid duplicate clicks");
 assert(validatorJs.includes("eth_signTypedData_v4"), "validator console must use scoped wallet signatures");

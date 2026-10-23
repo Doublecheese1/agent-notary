@@ -55,6 +55,8 @@ for (const locale of locales.slice(1)) {
   assert(international.includes(`href="/mainnet?lang={locale}#guide"`), "localized landing must preserve its language in the guided transaction link");
 }
 assert(international.includes('data-event="guide_click"') && international.includes('data["guide"]'), "every localized landing must expose its translated guide link");
+assert(international.includes('class="landing-nav-stack"') && international.includes('class="nav-guide"'), "localized guide links must appear as navigation buttons");
+assert(!international.includes('class="guided-entry"'), "localized guide links must not remain duplicated inside hero copy");
 assert(!international.includes("İngilizce işlem ekranını aç"), "Turkish call to action must not claim that the workspace is English-only");
 assert(!international.includes("workspace in English"), "stale English-only workspace wording must be removed");
 assert(appSource.includes("localizedDealLink"), "shareable deal links must retain the selected language");
