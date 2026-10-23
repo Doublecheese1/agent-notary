@@ -476,7 +476,7 @@ def send_email(report: dict) -> None:
     text = render_text(report)
     message.set_content(text)
     message.add_alternative(f"<html><body><pre style='font:14px/1.5 system-ui;white-space:pre-wrap'>{html.escape(text)}</pre></body></html>", subtype="html")
-    with smtplib.SMTP_SSL(host, port, timeout=20) as smtp:
+
         smtp.login(sender, password)
         smtp.send_message(message)
 
