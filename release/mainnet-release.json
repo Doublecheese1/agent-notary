@@ -36,7 +36,9 @@
     "treasury_safe": "0xeeAB450ef8A9F4596A1D95A7F0B451Dc0059c21C",
     "operations_safe": "0xc62DeAc99156D19F762A249bab2Df99cE7c0Bc0f",
     "human_review_safe": "0xb3d52A5Cf6d8862C18c274AfE5c43C0006b38Cd7",
-    "ai_review_resolver": "",
+    "validator_quorum": "0x61835c4f99086006dcea599279c728344341717c",
+    "ai_review_resolver": "0x3144c448215c3342c5158fdcce555fae6bfecd58",
+    "escrow": "0x95ed02f55695fa79744c122436f56541c6270b71",
     "validator_a": "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
     "validator_b": "0x9c41A746c6649b36e548cf4D9C5CCe3Ef4648cbA",
     "validator_c": "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A",
@@ -44,11 +46,31 @@
     "ai_reviewer_b": "0x9c41A746c6649b36e548cf4D9C5CCe3Ef4648cbA",
     "ai_reviewer_c": "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A"
   },
+  "deployed_contracts": {
+    "validator_quorum": {
+      "address": "0x61835c4f99086006dcea599279c728344341717c",
+      "transaction": "0x423b0eeaa73853b80ae973674ecd672324c1d86a848757b4a0692a0b68c014cf",
+      "block": 517538613
+    },
+    "ai_review_resolver": {
+      "address": "0x3144c448215c3342c5158fdcce555fae6bfecd58",
+      "transaction": "0x7884bfef0d4a2a7410f9a3ae574e7a7fc970abbb1aacb6b22001b60f2c76b190",
+      "block": 517542250
+    },
+    "escrow": {
+      "address": "0x95ed02f55695fa79744c122436f56541c6270b71",
+      "transaction": "0xe76955bd4a7b2b35ca4491117b781d64ea031951b4c266daf14d706a388d121d",
+      "block": 517543781,
+      "paused": true,
+      "public_access": false,
+      "total_escrowed_units": 0
+    }
+  },
   "gates": {
     "mainnet_enabled": false,
     "accepting_funds": false,
     "deployment_ui": false,
     "operations_ui": false
   },
-  "warning": "Not deployed and not independently audited. Verify every hash and address before funding."
+  "warning": "Deployed on Arbitrum One with new deals paused, public access closed and zero escrowed funds. Independent security review and the internal canary remain required before public funding."
 }
