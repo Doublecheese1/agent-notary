@@ -6,7 +6,7 @@ const PENDING_KEY = "agentnotary.deploymentPending";
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 const DEFAULT_SIGNERS = [
   "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
-  "0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2",
+  "0x9c41A746c6649b36e548cf4D9C5CCe3Ef4648cbA",
   "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A",
 ];
 let account = null, gate = false, expectedDeployer = null, prepared = null, sending = false;
