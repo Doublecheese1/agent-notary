@@ -1,0 +1,25 @@
+{
+  "network": "Arbitrum One",
+  "chain_id": 42161,
+  "address": "0x95ed02f55695fa79744c122436f56541c6270b71",
+  "deployment_transaction": "0xe76955bd4a7b2b35ca4491117b781d64ea031951b4c266daf14d706a388d121d",
+  "compiler": "v0.8.30+commit.73712a01",
+  "contract_name": "AgentNotaryMainnetEscrow.sol:AgentNotaryMainnetEscrow",
+  "optimization": {
+    "enabled": true,
+    "runs": 500
+  },
+  "evm_version": "cancun",
+  "via_ir": true,
+  "constructor_arguments_without_0x": "000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000eeab450ef8a9f4596a1d95a7f0b451dc0059c21c000000000000000000000000c62deac99156d19f762a249bab2df99ce7c0bc0f00000000000000000000000061835c4f99086006dcea599279c728344341717c0000000000000000000000003144c448215c3342c5158fdcce555fae6bfecd58",
+  "standard_input_sha256": "66ffa849b4f32ff8527a5a1d463cbe68dee54bb2a46a7dcada5ce25ffbc5fd4d",
+  "checks": {
+    "compiler_matches_artifact": true,
+    "compiled_creation_matches_artifact": true,
+    "transaction_creation_prefix_matches": true,
+    "receipt_succeeded": true,
+    "receipt_address_matches": true,
+    "onchain_runtime_matches_ignoring_immutables": true
+  },
+  "ready_for_submission": true
+}

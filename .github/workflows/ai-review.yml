@@ -22,6 +22,17 @@ jobs:
             echo "AI review sync is not configured; leaving the production gate closed."
             exit 0
           fi
+          readiness_url="${AI_REVIEW_SYNC_URL%/sync}/readiness"
+          readiness="$(curl --fail --silent --show-error --max-time 30 \
+            -H "Authorization: Bearer $AI_REVIEW_TRIGGER_TOKEN" "$readiness_url")"
+          READINESS="$readiness" python - <<'PY'
+          import json, os, sys
+          status = json.loads(os.environ["READINESS"])
+          if not status.get("evaluation_ready"):
+              print("AI review providers are not ready; sync was not started.")
+              sys.exit(1)
+          print("AI review provider readiness passed.")
+          PY
           curl --fail --silent --show-error --max-time 150 \
             -X POST -H "Authorization: Bearer $AI_REVIEW_TRIGGER_TOKEN" \
             "$AI_REVIEW_SYNC_URL"

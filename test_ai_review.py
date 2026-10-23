@@ -20,6 +20,18 @@ class AIReviewTriageTest(unittest.TestCase):
             "AI_REVIEW_TRIGGER_TOKEN": TOKEN,
             "AI_REVIEW_MIN_CONFIDENCE_BPS": "8500",
             "AI_REVIEW_AUTOMATIC_CAP_UNITS": "250000000",
+            "AI_REVIEW_PROVIDER_A_URL": "https://api.openai.com/v1/responses",
+            "AI_REVIEW_PROVIDER_A_MODEL": "model-a",
+            "AI_REVIEW_PROVIDER_A_API_KEY": "key-a",
+            "AI_REVIEW_PROVIDER_A_STYLE": "openai_responses",
+            "AI_REVIEW_PROVIDER_B_URL": "https://api.x.ai/v1/chat/completions",
+            "AI_REVIEW_PROVIDER_B_MODEL": "model-b",
+            "AI_REVIEW_PROVIDER_B_API_KEY": "key-b",
+            "AI_REVIEW_PROVIDER_B_STYLE": "openai_chat",
+            "AI_REVIEW_PROVIDER_C_URL": "https://api.anthropic.com/v1/messages",
+            "AI_REVIEW_PROVIDER_C_MODEL": "model-c",
+            "AI_REVIEW_PROVIDER_C_API_KEY": "key-c",
+            "AI_REVIEW_PROVIDER_C_STYLE": "anthropic_messages",
         })
 
     def tearDown(self):
@@ -94,11 +106,67 @@ class AIReviewTriageTest(unittest.TestCase):
                 }}}],
             })
 
+    def test_provider_envelopes_are_parsed(self):
+        expected = {"decision": "SELLER_WINS", "confidence_bps": 9000, "flags": [], "explanation": "Terms met."}
+        payloads = [
+            {"choices": [{"message": {"content": expected}}]},
+            {"output": [{"content": [{"type": "output_text", "text": __import__("json").dumps(expected)}]}]},
+            {"content": [{"type": "text", "text": __import__("json").dumps(expected)}]},
+        ]
+        for payload in payloads:
+            with self.subTest(payload=payload):
+                self.assertEqual(ai_review._parse_evaluation(payload).decision, "SELLER_WINS")
+
+    def test_provider_styles_send_strict_schema(self):
+        class Response:
+            def raise_for_status(self): pass
+            def json(self):
+                return {"choices": [{"message": {"content": {
+                    "decision": "ESCALATE", "confidence_bps": 5000,
+                    "flags": ["AMBIGUOUS_TERMS"], "explanation": "Needs human review.",
+                }}}]}
+
+        for style in ai_review.PROVIDER_STYLES:
+            with self.subTest(style=style), patch.dict(os.environ, {
+                "AI_REVIEW_PROVIDER_A_URL": "https://provider.example/v1/review",
+                "AI_REVIEW_PROVIDER_A_MODEL": "review-model",
+                "AI_REVIEW_PROVIDER_A_API_KEY": "secret",
+                "AI_REVIEW_PROVIDER_A_STYLE": style,
+            }), patch.object(ai_review.httpx, "post", return_value=Response()) as post:
+                ai_review._evaluate_remote("A", {"deal_id": "0x" + "11" * 32})
+                request = post.call_args.kwargs
+                if style == "openai_responses":
+                    self.assertEqual(request["headers"]["Authorization"], "Bearer secret")
+                    self.assertEqual(request["json"]["text"]["format"]["type"], "json_schema")
+                elif style == "anthropic_messages":
+                    self.assertEqual(request["headers"]["x-api-key"], "secret")
+                    self.assertNotIn("Authorization", request["headers"])
+                    self.assertEqual(request["json"]["output_config"]["format"]["type"], "json_schema")
+                    self.assertIn("anthropic-version", request["headers"])
+                else:
+                    self.assertEqual(request["headers"]["Authorization"], "Bearer secret")
+                    self.assertEqual(request["json"]["response_format"]["type"], "json_schema")
+
     def test_automatic_execution_is_closed_by_default(self):
         os.environ.pop("AI_REVIEW_AUTOMATIC_EXECUTION", None)
         with patch("mainnet.connection") as connection:
             self.assertEqual(ai_review._advance_ready_cases(), [])
         connection.assert_not_called()
+
+    def test_readiness_requires_three_distinct_provider_services(self):
+        status = ai_review.configuration_status()
+        self.assertTrue(status["evaluation_ready"])
+        self.assertFalse(status["execution_ready"])
+        with patch.dict(os.environ, {"AI_REVIEW_PROVIDER_B_URL": "https://api.openai.com/v1/chat/completions"}):
+            status = ai_review.configuration_status()
+        self.assertFalse(status["evaluation_ready"])
+        self.assertIn("AI providers must use three distinct service hosts.", status["reasons"])
+
+    def test_readiness_never_exposes_secrets(self):
+        status = ai_review.readiness(f"Bearer {TOKEN}")
+        rendered = __import__("json").dumps(status)
+        self.assertNotIn("key-a", rendered)
+        self.assertNotIn(TOKEN, rendered)
 
 
 if __name__ == "__main__":
