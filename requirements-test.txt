@@ -1,3 +1,4 @@
 -r requirements.txt
 eth-tester==0.13.0b1
 py-evm==0.12.1b1
+tzdata==2026.5

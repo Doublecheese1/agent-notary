@@ -28,6 +28,7 @@ router = APIRouter(prefix="/internal/ai-review", tags=["Internal AI review"])
 PROVIDERS = ("A", "B", "C")
 DECISIONS = {"SELLER_WINS", "BUYER_WINS", "ESCALATE"}
 CRITICAL_FLAGS = {"PROMPT_INJECTION", "MISSING_EVIDENCE", "AMBIGUOUS_TERMS", "INACCESSIBLE_CONTENT", "SAFETY_RISK"}
+ALLOWED_FLAGS = CRITICAL_FLAGS
 
 
 class ReviewCase(BaseModel):
@@ -158,6 +159,8 @@ def _parse_evaluation(payload) -> Evaluation:
     evaluation.flags = sorted({str(flag).upper() for flag in evaluation.flags})
     if evaluation.decision not in DECISIONS:
         raise HTTPException(502, "AI provider returned an unsupported decision.")
+    if any(flag not in ALLOWED_FLAGS for flag in evaluation.flags):
+        raise HTTPException(502, "AI provider returned an unsupported review flag.")
     return evaluation
 
 
@@ -348,13 +351,19 @@ def _aggregate(connection, case_id: str):
     )
 
 
-def _signer_signature(provider: str, operation_id: str, typed_data: dict) -> str:
+def _signer_signature(provider: str, operation_id: str, typed_data: dict, evaluation: dict) -> str:
     prefix = f"AI_REVIEW_SIGNER_{provider}_"
     url, token = os.getenv(prefix + "URL", ""), os.getenv(prefix + "TOKEN", "")
     if not url.startswith("https://") or not token:
         raise ValueError(f"Signer {provider} is not configured.")
     response = httpx.post(url, timeout=30, headers={"Authorization": f"Bearer {token}"},
-                          json={"operation_id": operation_id, "typed_data": typed_data})
+                          json={
+                              "operation_id": operation_id,
+                              "typed_data": typed_data,
+                              "provider": provider,
+                              "provider_decision": evaluation["decision"],
+                              "provider_evaluation_hash": evaluation["raw_hash"],
+                          })
     response.raise_for_status()
     signature = response.json().get("signature", "")
     if not isinstance(signature, str) or not signature.startswith("0x") or len(signature) != 132:
@@ -367,6 +376,8 @@ def _advance_ready_cases() -> list[dict]:
     from mainnet import AI_REVIEW_ARTIFACT, CHAIN, connection
     from web3 import Web3
 
+    if os.getenv("AI_REVIEW_AUTOMATIC_EXECUTION", "false").lower() != "true":
+        return []
     w3, escrow_contract = connection()
     resolver = w3.eth.contract(address=escrow_contract.functions.reviewArbitrator().call(), abi=AI_REVIEW_ARTIFACT["abi"])
     relayer_url, relayer_token = os.getenv("AI_REVIEW_RELAYER_URL", ""), os.getenv("AI_REVIEW_RELAYER_TOKEN", "")
@@ -379,6 +390,20 @@ def _advance_ready_cases() -> list[dict]:
     outputs = []
     for row in ready:
         case = dict(row)
+        with _db() as db:
+            supporting = {
+                item["provider"]: dict(item)
+                for item in db.execute(
+                    "SELECT provider,decision,raw_hash FROM evaluations WHERE case_id=? AND decision=?",
+                    (case["id"], case["decision"]),
+                ).fetchall()
+            }
+        if len(supporting) < 2:
+            with _db() as db:
+                db.execute("UPDATE cases SET status='HUMAN_REVIEW',reason=?,updated_at=? WHERE id=?",
+                           ("Fewer than two provider decisions support the proposed ruling.", int(time.time()), case["id"]))
+            outputs.append({"case_id": case["id"], "status": "HUMAN_REVIEW"})
+            continue
         deal_key = bytes.fromhex(case["deal_id"][2:])
         nonce = resolver.functions.nonces(deal_key).call()
         signature_deadline = int(w3.eth.get_block("latest")["timestamp"]) + 1800
@@ -394,9 +419,14 @@ def _advance_ready_cases() -> list[dict]:
         }
         operation_id = hashlib.sha256(_canonical({"case": case["id"], "nonce": nonce, "typed_data": typed_data})).hexdigest()
         signatures, signer_errors = [], []
-        for signer in PROVIDERS:
+        # A dissenting provider must never be asked to sign the majority result.
+        # Each isolated signer receives its provider's committed evaluation and
+        # is expected to verify it before returning a signature.
+        for signer in supporting:
             try:
-                signatures.append(bytes.fromhex(_signer_signature(signer, operation_id, typed_data)[2:]))
+                signatures.append(bytes.fromhex(_signer_signature(
+                    signer, operation_id, typed_data, supporting[signer]
+                )[2:]))
             except Exception as exc:
                 signer_errors.append(str(exc))
         if len(signatures) < 2:

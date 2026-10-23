@@ -319,9 +319,9 @@ class HumanReviewResolution(BaseModel):
 def prepare_human_review_resolution(req: HumanReviewResolution):
     if not operations_ui_enabled():
         raise HTTPException(503, "The founder operations screen is closed.")
-    _, escrow_contract = connection()
+    w3, escrow_contract = connection()
     resolver_address = escrow_contract.functions.reviewArbitrator().call()
-    resolver = Web3().eth.contract(address=resolver_address, abi=AI_REVIEW_ARTIFACT["abi"])
+    resolver = w3.eth.contract(address=resolver_address, abi=AI_REVIEW_ARTIFACT["abi"])
     decisions = {"SELLER_WINS": 0, "BUYER_WINS": 1}
     decision = decisions.get(req.decision.upper())
     if decision is None:
@@ -512,8 +512,19 @@ def prepare_action(deal_id: str, req: Action):
     return {"transaction": simulated(contract, caller, fn)}
 
 
-def _review_resolver(contract):
-    resolver = Web3().eth.contract(address=contract.functions.reviewArbitrator().call(), abi=AI_REVIEW_ARTIFACT["abi"])
+def _review_resolver(w3, contract):
+    """Return the configured resolver using the already verified Arbitrum provider.
+
+    A provider-less ``Web3()`` can encode resolver transactions, but every
+    resolver route also performs on-chain reads.  Keeping those reads on the
+    provider returned by ``connection()`` makes status, signing, relay,
+    appeal, finalization and human-review preparation fail closed against the
+    verified chain instead of raising a misleading unsupported-resolver 503.
+    """
+    resolver = w3.eth.contract(
+        address=contract.functions.reviewArbitrator().call(),
+        abi=AI_REVIEW_ARTIFACT["abi"],
+    )
     try:
         if not resolver.functions.isAgentNotaryReviewResolver().call():
             raise ValueError("marker missing")
@@ -524,9 +535,9 @@ def _review_resolver(contract):
 
 @router.get("/deals/{deal_id}/review-status")
 def review_status(deal_id: str):
-    _, contract = connection()
+    w3, contract = connection()
     key = digest(deal_id)
-    resolver = _review_resolver(contract)
+    resolver = _review_resolver(w3, contract)
     ruling = resolver.functions.pendingRulings(key).call()
     return {
         "resolver": resolver.address,
@@ -547,9 +558,9 @@ class ReviewAction(BaseModel):
 
 @router.post("/deals/{deal_id}/prepare-review-action")
 def prepare_review_action(deal_id: str, req: ReviewAction):
-    _, contract = connection()
+    w3, contract = connection()
     key, caller = digest(deal_id), address(req.caller)
-    resolver = _review_resolver(contract)
+    resolver = _review_resolver(w3, contract)
     fn = resolver.functions.appeal(key) if req.action == "appeal" else resolver.functions.finalizeAIResolution(key)
     return {"transaction": simulated(resolver, caller, fn), "action": req.action}
 
@@ -590,7 +601,7 @@ def ai_review_signing_payload(req: AIReviewSigningRequest, authorization: str | 
     case = ready_for_signing(req.case_id)
     if req.signature_deadline <= w3.eth.get_block("latest")["timestamp"]:
         raise HTTPException(422, "Signature deadline must be in the future.")
-    resolver = _review_resolver(contract)
+    resolver = _review_resolver(w3, contract)
     nonce = resolver.functions.nonces(digest(case["deal_id"])).call()
     return _ai_signing_payload(case, resolver, nonce, req.signature_deadline)
 
@@ -603,9 +614,9 @@ class AIReviewRelayRequest(AIReviewSigningRequest):
 @router.post("/ai-review/prepare-relay", include_in_schema=False)
 def prepare_ai_review_relay(req: AIReviewRelayRequest, authorization: str | None = Header(default=None)):
     require_ai_trigger(authorization)
-    _, contract = connection()
+    w3, contract = connection()
     case = ready_for_signing(req.case_id)
-    resolver = _review_resolver(contract)
+    resolver = _review_resolver(w3, contract)
     key = digest(case["deal_id"])
     nonce = resolver.functions.nonces(key).call()
     decision = {"SELLER_WINS": 0, "BUYER_WINS": 1}[case["decision"]]

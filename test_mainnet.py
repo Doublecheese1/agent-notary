@@ -5,7 +5,16 @@ from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
 from main import app
-from mainnet import BindReviewResolver, mainnet_units, prepare_action, prepare_bind_review_resolver, transaction
+from mainnet import (
+    BindReviewResolver,
+    HumanReviewResolution,
+    _review_resolver,
+    mainnet_units,
+    prepare_action,
+    prepare_bind_review_resolver,
+    prepare_human_review_resolution,
+    transaction,
+)
 
 
 class MainnetRouteTest(unittest.TestCase):
@@ -136,6 +145,41 @@ class MainnetRouteTest(unittest.TestCase):
         configured.assert_called_once_with()
         w3.eth.contract.assert_called_once()
         self.assertEqual(result["safe"], "0x0000000000000000000000000000000000000003")
+        self.assertEqual(result["transaction"]["data"], "0x1234")
+
+    def test_review_resolver_reads_use_configured_mainnet_provider(self):
+        w3, escrow, resolver = MagicMock(), MagicMock(), MagicMock()
+        escrow.functions.reviewArbitrator.return_value.call.return_value = (
+            "0x0000000000000000000000000000000000000002"
+        )
+        w3.eth.contract.return_value = resolver
+        resolver.functions.isAgentNotaryReviewResolver.return_value.call.return_value = True
+
+        result = _review_resolver(w3, escrow)
+
+        self.assertIs(result, resolver)
+        w3.eth.contract.assert_called_once()
+        resolver.functions.isAgentNotaryReviewResolver.return_value.call.assert_called_once_with()
+
+    def test_human_review_preparation_uses_configured_mainnet_provider(self):
+        w3, escrow, resolver = MagicMock(), MagicMock(), MagicMock()
+        resolver.address = "0x0000000000000000000000000000000000000002"
+        escrow.functions.reviewArbitrator.return_value.call.return_value = resolver.address
+        w3.eth.contract.return_value = resolver
+        safe = "0x0000000000000000000000000000000000000003"
+        resolver.functions.humanReviewSafe.return_value.call.return_value = safe
+        resolver.functions.humanResolve.return_value._encode_transaction_data.return_value = "0x1234"
+
+        with patch.dict(os.environ, {"MAINNET_OPERATIONS_UI": "true"}), patch(
+            "mainnet.connection", return_value=(w3, escrow)
+        ):
+            result = prepare_human_review_resolution(HumanReviewResolution(
+                deal_id="0x" + "11" * 32,
+                decision="SELLER_WINS",
+            ))
+
+        w3.eth.contract.assert_called_once()
+        self.assertEqual(result["safe"], safe)
         self.assertEqual(result["transaction"]["data"], "0x1234")
 
 

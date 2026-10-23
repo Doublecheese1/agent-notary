@@ -34,7 +34,10 @@ for (const id of ["arbitrationWindow", "reasonHash", "evidenceUri", "dealLink", 
   assert(html.includes(`id="${id}"`), `missing mainnet UI element: ${id}`);
 }
 assert(html.includes('id="propose" disabled'), "funding must wait for confirmed approval");
-assert(html.includes('id="fallback" type="number" min="0" max="100" value="0"'), "automatic mode must not default to seller payout on validator silence");
+assert(html.includes('<option value="buyer_review" selected>'), "buyer review must be the default settlement mode");
+assert(html.includes('id="amount" value="100"'), "buyer review must default to its 100 USDC contract minimum");
+assert(html.includes('id="fallback" type="number" min="0" max="100" value="50"'), "buyer review must default to the disclosed 50/50 timeout split");
+assert(js.includes('$("fallback").value=review?"50":"0"'), "switching to automatic mode must restore the zero seller-share timeout default");
 assert(!html.includes('id="resolverRole"'), "review must not appear as a public starting role");
 assert(html.includes('value="604800" selected'), "buyer review arbitration must default to seven days");
 assert(!html.includes("in two days"), "launch copy must not use a stale relative date");

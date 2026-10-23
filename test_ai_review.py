@@ -83,6 +83,23 @@ class AIReviewTriageTest(unittest.TestCase):
         self.assertEqual(result["status"], "HUMAN_REVIEW")
         self.assertIn("cap", result["reason"])
 
+    def test_unknown_provider_flag_is_rejected(self):
+        with self.assertRaisesRegex(Exception, "unsupported review flag"):
+            ai_review._parse_evaluation({
+                "choices": [{"message": {"content": {
+                    "decision": "SELLER_WINS",
+                    "confidence_bps": 9900,
+                    "flags": ["MADE_UP_FLAG"],
+                    "explanation": "Unsupported flag must fail closed.",
+                }}}],
+            })
+
+    def test_automatic_execution_is_closed_by_default(self):
+        os.environ.pop("AI_REVIEW_AUTOMATIC_EXECUTION", None)
+        with patch("mainnet.connection") as connection:
+            self.assertEqual(ai_review._advance_ready_cases(), [])
+        connection.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
