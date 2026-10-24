@@ -12,6 +12,7 @@ from international import LOCALES, localized_landing
 from launch_analytics import router as launch_analytics_router
 from founding50 import router as founding50_router
 from outreach_crm import router as outreach_crm_router
+from agent_coordination import router as agent_coordination_router
 
 app.include_router(router)
 app.include_router(payments_router)
@@ -25,6 +26,7 @@ app.include_router(discovery_router)
 app.include_router(launch_analytics_router)
 app.include_router(founding50_router)
 app.include_router(outreach_crm_router)
+app.include_router(agent_coordination_router)
 
 PUBLIC_ORIGIN = "https://agentsolis.solists.com.tr"
 
