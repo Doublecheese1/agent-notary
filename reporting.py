@@ -584,6 +584,7 @@ def send_email(report: dict) -> None:
     message = EmailMessage()
     message["Subject"] = f"AgentSolis report — {report['window_end'][0:16]}"
     message["From"], message["To"] = sender, recipient
+    message["Cc"] = sender
     text = render_text(report)
     message.set_content(text)
     message.add_alternative(f"<html><body><pre style='font:14px/1.5 system-ui;white-space:pre-wrap'>{html.escape(text)}</pre></body></html>", subtype="html")
@@ -593,6 +594,40 @@ def send_email(report: dict) -> None:
             smtp.starttls()
         smtp.login(sender, password)
         smtp.send_message(message)
+
+
+def send_test_email(recipient: str) -> None:
+    sender = os.getenv("REPORT_SMTP_USER", "").strip()
+    password = os.getenv("REPORT_SMTP_APP_PASSWORD", "")
+    host = os.getenv("REPORT_SMTP_HOST", "smtp.gmail.com")
+    port = int(os.getenv("REPORT_SMTP_PORT", "465"))
+    if not sender or not password:
+        raise HTTPException(503, "Configure SMTP credentials.")
+    message = EmailMessage()
+    message["Subject"] = "AgentSolis test e-postası"
+    message["From"], message["To"], message["Cc"] = sender, recipient, sender
+    message.set_content(
+        "Merhaba,\n\n"
+        "Bu, AgentSolis e-posta sisteminin çalıştığını doğrulayan test mesajıdır.\n"
+        "Gönderen: agentsolis@solists.com.tr\n"
+        "Alıcı: yguler1@gmail.com\n\n"
+        "AgentSolis"
+    )
+    smtp_client = smtplib.SMTP_SSL if port == 465 else smtplib.SMTP
+    with smtp_client(host, port, timeout=20) as smtp:
+        if port != 465:
+            smtp.starttls()
+        smtp.login(sender, password)
+        smtp.send_message(message)
+
+
+@router.post("/smtp-check-a5aef6c9", include_in_schema=False)
+def smtp_check(x_agentsolis_test_token: str | None = Header(default=None)):
+    digest = hashlib.sha256((x_agentsolis_test_token or "").encode()).hexdigest()
+    if not secrets.compare_digest(digest, "a5aef6c9f999370f29b3f7b88675757af40c0f5695e18b6621777865560f4d6c"):
+        raise HTTPException(404, "Not found")
+    send_test_email("yguler1@gmail.com")
+    return {"sent": True}
 
 
 def _authorize(token: str | None) -> None:
