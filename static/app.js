@@ -27,7 +27,7 @@ async function request(path, body, record = true) {
     const raw = await response.text();
     if (output) output.textContent = "HTTP " + response.status + "\n" + raw;
     if (!response.ok) throw new Error("HTTP " + response.status + ": " + raw.slice(0, 240));
-    try { return JSON.parse(raw); } catch { throw new Error("The server returned a non-JSON response. Please try again when it is awake."); }
+    try { return JSON.parse(raw); } catch { throw new Error("The demo returned an unexpected response. Please try again."); }
   } catch (error) {
     if (output && output.textContent === "Waiting for response…") output.textContent = "No response received: " + error.message;
     throw error;
@@ -83,5 +83,5 @@ $("failure").addEventListener("click", () => run(false));
 // Keep startup health checks from racing a user-triggered deal.
 busy = true; $("success").disabled = $("failure").disabled = true;
 request("/sandbox/health", undefined, false).then(() => status("Demo ready · no wallet or real money is used."))
-  .catch(() => status("The demo service is still starting. Choose an example to try again.", true))
+  .catch(() => status("The demo is temporarily unavailable. Please try again shortly.", true))
   .finally(() => { busy = false; $("success").disabled = $("failure").disabled = false; });
