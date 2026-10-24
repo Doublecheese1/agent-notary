@@ -37,6 +37,9 @@ for (const locale of locales) {
     assert(api.catalog[locale][key].trim(), `empty ${locale} static translation: ${key}`);
   }
 }
+assert(api.catalog.en.previewBody.includes("Public mainnet access is open"), "English workspace must show current public access status");
+assert(api.catalog.tr.previewBody.includes("Halka açık mainnet erişimi açıktır"), "Turkish workspace must show current public access status");
+assert(!i18nSource.includes("New mainnet deposits stay closed"), "stale English closed-access copy must be removed");
 
 const dynamicStart = appSource.indexOf("const D=") + "const D=".length;
 const dynamicEnd = appSource.indexOf(";\r\nconst T=", dynamicStart) >= 0
@@ -48,6 +51,8 @@ for (const locale of locales) {
   assert(dynamic[locale], `missing dynamic catalog: ${locale}`);
   assert.deepStrictEqual(Object.keys(dynamic[locale]).sort(), Object.keys(dynamic.en).sort(), `dynamic translation keys differ for ${locale}`);
 }
+assert.strictEqual(dynamic.en.accessActive, "Public mainnet access is open.", "dynamic English access state must be public");
+assert.strictEqual(dynamic.tr.accessActive, "Halka açık mainnet erişimi açık.", "dynamic Turkish access state must be public");
 
 assert(html.indexOf('/mainnet/i18n.js') < html.indexOf('/mainnet/app.js'), "translation script must load before transaction logic");
 assert(server.includes('@router.get("/i18n.js"'), "server must expose the translation script");

@@ -11,7 +11,7 @@ LOCALES = {
         "steps": [("Anlaş", "İşi, fiyatı, teslim kanıtını ve süreleri yazılı olarak belirleyin."), ("Kilitle", "Alıcı, işi güvenceye almak için USDC'yi akıllı sözleşmeye kilitler."), ("Teslim et", "Satıcı işi ve kararlaştırılan teslim kanıtını gönderir."), ("Sonuçlandır", "İş kabul edilirse ödeme satıcıya gider; itiraz varsa yayımlanmış inceleme yolu işler.")],
         "rules": "Ücret ve güvenlik", "fee": "Başarılı satıcı ödemesinde iş tutarının %1,5'i; en fazla 50 USDC.",
         "safety": "AgentSolis hiçbir zaman kurtarma kelimelerinizi veya özel anahtarınızı istemez.",
-        "closed": "Şu anda para yatırma kapalıdır. Site incelemeye açıktır; halka açık gerçek para kabul edilmemektedir.",
+        "closed": "Halka açık mainnet erişimi açıktır. AgentSolis Arbitrum One üzerindeki yerel USDC'yi kullanır; imzalamadan önce ağı, tutarı, tarafları ve sözleşme adresini cüzdanınızda doğrulayın.",
         "open": "İşlem ekranını aç", "guide": "İlk kez mi kullanıyorsunuz? Adım adım rehberi açın", "founding": "Founding 50'ye başvur", "notice": "Bu çeviri kullanım kolaylığı sağlar. Akıllı sözleşme parametreleri, adresler ve cüzdanınızda gösterilen son işlem bilgileri teknik olarak esas alınır. İmzalamadan önce bunları kontrol edin.",
     },
     "es": {
@@ -23,7 +23,7 @@ LOCALES = {
         "steps": [("Acordar", "Definan el trabajo, el precio, las pruebas de entrega y los plazos."), ("Bloquear", "El comprador bloquea USDC en el contrato inteligente."), ("Entregar", "El vendedor presenta el trabajo y las pruebas acordadas."), ("Resolver", "Si se acepta, se paga al vendedor; si hay disputa, se sigue el proceso publicado.")],
         "rules": "Tarifas y seguridad", "fee": "1,5 % del importe del trabajo cuando el vendedor recibe el pago, con un máximo de 50 USDC.",
         "safety": "AgentSolis nunca solicita tu frase de recuperación ni tu clave privada.",
-        "closed": "Los depósitos están cerrados. La interfaz está disponible para revisión, pero todavía no acepta fondos públicos reales.",
+        "closed": "El acceso público a mainnet está abierto. AgentSolis usa USDC nativo en Arbitrum One; comprueba la red, el importe, las partes y la dirección del contrato antes de firmar.",
         "open": "Abrir el espacio de transacción", "guide": "¿Es tu primera vez? Abre la guía paso a paso", "founding": "Solicitar acceso a Founding 50", "notice": "Esta traducción facilita el uso. Los parámetros del contrato inteligente, las direcciones y los datos finales que muestra tu billetera constituyen la referencia técnica. Compruébalos antes de firmar.",
     },
     "pt-br": {
@@ -35,7 +35,7 @@ LOCALES = {
         "steps": [("Acordar", "Definam o trabalho, o preço, a evidência de entrega e os prazos."), ("Bloquear", "O comprador bloqueia USDC no contrato inteligente."), ("Entregar", "O vendedor envia o trabalho e a evidência combinada."), ("Liquidar", "Se houver aceite, o vendedor recebe; se houver disputa, segue-se o processo publicado.")],
         "rules": "Taxas e segurança", "fee": "1,5% do valor do trabalho quando o vendedor recebe, limitado a 50 USDC.",
         "safety": "A AgentSolis nunca solicita sua frase de recuperação ou chave privada.",
-        "closed": "Os depósitos estão fechados. A interface está aberta para avaliação, mas ainda não aceita fundos públicos reais.",
+        "closed": "O acesso público à mainnet está aberto. A AgentSolis usa USDC nativo na Arbitrum One; confira a rede, o valor, as partes e o endereço do contrato antes de assinar.",
         "open": "Abrir a área de transação", "guide": "Primeira vez? Abra o guia passo a passo", "founding": "Candidatar-se ao Founding 50", "notice": "Esta tradução facilita o uso. Os parâmetros do contrato inteligente, os endereços e os dados finais exibidos na carteira são a referência técnica. Confira-os antes de assinar.",
     },
     "ru": {
@@ -47,7 +47,7 @@ LOCALES = {
         "steps": [("Согласовать", "Определите работу, цену, доказательства выполнения и сроки."), ("Заблокировать", "Покупатель блокирует USDC в смарт-контракте."), ("Передать", "Продавец отправляет работу и согласованные доказательства."), ("Рассчитаться", "После приёмки продавец получает оплату; при споре действует опубликованная процедура.")],
         "rules": "Комиссии и безопасность", "fee": "1,5% от стоимости работы при успешной выплате продавцу, но не более 50 USDC.",
         "safety": "AgentSolis никогда не запрашивает seed-фразу или приватный ключ.",
-        "closed": "Пополнение сейчас закрыто. Интерфейс доступен для ознакомления, но публичные реальные средства ещё не принимаются.",
+        "closed": "Публичный доступ к основной сети открыт. AgentSolis использует нативный USDC в Arbitrum One; перед подписью проверьте сеть, сумму, стороны и адрес контракта.",
         "open": "Открыть экран сделки", "guide": "Впервые здесь? Откройте пошаговую инструкцию", "founding": "Подать заявку в Founding 50", "notice": "Этот перевод предназначен для удобства. Техническими исходными данными являются параметры смарт-контракта, адреса и окончательные сведения в кошельке. Проверьте их перед подписанием.",
     },
     "zh-cn": {
@@ -59,7 +59,7 @@ LOCALES = {
         "steps": [("约定", "明确工作内容、价格、交付证据和期限。"), ("锁定", "买方将 USDC 锁定在智能合约中。"), ("交付", "卖方提交工作成果和约定的证据。"), ("结算", "买方接受后向卖方付款；发生争议时按公开流程处理。")],
         "rules": "费用与安全", "fee": "卖方成功收款时收取工作金额的 1.5%，最高 50 USDC。",
         "safety": "AgentSolis 绝不会索取助记词或私钥。",
-        "closed": "充值功能目前关闭。界面仅供查看，暂不接受公众真实资金。",
+        "closed": "主网公开访问现已开放。AgentSolis 使用 Arbitrum One 上的原生 USDC；签名前请核对网络、金额、交易双方和合约地址。",
         "open": "打开交易工作区", "guide": "第一次使用？打开分步指南", "founding": "申请加入 Founding 50", "notice": "本翻译旨在方便使用。智能合约参数、地址以及钱包显示的最终交易信息是技术依据。签名前请仔细核对。",
     },
 }

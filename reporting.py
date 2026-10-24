@@ -208,6 +208,96 @@ def _same_time_previous_year(value: datetime) -> datetime:
         return value.replace(year=value.year - 1, day=28)
 
 
+def _customer_registry(
+    proposed: list,
+    accepted: list,
+    delivered: list,
+    disputed: list,
+    closed: list,
+    block_times: dict[int, int],
+    deal_for,
+    zone,
+) -> tuple[list[dict], list[dict]]:
+    """Build a read-only customer register exclusively from on-chain records."""
+    activity_names = (
+        (proposed, "Proposed"),
+        (accepted, "Accepted"),
+        (delivered, "Delivered"),
+        (disputed, "Disputed"),
+        (closed, "Closed"),
+    )
+    activity_by_deal: dict[str, list[tuple[int, int, str, str]]] = {}
+    for logs, activity in activity_names:
+        for item in logs:
+            deal_id = Web3.to_hex(item["args"]["id"])
+            activity_by_deal.setdefault(deal_id, []).append((
+                block_times[int(item["blockNumber"])],
+                int(item.get("logIndex", 0)),
+                activity,
+                item["transactionHash"].hex(),
+            ))
+
+    deals: list[dict] = []
+    customers: dict[str, dict] = {}
+    for item in proposed:
+        deal_id = Web3.to_hex(item["args"]["id"])
+        current = deal_for(item["args"]["id"])
+        state_number = int(current[4])
+        state = STATES[state_number] if 0 <= state_number < len(STATES) else f"UNKNOWN_{state_number}"
+        activities = sorted(activity_by_deal.get(deal_id, []))
+        proposed_timestamp = block_times[int(item["blockNumber"])]
+        last_timestamp, _, last_activity, last_tx = activities[-1]
+        buyer = Web3.to_checksum_address(item["args"]["buyer"])
+        seller = Web3.to_checksum_address(item["args"]["seller"])
+        amount = int(item["args"]["amount"])
+        mode = "Automatic" if int(item["args"]["mode"]) == 0 else "Buyer Review"
+        deals.append({
+            "deal_id": deal_id,
+            "buyer": buyer,
+            "seller": seller,
+            "amount": _amount(amount),
+            "mode": mode,
+            "state": state,
+            "last_activity": last_activity,
+            "proposed_at": datetime.fromtimestamp(proposed_timestamp, timezone.utc).astimezone(zone).isoformat(),
+            "updated_at": datetime.fromtimestamp(last_timestamp, timezone.utc).astimezone(zone).isoformat(),
+            "transaction_hash": last_tx,
+        })
+
+        for wallet, role in ((buyer, "Buyer"), (seller, "Seller")):
+            key = wallet.lower()
+            customer = customers.setdefault(key, {
+                "wallet": wallet,
+                "roles": set(),
+                "deal_ids": set(),
+                "total_volume_units": 0,
+                "first_timestamp": proposed_timestamp,
+                "last_timestamp": last_timestamp,
+            })
+            customer["roles"].add(role)
+            if deal_id not in customer["deal_ids"]:
+                customer["deal_ids"].add(deal_id)
+                customer["total_volume_units"] += amount
+            customer["first_timestamp"] = min(customer["first_timestamp"], proposed_timestamp)
+            customer["last_timestamp"] = max(customer["last_timestamp"], last_timestamp)
+
+    customer_rows = [{
+        "wallet": customer["wallet"],
+        "roles": sorted(customer["roles"]),
+        "first_transaction_at": datetime.fromtimestamp(
+            customer["first_timestamp"], timezone.utc
+        ).astimezone(zone).isoformat(),
+        "last_transaction_at": datetime.fromtimestamp(
+            customer["last_timestamp"], timezone.utc
+        ).astimezone(zone).isoformat(),
+        "deal_count": len(customer["deal_ids"]),
+        "total_volume": _amount(customer["total_volume_units"]),
+    } for customer in customers.values()]
+    customer_rows.sort(key=lambda value: value["last_transaction_at"], reverse=True)
+    deals.sort(key=lambda value: value["updated_at"], reverse=True)
+    return deals, customer_rows
+
+
 def _dashboard_windows(now_local: datetime) -> dict[str, tuple[datetime | None, datetime]]:
     day = datetime.combine(now_local.date(), time.min, now_local.tzinfo)
     week = datetime.combine(now_local.date() - timedelta(days=now_local.weekday()), time.min, now_local.tzinfo)
@@ -342,6 +432,11 @@ def collect_dashboard(now: datetime | None = None) -> dict:
             "country": None,
         })
 
+    customer_deals, customers = _customer_registry(
+        proposed, accepted, delivered, disputed, closed,
+        block_times, deal_for, zone,
+    )
+
     paused = bool(contract.functions.paused().call(block_identifier=latest))
     public_access = bool(contract.functions.publicAccess().call(block_identifier=latest))
     operations = contract.functions.operationsSafe().call(block_identifier=latest)
@@ -363,6 +458,8 @@ def collect_dashboard(now: datetime | None = None) -> dict:
         "period_ranges": period_ranges,
         "monthly_history": monthly_history,
         "revenue_sources": revenue_sources[:100],
+        "customer_deals": customer_deals,
+        "customers": customers,
         "chain_status": {
             "paused": paused,
             "public_access": public_access,

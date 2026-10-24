@@ -55,6 +55,20 @@ import reporting
 import launch_analytics
 
 
+class FakeHash(bytes):
+    def hex(self):
+        return "0x" + bytes.hex(self)
+
+
+def chain_log(deal_id, block, tx, **args):
+    return {
+        "args": {"id": deal_id, **args},
+        "blockNumber": block,
+        "logIndex": 0,
+        "transactionHash": FakeHash.fromhex(tx),
+    }
+
+
 class ReportingTest(unittest.TestCase):
     def tearDown(self):
         reporting._LOGIN_ATTEMPTS.clear()
@@ -80,6 +94,42 @@ class ReportingTest(unittest.TestCase):
                     "last_21_days", "previous_21_days", "month", "previous_month",
                     "year", "previous_year_same_period", "all"):
             self.assertIn(key, windows)
+
+    def test_customer_registry_uses_only_on_chain_deal_data(self):
+        deal_one = bytes.fromhex("11" * 32)
+        deal_two = bytes.fromhex("22" * 32)
+        buyer = "0x" + "aa" * 20
+        seller = "0x" + "bb" * 20
+        second_buyer = "0x" + "cc" * 20
+        proposed = [
+            chain_log(deal_one, 10, "01" * 32, buyer=buyer, seller=seller, amount=10_000_000, mode=0),
+            chain_log(deal_two, 20, "02" * 32, buyer=second_buyer, seller=seller, amount=20_000_000, mode=1),
+        ]
+        accepted = [chain_log(deal_one, 11, "03" * 32)]
+        closed = [chain_log(deal_one, 12, "04" * 32)]
+        states = {reporting.Web3.to_hex(deal_one): 5, reporting.Web3.to_hex(deal_two): 1}
+
+        def deal_for(deal_id):
+            value = [None] * 5
+            value[4] = states[reporting.Web3.to_hex(deal_id)]
+            return value
+
+        deals, customers = reporting._customer_registry(
+            proposed, accepted, [], [], closed,
+            {10: 1_000, 11: 1_100, 12: 1_200, 20: 2_000},
+            deal_for, timezone.utc,
+        )
+        self.assertEqual({item["state"] for item in deals}, {"PAID", "PROPOSED"})
+        first = next(item for item in deals if item["deal_id"] == reporting.Web3.to_hex(deal_one))
+        self.assertEqual(first["last_activity"], "Closed")
+        self.assertEqual(first["amount"], "10.00")
+        seller_row = next(item for item in customers if item["wallet"].lower() == seller.lower())
+        self.assertEqual(seller_row["roles"], ["Seller"])
+        self.assertEqual(seller_row["deal_count"], 2)
+        self.assertEqual(seller_row["total_volume"], "30.00")
+        self.assertNotIn("name", seller_row)
+        self.assertNotIn("email", seller_row)
+        self.assertNotIn("country", seller_row)
 
     def test_authorization_requires_enabled_matching_token(self):
         with patch.dict(os.environ, {

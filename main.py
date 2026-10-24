@@ -11,6 +11,7 @@ from discovery import router as discovery_router
 from international import LOCALES, localized_landing
 from launch_analytics import router as launch_analytics_router
 from founding50 import router as founding50_router
+from outreach_crm import router as outreach_crm_router
 
 app.include_router(router)
 app.include_router(payments_router)
@@ -23,6 +24,7 @@ app.include_router(ai_review_router)
 app.include_router(discovery_router)
 app.include_router(launch_analytics_router)
 app.include_router(founding50_router)
+app.include_router(outreach_crm_router)
 
 PUBLIC_ORIGIN = "https://agentsolis.solists.com.tr"
 
@@ -135,7 +137,7 @@ def sitemap():
     ]
     urls.extend((f"/{locale}", "0.7") for locale in LOCALES)
     entries = "".join(
-        f"<url><loc>{PUBLIC_ORIGIN}{path}</loc><lastmod>2026-10-22</lastmod><priority>{priority}</priority></url>"
+        f"<url><loc>{PUBLIC_ORIGIN}{path}</loc><lastmod>2026-10-24</lastmod><priority>{priority}</priority></url>"
         for path, priority in urls
     )
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{entries}</urlset>'

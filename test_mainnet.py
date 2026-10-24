@@ -29,7 +29,7 @@ class MainnetRouteTest(unittest.TestCase):
         with patch.dict(os.environ, {"MAINNET_ENABLED": "false", "MAINNET_ACCEPTING_FUNDS": "false"}):
             page = self.client.get("/mainnet")
             self.assertEqual(page.status_code, 200)
-            self.assertIn("Public interface preview", page.text)
+            self.assertIn("Public mainnet access is open", page.text)
             self.assertNotIn('id="resolverRole"', page.text)
             response = self.client.get("/mainnet/config")
         body = response.json()

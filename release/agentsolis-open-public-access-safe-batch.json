@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "chainId": "42161",
+  "createdAt": 1792800000000,
+  "meta": {
+    "name": "AgentSolis open public escrow access",
+    "description": "Open AgentSolis mainnet escrow creation to every buyer. This transaction moves no ETH or USDC.",
+    "txBuilderVersion": "1.18.0",
+    "createdFromSafeAddress": "0xc62DeAc99156D19F762A249bab2Df99cE7c0Bc0f",
+    "createdFromOwnerAddress": ""
+  },
+  "transactions": [
+    {
+      "to": "0x95eD02f55695FA79744c122436f56541C6270B71",
+      "value": "0",
+      "data": "0xdc9ad1f50000000000000000000000000000000000000000000000000000000000000001",
+      "contractMethod": null,
+      "contractInputsValues": null
+    }
+  ]
+}

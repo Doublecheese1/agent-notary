@@ -1,0 +1,18 @@
+AgentSolis closed canary Operations Safe batch
+
+Network: Arbitrum One (chain ID 42161)
+Safe: 0xc62DeAc99156D19F762A249bab2Df99cE7c0Bc0f
+Target escrow: 0x95eD02f55695FA79744c122436f56541C6270B71
+
+1. admitFoundingBuyer(0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD)
+   calldata: 0xd227ad440000000000000000000000006f0e740a38c80036b8b0e5c613725b047bcda4bd
+2. resumeNewDeals()
+   calldata: 0xb53f35dc
+
+Expected after execution:
+- Account 1 founding state = Approved
+- Escrow paused = false
+- publicAccess remains false
+- Render MAINNET_ACCEPTING_FUNDS remains false until closed-canary funding is prepared
+
+This batch transfers no ETH or USDC. It changes contract access state and therefore still requires 2-of-3 Safe review and signatures.

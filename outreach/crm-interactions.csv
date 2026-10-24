@@ -1,0 +1,1 @@
+interaction_id,lead_id,occurred_at,direction,channel,event_type,from_address,to_address_or_url,cc_address,subject_or_context,message_template_id,provider_message_id,reply_class,reply_summary,evidence_url_or_ref,recorded_by

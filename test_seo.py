@@ -51,6 +51,22 @@ class SeoTest(unittest.TestCase):
         self.assertIn('name="description"', response.text)
         self.assertIn('rel="canonical" href="https://agentsolis.solists.com.tr/mainnet"', response.text)
         self.assertIn('type="application/ld+json"', response.text)
+        self.assertIn("Public mainnet access is open", response.text)
+        self.assertNotIn("deposits stay closed", response.text)
+
+    def test_public_pages_do_not_publish_stale_closed_access_copy(self):
+        stale_phrases = (
+            "MAINNET DEPOSITS REMAIN CLOSED",
+            "Funds are closed today",
+            "new mainnet deposits stay closed",
+            "yeni mainnet yatırımları kapalıdır",
+        )
+        for path in ("/", "/mainnet", "/ai-agent-escrow", "/tr", "/es", "/pt-br", "/ru", "/zh-cn"):
+            response = self.client.get(path)
+            self.assertEqual(response.status_code, 200)
+            lower = response.text.lower()
+            for phrase in stale_phrases:
+                self.assertNotIn(phrase.lower(), lower, f"stale access copy on {path}")
 
     def test_localized_introductions_are_indexable_and_reciprocal(self):
         expected = {
