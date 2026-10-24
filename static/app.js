@@ -83,5 +83,5 @@ $("failure").addEventListener("click", () => run(false));
 // Keep startup health checks from racing a user-triggered deal.
 busy = true; $("success").disabled = $("failure").disabled = true;
 request("/sandbox/health", undefined, false).then(() => status("Demo ready · no wallet or real money is used."))
-  .catch(() => status("The demo is temporarily unavailable. Please try again shortly.", true))
+  .catch(() => status("We could not connect to the demo. Refresh the page and try again.", true))
   .finally(() => { busy = false; $("success").disabled = $("failure").disabled = false; });
