@@ -120,7 +120,9 @@ async def _ask(provider: str, instructions: str, prompt: str) -> str:
         "model": model,
         "instructions": instructions,
         "input": prompt,
-        "max_output_tokens": 1200,
+        # Reviews include both agents' first proposals. A 1,200-token ceiling can
+        # be consumed by model reasoning before any visible text is produced.
+        "max_output_tokens": 3000,
     }
     timeout = httpx.Timeout(120.0, connect=15.0)
     async with httpx.AsyncClient(timeout=timeout) as client:
