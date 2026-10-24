@@ -31,7 +31,7 @@ def _database_path() -> Path:
     configured = os.getenv("AGENT_COORDINATION_DB_PATH", "").strip()
     if configured:
         return Path(configured)
-    return Path(__file__).resolve().parent / "data" / "agent-coordination.sqlite3"
+    return Path("/var/data/agentnotary/agent-coordination.sqlite3")
 
 
 @contextmanager
