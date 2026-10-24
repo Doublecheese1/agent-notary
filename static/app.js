@@ -46,65 +46,42 @@ async function run(success) {
   try {
     status("Connecting to sandbox…");
     await request("/sandbox/health");
-    status("Buyer agent is locking the budget…");
+    status("The buyer is securing the simulated budget…");
     const locked = await request("/sandbox/v1/deals/lock", lockBody);
     if (typeof locked.deal_id !== "string" || locked.status !== "LOCKED") throw new Error("Unexpected lock response; settlement was not sent.");
     dealId = locked.deal_id;
     $("step-lock").classList.add("active");
-    $("buyer-state").textContent = money(locked.locked_amount_usd) + " locked · " + dealId;
+    $("buyer-state").textContent = money(locked.locked_amount_usd) + " secured for this demo job.";
     $("step-deliver").classList.add("active");
-    $("seller-state").textContent = "Submitting delivery for validation…";
-    status("Seller is delivering; the API is validating…");
+    $("seller-state").textContent = "Submitting the completed work…";
+    status("The seller has delivered the work. AgentSolis is checking the demo rule…");
     const result = await request("/sandbox/v1/deals/settle", {deal_id: dealId, seller_agent_id: lockBody.seller_agent_id, deliverable: success ? valid : invalid});
     if (!["APPROVED", "REJECTED"].includes(result.decision)) throw new Error("Unexpected settlement response; inspect the response trail.");
     $("step-validate").classList.add("active"); $("step-final").classList.add("active");
     const approved = result.decision === "APPROVED";
-    $("decision").textContent = approved ? "APPROVED · Settlement complete" : "REJECTED · Buyer refund recorded";
+    $("decision").textContent = approved ? "Job completed · Seller paid" : "Delivery did not pass · Buyer return recorded";
     $("decision").classList.toggle("error", !approved);
-    $("deal").textContent = "deal_id: " + dealId;
+    $("deal").textContent = "Demo transaction reference: " + dealId;
     $("locked").textContent = money(locked.locked_amount_usd);
     $("fee").textContent = money(result.protocol_fee_usd);
     $("payout").textContent = money(result.seller_payout_usd);
     $("refund").textContent = money(result.refund_to_buyer_usd);
-    $("reason").textContent = result.reason || "The API approved this payload using its current structural checks.";
+    $("reason").textContent = approved
+      ? "The sample delivery included the result required by this demonstration, so the simulated seller payment was completed."
+      : "The sample delivery did not include the result required by this demonstration, so the simulated buyer return was recorded.";
     $("outcome").hidden = false;
     $("seller-title").textContent = approved ? "Delivery approved" : "Delivery rejected";
-    $("seller-state").textContent = "Seller payout: " + money(result.seller_payout_usd);
-    $("buyer-state").textContent = approved ? "Deal settled · " + dealId : "Refund: " + money(result.refund_to_buyer_usd) + " · " + dealId;
-    status("Complete. Try the other scenario or run a fresh deal.");
+    $("seller-state").textContent = approved ? "Delivery accepted. Seller receives " + money(result.seller_payout_usd) + "." : "Delivery did not pass the demo rule.";
+    $("buyer-state").textContent = approved ? "The transaction is complete." : money(result.refund_to_buyer_usd) + " returned to the simulated buyer balance.";
+    status("Demonstration complete. You can now try the other outcome.");
   } catch (error) {
     status((error.name === "AbortError" ? "The server did not respond within 90 seconds." : error.message) + (dealId ? " Deal " + dealId + " may still be pending or finalized; no automatic retry was sent." : "") + " You can start a new sandbox deal.", true);
   } finally { busy = false; $("success").disabled = $("failure").disabled = false; }
 }
 $("success").addEventListener("click", () => run(true));
 $("failure").addEventListener("click", () => run(false));
-$("code").textContent = `import httpx
-
-# Simulated balances only; keep /sandbox in this URL.
-BASE_URL = "${location.origin}/sandbox"
-with httpx.Client(base_url=BASE_URL, timeout=90) as client:
-    client.get("/health").raise_for_status()
-    response = client.post("/v1/deals/lock", json={
-        "buyer_agent_id": "buyer.playground",
-        "seller_agent_id": "seller.playground",
-        "amount_usd": 1,
-        "criteria": "Return a research summary in the result field."
-    })
-    response.raise_for_status()
-    deal = response.json()
-    response = client.post("/v1/deals/settle", json={
-        "deal_id": deal["deal_id"],
-        "seller_agent_id": "seller.playground",
-        "deliverable": {"result": "Q3 revenue increased by 12 percent."}
-    })
-    response.raise_for_status()
-    print(deal, response.json())`;
-$("copy").addEventListener("click", async () => {
-  try { await navigator.clipboard.writeText($("code").textContent); $("copy").textContent = "Copied"; }
-  catch { $("copy").textContent = "Select and copy the code below"; }
-});
 // Keep startup health checks from racing a user-triggered deal.
 busy = true; $("success").disabled = $("failure").disabled = true;
-request("/sandbox/health", undefined, false).then(() => status("Sandbox ready · simulated balances only."))
-  .catch(() => status("Connection unavailable. Run a scenario to retry waking the server.", true))
+request("/sandbox/health", undefined, false).then(() => status("Demo ready · no wallet or real money is used."))
+  .catch(() => status("The demo service is still starting. Choose an example to try again.", true))
   .finally(() => { busy = false; $("success").disabled = $("failure").disabled = false; });
