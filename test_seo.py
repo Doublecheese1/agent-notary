@@ -13,6 +13,7 @@ class SeoTest(unittest.TestCase):
         response = self.client.get("/robots.txt")
         self.assertEqual(response.status_code, 200)
         self.assertIn("Sitemap: https://agentsolis.solists.com.tr/sitemap.xml", response.text)
+        self.assertIn("Disallow: /private-report/", response.text)
         self.assertIn("Disallow: /internal/", response.text)
         self.assertIn("Disallow: /mainnet/deal/", response.text)
         self.assertIn("Disallow: /mainnet/negotiate/", response.text)

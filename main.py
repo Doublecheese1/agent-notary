@@ -108,6 +108,7 @@ def robots():
         "User-agent: *",
         "Allow: /",
         "Disallow: /internal/",
+        "Disallow: /private-report/",
         "Disallow: /mainnet/setup",
         "Disallow: /mainnet/operations",
         "Disallow: /mainnet/validator",
