@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, HTTPException, Query, Request, Response
 from pydantic import BaseModel, Field
 
 
@@ -156,3 +156,67 @@ def analytics_summary(now: datetime | None = None) -> dict:
             db.close()
     return {"available": True, "message": "Yaklaşık ürün analitiğidir; bot ve test trafiği içerebilir. Ziyaretçi sayısı tarayıcı sekmesi oturumudur. Ülke yalnız güvenilir ağ başlığı yapılandırılmışsa gösterilir. IP adresi, cüzdan, e-posta ve cihaz parmak izi saklanmaz.",
             "periods": periods, "top_pages": top_pages, "countries": countries, "actions": actions}
+
+
+def _parse_filter_date(value: str | None, end: bool = False) -> int | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise HTTPException(422, "Tarih ISO-8601 biçiminde olmalı.") from exc
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return int(parsed.astimezone(timezone.utc).timestamp())
+
+
+def analytics_events(
+    start: str | None = None,
+    end: str | None = None,
+    country: str | None = None,
+    path: str | None = None,
+    event: str | None = None,
+    limit: int = 500,
+) -> dict:
+    """Return filterable, privacy-light event detail for the private founder panel."""
+    if not analytics_enabled() or not _database_path().exists():
+        return {"available": False, "message": "Ziyaretçi analitiği etkin değil veya henüz veri oluşmadı.", "events": []}
+    start_ts = _parse_filter_date(start)
+    end_ts = _parse_filter_date(end, end=True)
+    if end_ts is not None:
+        end_ts = end_ts + 86399 if len(end or "") <= 10 else end_ts
+    clauses, args = [], []
+    if start_ts is not None:
+        clauses.append("recorded_at >= ?"); args.append(start_ts)
+    if end_ts is not None:
+        clauses.append("recorded_at <= ?"); args.append(end_ts)
+    if country:
+        clauses.append("COALESCE(country,'Unknown') = ?"); args.append(country.upper())
+    if path:
+        clauses.append("path = ?"); args.append(path)
+    if event:
+        clauses.append("event = ?"); args.append(event)
+    where = "WHERE " + " AND ".join(clauses) if clauses else ""
+    safe_limit = min(2000, max(1, int(limit)))
+    with _LOCK:
+        db = _connect()
+        try:
+            rows = db.execute(
+                f"""SELECT recorded_at, session_id, event, path, language, campaign,
+                           COALESCE(country,'Unknown') AS country, duration_seconds
+                    FROM analytics_events {where}
+                    ORDER BY recorded_at DESC LIMIT ?""",
+                (*args, safe_limit),
+            ).fetchall()
+        finally:
+            db.close()
+    return {
+        "available": True,
+        "message": "IP, cüzdan, e-posta ve cihaz parmak izi saklanmaz; yalnız toplulaştırılmış ülke ve olay kaydı gösterilir.",
+        "filters": {"start": start, "end": end, "country": country, "path": path, "event": event},
+        "events": [
+            {"recorded_at": int(row[0]), "session_id": row[1], "event": row[2], "path": row[3],
+             "language": row[4], "campaign": row[5], "country": row[6], "duration_seconds": int(row[7] or 0)}
+            for row in rows
+        ],
+    }

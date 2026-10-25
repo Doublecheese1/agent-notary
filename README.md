@@ -56,7 +56,7 @@ See `MAINNET_FINAL_STEPS_TR.md` for the exact Turkish launch checklist.
 
 `.github/workflows/daily-report.yml` triggers the protected reporting endpoint at 08:00 and 00:00 Europe/Istanbul. The report includes deal counts, volume, seller and buyer payments, protocol fees, escrow and treasury balances, and unresolved disputes requiring attention. SMTP credentials and the recipient stay in Render secrets; the repository contains no email password. See `REPORTING_SETUP_TR.md`.
 
-The private dashboard path is set through `REPORT_DASHBOARD_PATH` and is never linked from the public site. It calculates confirmed protocol revenue from `DealClosed` events. Owner withdrawals are native USDC transfers from the Treasury Safe to the explicitly configured `REPORT_OWNER_PAYOUT_ADDRESS`; other treasury outflows are not labeled as personal withdrawals. It also lists AI reviews waiting for evidence, lacking agreement or requiring a human ruling.
+The private dashboard path is set through `REPORT_DASHBOARD_PATH` and is never linked from the public site. It calculates confirmed protocol revenue from `DealClosed` events. Owner withdrawals are native USDC transfers from the Treasury Safe to the explicitly configured `REPORT_OWNER_PAYOUT_ADDRESS`; other treasury outflows are not labeled as personal withdrawals. It also lists AI reviews waiting for evidence, lacking agreement or requiring a human ruling. Completed scheduled reports are saved as private, date-stamped TXT files under `REPORT_ARCHIVE_PATH` (use a persistent mounted path in production) and can be downloaded from the authenticated dashboard.
 
 ## Build and verification
 

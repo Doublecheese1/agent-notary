@@ -10,16 +10,17 @@ import smtplib
 import time as clock
 from datetime import datetime, time, timedelta, timezone
 from email.message import EmailMessage
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Body, Cookie, Header, HTTPException, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Body, Cookie, Header, HTTPException, Query, Request, Response
+from fastapi.responses import JSONResponse, PlainTextResponse
 from web3 import Web3
 
 from mainnet import connection
 from ai_review import attention_queue as ai_attention_queue
 from founding50 import application_list as founding50_application_list
-from launch_analytics import analytics_summary
+from launch_analytics import analytics_events, analytics_summary
 
 router = APIRouter(prefix="/internal/reporting", tags=["Internal reporting"])
 _LOGIN_ATTEMPTS: dict[str, list[float]] = {}
@@ -511,6 +512,15 @@ def collect_report(now: datetime | None = None) -> dict:
     period_withdrawals = _withdrawal_logs(token, treasury, owner, start_block, end_block)
     lifetime_withdrawals = _withdrawal_logs(token, treasury, owner, deployment_block, end_block)
     tx_hashes = {log["transactionHash"].hex() for group in (proposed, accepted, delivered, disputed, validations, closed) for log in group}
+    visitor = analytics_summary()
+    visitor_text = visitor.get("message", "Visitor analytics unavailable.")
+    if visitor.get("available"):
+        today = visitor.get("periods", {}).get("today", {})
+        visitor_text = (
+            f"Today: {today.get('visitors', 0)} approximate sessions, "
+            f"{today.get('page_views', 0)} page views, "
+            f"{today.get('average_session_seconds', 0)} sec average page duration."
+        )
     return {
         "window_start": start_local.isoformat(), "window_end": end_local.isoformat(),
         "start_block": start_block, "end_block": end_block,
@@ -528,6 +538,7 @@ def collect_report(now: datetime | None = None) -> dict:
         "total_escrowed": _amount(int(contract.functions.totalEscrowed().call(block_identifier=latest))),
         "treasury_balance": _amount(int(token.functions.balanceOf(treasury).call(block_identifier=latest))),
         "escrow": contract.address, "treasury": treasury,
+        "visitor_analytics_text": visitor_text,
     }
 
 
@@ -561,6 +572,9 @@ Resolver payments: {report['resolver_paid']} USDC
 Currently escrowed: {report['total_escrowed']} USDC
 Treasury balance: {report['treasury_balance']} USDC
 
+Visitor analytics:
+{report.get('visitor_analytics_text', 'Not included in this report.')}
+
 Human attention — unresolved disputes:
 {attention}
 
@@ -571,6 +585,44 @@ Escrow: {report['escrow']}
 Treasury: {report['treasury']}
 This is a read-only operational report. It does not move funds or sign transactions.
 """
+
+
+def _report_archive_directory() -> Path:
+    return Path(os.getenv("REPORT_ARCHIVE_PATH", "/var/data/agentnotary/report-archive"))
+
+
+def archive_report(report: dict) -> dict | None:
+    """Persist the generated report as a private, date-stamped TXT file."""
+    try:
+        directory = _report_archive_directory()
+        directory.mkdir(parents=True, exist_ok=True)
+        end = datetime.fromisoformat(report["window_end"])
+        filename = f"agentsolis-{end.strftime('%Y%m%d-%H%M')}-{report['end_block']}.txt"
+        path = directory / filename
+        path.write_text(render_text(report), encoding="utf-8")
+        return {"filename": filename, "generated_at": end.isoformat(), "size": path.stat().st_size,
+                "url": f"/internal/reporting/archive/{filename}"}
+    except OSError:
+        return None
+
+
+def report_archives(limit: int = 100) -> list[dict]:
+    """List private TXT reports without exposing the archive filesystem path."""
+    try:
+        directory = _report_archive_directory()
+        files = sorted(directory.glob("agentsolis-*.txt"), key=lambda item: item.stat().st_mtime, reverse=True)
+    except OSError:
+        return []
+    result = []
+    for path in files[:limit]:
+        try:
+            result.append({"filename": path.name, "generated_at": datetime.fromtimestamp(
+                path.stat().st_mtime, timezone.utc
+            ).isoformat(), "size": path.stat().st_size,
+                "url": f"/internal/reporting/archive/{path.name}"})
+        except OSError:
+            continue
+    return result
 
 
 def send_email(report: dict) -> None:
@@ -606,8 +658,10 @@ def _authorize(token: str | None) -> None:
 def send_scheduled_report(x_agentnotary_report_token: str | None = Header(default=None)):
     _authorize(x_agentnotary_report_token)
     report = collect_report()
+    archive = archive_report(report)
     send_email(report)
-    return {"sent": True, "window_start": report["window_start"], "window_end": report["window_end"]}
+    return {"sent": True, "archived": archive is not None, "archive": archive,
+            "window_start": report["window_start"], "window_end": report["window_end"]}
 
 
 @router.post("/login", include_in_schema=False)
@@ -647,4 +701,34 @@ def dashboard_logout(response: Response):
 @router.get("/data", include_in_schema=False)
 def dashboard_data(agentnotary_report_session: str | None = Cookie(default=None)):
     _authorize_session(agentnotary_report_session)
-    return JSONResponse(collect_dashboard(), headers={"Cache-Control": "no-store", "Pragma": "no-cache"})
+    data = collect_dashboard()
+    data["report_archives"] = report_archives()
+    return JSONResponse(data, headers={"Cache-Control": "no-store", "Pragma": "no-cache"})
+
+
+@router.get("/visitor-events", include_in_schema=False)
+def dashboard_visitor_events(
+    start: str | None = Query(default=None),
+    end: str | None = Query(default=None),
+    country: str | None = Query(default=None, max_length=2),
+    path: str | None = Query(default=None, max_length=160),
+    event: str | None = Query(default=None, max_length=40),
+    limit: int = Query(default=500, ge=1, le=2000),
+    agentnotary_report_session: str | None = Cookie(default=None),
+):
+    _authorize_session(agentnotary_report_session)
+    return JSONResponse(
+        analytics_events(start=start, end=end, country=country, path=path, event=event, limit=limit),
+        headers={"Cache-Control": "no-store", "Pragma": "no-cache"},
+    )
+
+
+@router.get("/archive/{filename}", include_in_schema=False)
+def download_report_archive(filename: str, agentnotary_report_session: str | None = Cookie(default=None)):
+    _authorize_session(agentnotary_report_session)
+    if not filename.startswith("agentsolis-") or not filename.endswith(".txt") or Path(filename).name != filename:
+        raise HTTPException(404, "Archive not found")
+    path = _report_archive_directory() / filename
+    if not path.is_file():
+        raise HTTPException(404, "Archive not found")
+    return PlainTextResponse(path.read_text(encoding="utf-8"), headers={"Content-Disposition": f'attachment; filename="{filename}"'})
