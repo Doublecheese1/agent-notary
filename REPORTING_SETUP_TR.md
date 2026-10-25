@@ -19,6 +19,7 @@ ANALYTICS_DB_PATH=/var/data/agentnotary/analytics.sqlite3
 ANALYTICS_RETENTION_DAYS=760
 # Yalnız edge/proxy kullanıcıdan gelen değeri silip kendisi yazıyorsa açın:
 ANALYTICS_COUNTRY_HEADER=cf-ipcountry
+ANALYTICS_GEOIP_URL=
 ```
 
 Yalnızca internet sayfası kullanılacaksa yukarıdaki ayarlar yeterlidir. E-posta da kullanılacaksa ayrıca şunları ekleyin:

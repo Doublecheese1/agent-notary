@@ -11,6 +11,8 @@ import re
 import sqlite3
 import threading
 import time
+from urllib.parse import quote
+from urllib.request import Request as UrlRequest, urlopen
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Literal
@@ -21,6 +23,7 @@ from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/internal/analytics", tags=["Internal analytics"])
 _ATTEMPTS: dict[str, list[float]] = {}
+_GEO_CACHE: dict[str, tuple[float, str | None]] = {}
 _LOCK = threading.RLock()
 
 
@@ -99,6 +102,34 @@ def _country(request: Request) -> str | None:
     return None
 
 
+def _geoip_country(source_ip: str) -> str | None:
+    """Resolve a country code via an explicitly configured GeoIP endpoint."""
+    template = os.getenv("ANALYTICS_GEOIP_URL", "").strip()
+    if not template or source_ip in {"", "unknown"}:
+        return None
+    now = time.time()
+    cached = _GEO_CACHE.get(source_ip)
+    if cached and now - cached[0] < 86_400:
+        return cached[1]
+    country = None
+    try:
+        url = template.format(ip=quote(source_ip, safe=""))
+        request = UrlRequest(url, headers={"Accept": "application/json,text/plain"})
+        with urlopen(request, timeout=1.5) as response:
+            body = response.read(4096).decode("utf-8", "replace").strip()
+        if body.startswith("{"):
+            import json
+            payload = json.loads(body)
+            body = payload.get("country_code") or payload.get("country") or ""
+        candidate = str(body).strip().upper()
+        if re.fullmatch(r"[A-Z]{2}", candidate) and candidate not in {"XX", "T1"}:
+            country = candidate
+    except Exception:
+        country = None
+    _GEO_CACHE[source_ip] = (now, country)
+    return country
+
+
 def _source_ip(request: Request) -> str:
     """Return the source address without trusting spoofable proxy headers by default."""
     if os.getenv("ANALYTICS_TRUST_PROXY_HEADERS", "false").lower() == "true":
@@ -119,10 +150,12 @@ def record_launch_event(item: LaunchEvent, request: Request) -> Response:
         raise HTTPException(status_code=429, detail="Too many analytics events")
     recent.append(now)
     _ATTEMPTS[key] = recent
+    source_ip = _source_ip(request)
     data = {
         "session_id": item.session_id, "event": item.event, "path": item.path,
         "language": item.language, "campaign": item.campaign,
-        "country": _country(request), "duration_seconds": item.duration_seconds,
+        "country": _country(request) or _geoip_country(source_ip),
+        "duration_seconds": item.duration_seconds,
         "recorded_at": int(time.time()),
     }
     with _LOCK:
@@ -138,7 +171,7 @@ def record_launch_event(item: LaunchEvent, request: Request) -> Response:
                 """INSERT INTO analytics_security_events
                 (source_ip,event,path,country,recorded_at)
                 VALUES (?,?,?,?,?)""",
-                (_source_ip(request), item.event, item.path, data["country"], data["recorded_at"]),
+                (source_ip, item.event, item.path, data["country"], data["recorded_at"]),
             )
             cutoff = data["recorded_at"] - _retention_days() * 86_400
             db.execute("DELETE FROM analytics_events WHERE recorded_at < ?", (cutoff,))
