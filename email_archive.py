@@ -38,7 +38,7 @@ def _decode(value: str | None) -> str:
 
 
 def _addresses(value: str | None) -> str:
-    return ", ".join(email.utils.getaddresses([value or ""]))
+    return ", ".join(email.utils.formataddr(pair) for pair in email.utils.getaddresses([value or ""]))
 
 
 def _plain_text(message: Message) -> str:
