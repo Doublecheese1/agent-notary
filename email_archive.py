@@ -12,7 +12,6 @@ import imaplib
 import os
 import re
 import time
-from contextlib import closing
 from email import policy
 from email.message import Message
 from typing import Iterable
@@ -86,7 +85,8 @@ def sync_imap() -> dict:
     imported = 0
     checked = 0
     now = int(time.time())
-    with closing(imaplib.IMAP4_SSL(host, port)) as client:
+    client = imaplib.IMAP4_SSL(host, port)
+    try:
         client.login(user, password)
         for mailbox in _folders():
             status, _ = client.select(mailbox, readonly=True)
@@ -132,7 +132,15 @@ def sync_imap() -> dict:
                          _decode(message.get("Subject")), occurred, status_value, _summary(message), lead_id, now),
                     )
                     imported += 1
-    return {"ok": True, "checked": checked, "imported": imported, "synced_at": now}
+        return {"ok": True, "checked": checked, "imported": imported, "synced_at": now}
+    finally:
+        # IMAP.close() is only legal in SELECTED state.  After a mailbox
+        # search loop the connection may be AUTHENTICATED, so always use the
+        # session-level logout command and ignore a server-side close error.
+        try:
+            client.logout()
+        except (imaplib.IMAP4.error, OSError):
+            pass
 
 
 def archive_summary(limit: int = 500) -> dict:
