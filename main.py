@@ -1,4 +1,8 @@
 """Original API plus an isolated, wallet-free playground."""
+import asyncio
+import contextlib
+import os
+
 from legacy import *
 from playground import router
 from payments import router as payments_router
@@ -12,6 +16,7 @@ from international import LOCALES, localized_landing
 from launch_analytics import router as launch_analytics_router
 from founding50 import router as founding50_router
 from outreach_crm import router as outreach_crm_router
+from email_archive import router as email_archive_router
 from agent_coordination import router as agent_coordination_router
 
 app.include_router(router)
@@ -26,7 +31,42 @@ app.include_router(discovery_router)
 app.include_router(launch_analytics_router)
 app.include_router(founding50_router)
 app.include_router(outreach_crm_router)
+app.include_router(email_archive_router)
 app.include_router(agent_coordination_router)
+
+
+_email_archive_task: asyncio.Task | None = None
+
+
+async def _email_archive_loop() -> None:
+    """Run the read-only IMAP archive in the existing web service process."""
+    from email_archive import sync_imap
+
+    interval = max(3600, int(os.getenv("OUTREACH_IMAP_SYNC_INTERVAL_SECONDS", "86400")))
+    while True:
+        try:
+            await asyncio.to_thread(sync_imap)
+        except Exception as exc:  # pragma: no cover - runtime safety net
+            print(f"[email-archive] sync failed: {exc}", flush=True)
+        await asyncio.sleep(interval)
+
+
+@app.on_event("startup")
+async def start_email_archive_loop() -> None:
+    global _email_archive_task
+    enabled = os.getenv("OUTREACH_IMAP_BACKGROUND_SYNC", "false").strip().lower() == "true"
+    if enabled and _email_archive_task is None:
+        _email_archive_task = asyncio.create_task(_email_archive_loop())
+
+
+@app.on_event("shutdown")
+async def stop_email_archive_loop() -> None:
+    global _email_archive_task
+    if _email_archive_task is not None:
+        _email_archive_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await _email_archive_task
+        _email_archive_task = None
 
 PUBLIC_ORIGIN = "https://agentsolis.solists.com.tr"
 

@@ -13,6 +13,50 @@ Render persistent disk üzerinde şu değişken kullanılmalıdır:
 OUTREACH_CRM_DB_PATH=/var/data/agentnotary/outreach-crm.sqlite3
 ```
 
+## Salt-okunur e-posta arşivi
+
+E-posta arşivi yalnız Render Secret değişkenleriyle etkinleştirilir. Parola
+GitHub'a veya tarayıcıya yazılmaz; senkronizasyon yalnızca IMAP üzerinden
+okur, mesaj göndermez, silmez ve değiştirmez.
+
+```text
+OUTREACH_IMAP_HOST=mail.solists.com.tr
+OUTREACH_IMAP_PORT=993
+OUTREACH_IMAP_USER=agentsolis@solists.com.tr
+OUTREACH_IMAP_PASSWORD=<Render Secret>
+OUTREACH_IMAP_FOLDERS=INBOX,Sent
+```
+
+`POST /internal/reporting/outreach/email-archive/sync` yalnız kurucu oturumu
+ile çalıştırılır. Her ileti `Message-ID + mailbox` ile tekilleştirilir; konu,
+gönderen/alıcı/CC, tarih-saat, yön, durum ve kısa gövde özeti saklanır. Tam
+mesaj gövdesi ve ekler arşive kopyalanmaz. `GET /internal/reporting/outreach/email-archive`
+özel panel için kronolojik arşivi döndürür.
+
+Render'da bunu sürekli çalıştırmak için ayrı bir Cron Job oluşturulmalıdır:
+
+```text
+Komut: python email_archive_job.py
+Zamanlama: */15 * * * *
+```
+
+Cron Job aynı özel veritabanı/persistent disk'e erişmelidir. Web servisi yalnız
+paneli gösterir; Cron Job her 15 dakikada bir salt-okunur IMAP senkronizasyonu
+yapar. Cron kurulmadan panel arşivi yalnız elle çağrılan `/sync` ile güncellenir.
+
+Ücretli Cron kullanılmak istenmezse aynı Web Service içinde arka plan döngüsü
+kullanılabilir. Bunun için şu değişkenler eklenir:
+
+```text
+OUTREACH_IMAP_BACKGROUND_SYNC=true
+OUTREACH_IMAP_SYNC_INTERVAL_SECONDS=86400
+```
+
+Bu seçenek ayrı Render hizmeti oluşturmaz; mevcut web servisi açık kaldığı
+sürece günde bir kez IMAP senkronizasyonu yapar. Web Service yeniden
+başlarsa döngü otomatik yeniden başlar. Servis uykuya geçerse senkron da o
+süre boyunca çalışmaz; uyanınca tekrar devam eder.
+
 Mevcut rapor oturumu bütün CRM uçlarını da korur. Uçlar OpenAPI belgesinde
 gösterilmez.
 

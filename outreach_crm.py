@@ -105,10 +105,29 @@ def _migrate(db: sqlite3.Connection) -> None:
             source_url TEXT,
             created_at INTEGER NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS outreach_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            message_id TEXT NOT NULL,
+            mailbox TEXT NOT NULL,
+            imap_uid TEXT,
+            direction TEXT NOT NULL,
+            sender TEXT,
+            recipients TEXT,
+            cc TEXT,
+            subject TEXT,
+            occurred_at INTEGER NOT NULL,
+            status TEXT NOT NULL,
+            body_summary TEXT,
+            lead_id TEXT REFERENCES outreach_leads(id) ON DELETE SET NULL,
+            synced_at INTEGER NOT NULL,
+            UNIQUE(message_id, mailbox)
+        );
         CREATE INDEX IF NOT EXISTS idx_outreach_status ON outreach_leads(status);
         CREATE INDEX IF NOT EXISTS idx_outreach_follow_up ON outreach_leads(next_follow_up_at);
         CREATE INDEX IF NOT EXISTS idx_outreach_owner ON outreach_leads(owner);
         CREATE INDEX IF NOT EXISTS idx_outreach_event_lead ON outreach_events(lead_id, occurred_at);
+        CREATE INDEX IF NOT EXISTS idx_outreach_messages_time ON outreach_messages(occurred_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_outreach_messages_lead ON outreach_messages(lead_id, occurred_at DESC);
         """
     )
     db.execute("PRAGMA user_version=1")
