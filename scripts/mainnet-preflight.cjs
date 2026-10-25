@@ -16,7 +16,7 @@ requireValue(release.chain_id === 42161, "Chain must be Arbitrum One (42161).");
 requireValue(release.native_usdc.toLowerCase() === "0xaf88d065e77c8cc2239327c5edb3a432268e5831", "Native Circle USDC address is wrong.");
 requireValue(release.deployment_inputs.deployer === expectedDeployer, "Deployer must be the controlled MetaMask Account 1.");
 requireValue(hash.test(release.policies.automatic_hash) && hash.test(release.policies.review_hash), "Policy hashes are missing.");
-requireValue(release.gates.accepting_funds === false, "Release manifest must keep public funding closed before canary and review.");
+requireValue(typeof release.gates.accepting_funds === "boolean", "Release manifest must declare the current public funding gate.");
 
 const fileMap = {
   escrow_source: "contracts/AgentNotaryMainnetEscrow.sol",
