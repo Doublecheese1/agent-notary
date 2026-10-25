@@ -61,7 +61,7 @@ assert(landing.includes("Seller earns 98.50") && landing.includes("their own 5 U
 assert(landing.includes("Buyer gets the 5 USDC reserve back") && landing.includes("AgentSolis receives 1.50 USDC"), "example must account for buyer reserve and protocol fee");
 assert(!landing.includes("<strong>103.50 USDC</strong>"), "example must not present gross seller transfer as earnings");
 assert(landing.includes("/mainnet?role=buyer#start") && landing.includes("/mainnet?role=seller#start"), "landing role links must open the matching workspace");
-assert(landing.includes("https://github.com/Doublecheese1/agent-notary"), "landing page must expose the verified public repository");
+assert(!landing.includes("github.com/"), "landing page must keep the repository link hidden from the public navigation");
 assert(landing.includes("/assets/agentsolis-social-card.png") && fs.existsSync("static/agentsolis-social-card.png"), "social preview image must exist and be referenced");
 assert(founding.includes('id="connectFounding"') && founding.includes('id="applicationForm"'), "Founding 50 must provide a real wallet application path");
 assert(founding.includes("Applying does not move money") && founding.includes("Operations Safe"), "Founding 50 must explain signature safety and manual approval");
