@@ -284,7 +284,7 @@ def analytics_events(
                 f"""SELECT recorded_at, session_id, event, path, language, campaign,
                            COALESCE(country,'Unknown') AS country, duration_seconds
                     FROM analytics_events {where}
-                    ORDER BY recorded_at DESC LIMIT ?""",
+                    ORDER BY recorded_at ASC LIMIT ?""",
                 (*args, safe_limit),
             ).fetchall()
         finally:
@@ -333,7 +333,7 @@ def analytics_security_events(
                 f"""SELECT recorded_at, source_ip, event, path,
                            COALESCE(country,'Unknown') AS country
                     FROM analytics_security_events {where}
-                    ORDER BY recorded_at DESC LIMIT ?""",
+                    ORDER BY recorded_at ASC LIMIT ?""",
                 (*args, safe_limit),
             ).fetchall()
         finally:
