@@ -104,29 +104,35 @@ def _country(request: Request) -> str | None:
 
 def _geoip_country(source_ip: str) -> str | None:
     """Resolve a country code via an explicitly configured GeoIP endpoint."""
-    template = os.getenv("ANALYTICS_GEOIP_URL", "").strip()
-    if not template or source_ip in {"", "unknown"}:
+    templates = [item.strip() for item in (
+        os.getenv("ANALYTICS_GEOIP_URL", ""),
+        os.getenv("ANALYTICS_GEOIP_FALLBACK_URL", ""),
+    ) if item.strip()]
+    if not templates or source_ip in {"", "unknown"}:
         return None
     now = time.time()
     cached = _GEO_CACHE.get(source_ip)
     if cached and now - cached[0] < 86_400:
         return cached[1]
     country = None
-    try:
-        url = template.format(ip=quote(source_ip, safe=""))
-        request = UrlRequest(url, headers={"Accept": "application/json,text/plain"})
-        with urlopen(request, timeout=1.5) as response:
-            body = response.read(4096).decode("utf-8", "replace").strip()
-        if body.startswith("{"):
-            import json
-            payload = json.loads(body)
-            body = payload.get("country_code") or payload.get("country") or ""
-        candidate = str(body).strip().upper()
-        if re.fullmatch(r"[A-Z]{2}", candidate) and candidate not in {"XX", "T1"}:
-            country = candidate
-    except Exception:
-        country = None
-    _GEO_CACHE[source_ip] = (now, country)
+    for template in templates:
+        try:
+            url = template.format(ip=quote(source_ip, safe=""))
+            request = UrlRequest(url, headers={"Accept": "application/json,text/plain", "User-Agent": "AgentSolis-Analytics/1.0"})
+            with urlopen(request, timeout=1.5) as response:
+                body = response.read(4096).decode("utf-8", "replace").strip()
+            if body.startswith("{"):
+                import json
+                payload = json.loads(body)
+                body = payload.get("country_code") or payload.get("countryCode") or payload.get("country") or ""
+            candidate = str(body).strip().upper()
+            if re.fullmatch(r"[A-Z]{2}", candidate) and candidate not in {"XX", "T1"}:
+                country = candidate
+                break
+        except Exception:
+            continue
+    if country:
+        _GEO_CACHE[source_ip] = (now, country)
     return country
 
 
