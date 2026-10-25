@@ -10,6 +10,7 @@ import os
 import sqlite3
 import time
 import uuid
+import csv
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -111,6 +112,88 @@ def _migrate(db: sqlite3.Connection) -> None:
         """
     )
     db.execute("PRAGMA user_version=1")
+    db.commit()
+    if os.getenv("OUTREACH_CRM_SEED_EVIDENCE", "false").lower() == "true":
+        _seed_evidence(db)
+
+
+def _epoch(value: str | None) -> int:
+    if not value:
+        return int(time.time())
+    try:
+        return int(datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp())
+    except ValueError:
+        return int(time.time())
+
+
+def _seed_evidence(db: sqlite3.Connection) -> None:
+    """Import founder-verified CSV evidence once into the private CRM."""
+    if db.execute("SELECT 1 FROM outreach_events LIMIT 1").fetchone():
+        return
+    root = Path(__file__).resolve().parent / "outreach"
+    leads_path, events_path = root / "crm-leads.csv", root / "crm-interactions.csv"
+    if not events_path.exists():
+        return
+    lead_ids: dict[str, str] = {}
+    if leads_path.exists():
+        with leads_path.open(newline="", encoding="utf-8") as handle:
+            for row in csv.DictReader(handle):
+                lead_id = row.get("lead_id") or str(uuid.uuid4())
+                created = _epoch(row.get("created_at"))
+                country = (row.get("country") or "").strip()
+                country_value = None if country.lower() in {"", "unknown", "bilinmiyor"} else country
+                source = row.get("website_or_profile_url") or "https://agentsolis.solists.com.tr/"
+                db.execute(
+                    """INSERT OR IGNORE INTO outreach_leads
+                    (id,company_name,contact_name,website,country,country_verified,channel_type,
+                     channel_value,source_url,segment,owner,status,subject,next_follow_up_at,
+                     wallet,deal_id,relationship_verified,created_at,updated_at)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (lead_id, row.get("company_or_person") or "Bilinmeyen aday", None,
+                     row.get("website_or_profile_url") or None, country_value,
+                     int(bool(country_value and row.get("country_source_url"))),
+                     row.get("contact_channel") or "other", row.get("contact_address_or_url") or "—",
+                     source, row.get("segment") or "unknown", row.get("owner_agent") or "codex",
+                     row.get("status") if row.get("status") in STATUSES else "draft", None, None,
+                     None, None, 0, created, _epoch(row.get("updated_at")) or created),
+                )
+                lead_ids[row["lead_id"]] = lead_id
+    with events_path.open(newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            interaction_id = row.get("interaction_id") or str(uuid.uuid4())
+            existing = db.execute("SELECT 1 FROM outreach_events WHERE source_url LIKE ?", (f"%{interaction_id}%",)).fetchone()
+            if existing:
+                continue
+            lead_id = lead_ids.get(row.get("lead_id") or "")
+            recipient = (row.get("to_address_or_url") or "").strip()
+            if not lead_id:
+                lead_id = f"evidence-{interaction_id[:48]}"
+                domain = recipient.split("@", 1)[-1] if "@" in recipient else "unknown"
+                db.execute(
+                    """INSERT OR IGNORE INTO outreach_leads
+                    (id,company_name,website,country_verified,channel_type,channel_value,
+                     source_url,segment,owner,status,created_at,updated_at)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (lead_id, domain, f"https://{domain}" if domain != "unknown" else None, 0,
+                     "email", recipient or "—", "https://agentsolis.solists.com.tr/",
+                     "verified_outreach", "codex", "draft", _epoch(row.get("occurred_at")), _epoch(row.get("occurred_at"))),
+                )
+            event_type = row.get("event_type") or "note"
+            kind = "sent" if event_type == "sent_evidence" else "bounced" if event_type == "bounce" else "replied" if event_type == "auto_reply" else "note"
+            occurred = _epoch(row.get("occurred_at"))
+            subject = row.get("subject_or_context") or None
+            summary = row.get("reply_summary") or None
+            evidence = f"evidence:{interaction_id}; {row.get('evidence_url_or_ref') or ''}".strip()
+            db.execute(
+                """INSERT INTO outreach_events
+                (lead_id,kind,occurred_at,subject,message_summary,reply_summary,source_url,created_at)
+                VALUES (?,?,?,?,?,?,?,?)""",
+                (lead_id, kind, occurred, subject, summary, summary if kind in {"bounced", "replied"} else None, evidence, occurred),
+            )
+            db.execute(
+                "UPDATE outreach_leads SET status=?,first_contact_at=COALESCE(first_contact_at,?),last_contact_at=?,subject=?,reply_summary=?,updated_at=? WHERE id=?",
+                (kind, occurred, occurred, subject, summary if kind in {"bounced", "replied"} else None, occurred, lead_id),
+            )
     db.commit()
 
 
