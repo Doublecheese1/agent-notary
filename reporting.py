@@ -20,7 +20,7 @@ from web3 import Web3
 from mainnet import connection
 from ai_review import attention_queue as ai_attention_queue
 from founding50 import application_list as founding50_application_list
-from launch_analytics import analytics_events, analytics_summary
+from launch_analytics import analytics_events, analytics_security_events, analytics_summary
 
 router = APIRouter(prefix="/internal/reporting", tags=["Internal reporting"])
 _LOGIN_ATTEMPTS: dict[str, list[float]] = {}
@@ -719,6 +719,22 @@ def dashboard_visitor_events(
     _authorize_session(agentnotary_report_session)
     return JSONResponse(
         analytics_events(start=start, end=end, country=country, path=path, event=event, limit=limit),
+        headers={"Cache-Control": "no-store", "Pragma": "no-cache"},
+    )
+
+
+@router.get("/security-ip-events", include_in_schema=False)
+def dashboard_security_ip_events(
+    start: str | None = Query(default=None),
+    end: str | None = Query(default=None),
+    country: str | None = Query(default=None, max_length=2),
+    path: str | None = Query(default=None, max_length=160),
+    limit: int = Query(default=500, ge=1, le=2000),
+    agentnotary_report_session: str | None = Cookie(default=None),
+):
+    _authorize_session(agentnotary_report_session)
+    return JSONResponse(
+        analytics_security_events(start=start, end=end, country=country, path=path, limit=limit),
         headers={"Cache-Control": "no-store", "Pragma": "no-cache"},
     )
 

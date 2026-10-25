@@ -1,4 +1,9 @@
-"""Privacy-light product analytics with no IP, wallet, email or fingerprint storage."""
+"""Product analytics plus a restricted, time-limited security IP log.
+
+The normal analytics tables never contain raw IP addresses.  A separate
+security log may retain the source IP for the configured six-month window so
+the owner can investigate abuse; it is not part of visitor counts.
+"""
 from __future__ import annotations
 
 import os
@@ -35,6 +40,15 @@ def _retention_days() -> int:
     return min(1095, max(30, value))
 
 
+def _security_ip_retention_days() -> int:
+    """Raw-IP security-log retention; six months by default and at most six months."""
+    try:
+        value = int(os.getenv("ANALYTICS_IP_RETENTION_DAYS", "180"))
+    except ValueError:
+        value = 180
+    return min(180, max(1, value))
+
+
 def _connect() -> sqlite3.Connection:
     path = _database_path()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -48,8 +62,17 @@ def _connect() -> sqlite3.Connection:
         duration_seconds INTEGER NOT NULL, recorded_at INTEGER NOT NULL
         )"""
     )
+    db.execute(
+        """CREATE TABLE IF NOT EXISTS analytics_security_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        source_ip TEXT NOT NULL,
+        event TEXT NOT NULL, path TEXT NOT NULL,
+        country TEXT, recorded_at INTEGER NOT NULL
+        )"""
+    )
     db.execute("CREATE INDEX IF NOT EXISTS idx_analytics_time ON analytics_events(recorded_at)")
     db.execute("CREATE INDEX IF NOT EXISTS idx_analytics_session ON analytics_events(session_id)")
+    db.execute("CREATE INDEX IF NOT EXISTS idx_security_time ON analytics_security_events(recorded_at)")
     return db
 
 
@@ -74,6 +97,15 @@ def _country(request: Request) -> str | None:
     if re.fullmatch(r"[A-Z]{2}", value) and value not in {"XX", "T1"}:
         return value
     return None
+
+
+def _source_ip(request: Request) -> str:
+    """Return the source address without trusting spoofable proxy headers by default."""
+    if os.getenv("ANALYTICS_TRUST_PROXY_HEADERS", "false").lower() == "true":
+        forwarded = request.headers.get("x-forwarded-for", "").split(",", 1)[0].strip()
+        if forwarded:
+            return forwarded[:128]
+    return (request.client.host if request.client else "unknown")[:128]
 
 
 @router.post("/event", include_in_schema=False, status_code=204)
@@ -102,8 +134,16 @@ def record_launch_event(item: LaunchEvent, request: Request) -> Response:
                 VALUES (:session_id,:event,:path,:language,:campaign,:country,:duration_seconds,:recorded_at)""",
                 data,
             )
+            db.execute(
+                """INSERT INTO analytics_security_events
+                (source_ip,event,path,country,recorded_at)
+                VALUES (?,?,?,?,?)""",
+                (_source_ip(request), item.event, item.path, data["country"], data["recorded_at"]),
+            )
             cutoff = data["recorded_at"] - _retention_days() * 86_400
             db.execute("DELETE FROM analytics_events WHERE recorded_at < ?", (cutoff,))
+            ip_cutoff = data["recorded_at"] - _security_ip_retention_days() * 86_400
+            db.execute("DELETE FROM analytics_security_events WHERE recorded_at < ?", (ip_cutoff,))
             db.commit()
         finally:
             db.close()
@@ -217,6 +257,54 @@ def analytics_events(
         "events": [
             {"recorded_at": int(row[0]), "session_id": row[1], "event": row[2], "path": row[3],
              "language": row[4], "campaign": row[5], "country": row[6], "duration_seconds": int(row[7] or 0)}
+            for row in rows
+        ],
+    }
+
+
+def analytics_security_events(
+    start: str | None = None,
+    end: str | None = None,
+    country: str | None = None,
+    path: str | None = None,
+    limit: int = 500,
+) -> dict:
+    """Return restricted raw-IP security records; never used for visitor totals."""
+    if not analytics_enabled() or not _database_path().exists():
+        return {"available": False, "message": "Güvenlik IP arşivi etkin değil veya henüz veri oluşmadı.", "events": []}
+    start_ts = _parse_filter_date(start)
+    end_ts = _parse_filter_date(end, end=True)
+    if end_ts is not None:
+        end_ts = end_ts + 86399 if len(end or "") <= 10 else end_ts
+    clauses, args = [], []
+    if start_ts is not None:
+        clauses.append("recorded_at >= ?"); args.append(start_ts)
+    if end_ts is not None:
+        clauses.append("recorded_at <= ?"); args.append(end_ts)
+    if country:
+        clauses.append("COALESCE(country,'Unknown') = ?"); args.append(country.upper())
+    if path:
+        clauses.append("path = ?"); args.append(path)
+    where = "WHERE " + " AND ".join(clauses) if clauses else ""
+    safe_limit = min(2000, max(1, int(limit)))
+    with _LOCK:
+        db = _connect()
+        try:
+            rows = db.execute(
+                f"""SELECT recorded_at, source_ip, event, path,
+                           COALESCE(country,'Unknown') AS country
+                    FROM analytics_security_events {where}
+                    ORDER BY recorded_at DESC LIMIT ?""",
+                (*args, safe_limit),
+            ).fetchall()
+        finally:
+            db.close()
+    return {
+        "available": True,
+        "message": "Kısıtlı güvenlik kaydıdır; yalnız güvenlik/abuse incelemesi için gösterilir ve 180 gün sonra silinir.",
+        "retention_days": _security_ip_retention_days(),
+        "events": [
+            {"recorded_at": int(row[0]), "ip": row[1], "event": row[2], "path": row[3], "country": row[4]}
             for row in rows
         ],
     }
