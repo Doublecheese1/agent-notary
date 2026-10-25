@@ -61,16 +61,16 @@
       "address": "0x95ed02f55695fa79744c122436f56541c6270b71",
       "transaction": "0xe76955bd4a7b2b35ca4491117b781d64ea031951b4c266daf14d706a388d121d",
       "block": 517543781,
-      "paused": true,
-      "public_access": false,
+      "paused": false,
+      "public_access": true,
       "total_escrowed_units": 0
     }
   },
   "gates": {
-    "mainnet_enabled": false,
-    "accepting_funds": false,
+    "mainnet_enabled": true,
+    "accepting_funds": true,
     "deployment_ui": false,
     "operations_ui": false
   },
-  "warning": "Deployed on Arbitrum One with new deals paused, public access closed and zero escrowed funds. Independent security review and the internal canary remain required before public funding."
+  "warning": "Live configuration observed at block 518227250: mainnet enabled, public access open, funding enabled and paused=false."
 }
