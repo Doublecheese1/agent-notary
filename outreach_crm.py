@@ -131,7 +131,8 @@ def _seed_evidence(db: sqlite3.Connection) -> None:
     if db.execute("SELECT 1 FROM outreach_events LIMIT 1").fetchone():
         return
     root = Path(__file__).resolve().parent / "outreach"
-    leads_path, events_path = root / "crm-leads.csv", root / "crm-interactions.csv"
+    leads_path = root / "crm-leads.csv"
+    events_path = Path(os.getenv("OUTREACH_CRM_EVIDENCE_PATH", str(root / "crm-interactions.csv")))
     if not events_path.exists():
         return
     lead_ids: dict[str, str] = {}
