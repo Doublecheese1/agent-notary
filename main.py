@@ -180,7 +180,7 @@ def sitemap():
     ]
     urls.extend((f"/{locale}", "0.7") for locale in LOCALES)
     entries = "".join(
-        f"<url><loc>{PUBLIC_ORIGIN}{path}</loc><lastmod>2026-10-24</lastmod><priority>{priority}</priority></url>"
+        f"<url><loc>{PUBLIC_ORIGIN}{path}</loc><priority>{priority}</priority></url>"
         for path, priority in urls
     )
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{entries}</urlset>'

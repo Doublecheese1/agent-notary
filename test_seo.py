@@ -29,6 +29,7 @@ class SeoTest(unittest.TestCase):
             self.assertIn(f"https://agentsolis.solists.com.tr/{locale}", response.text)
         self.assertNotIn("/private-report/", response.text)
         self.assertNotIn("/setup", response.text)
+        self.assertNotIn("<lastmod>2026-10-24</lastmod>", response.text)
 
     def test_root_is_public_landing_page_with_security_headers(self):
         response = self.client.get("/")
@@ -52,7 +53,7 @@ class SeoTest(unittest.TestCase):
         self.assertIn('name="description"', response.text)
         self.assertIn('rel="canonical" href="https://agentsolis.solists.com.tr/mainnet"', response.text)
         self.assertIn('type="application/ld+json"', response.text)
-        self.assertIn("Public mainnet access is open", response.text)
+        self.assertIn("Checking live mainnet funding status", response.text)
         self.assertNotIn("deposits stay closed", response.text)
 
     def test_public_pages_do_not_publish_stale_closed_access_copy(self):
@@ -98,6 +99,17 @@ class SeoTest(unittest.TestCase):
             self.assertIn('name="description"', response.text)
             self.assertIn(f'rel="canonical" href="https://agentsolis.solists.com.tr{path}"', response.text)
             self.assertIn('type="application/ld+json"', response.text)
+
+    def test_public_copy_covers_people_and_agent_settlement_modes(self):
+        response = self.client.get("/")
+        for phrase in ("agent-to-agent", "agent-to-human", "human-to-agent", "Human → Human"):
+            self.assertIn(phrase, response.text)
+
+    def test_founding50_has_indexable_search_metadata(self):
+        response = self.client.get("/mainnet/founding50")
+        self.assertIn('<meta name="robots" content="index,follow">', response.text)
+        self.assertIn('<meta name="description"', response.text)
+        self.assertIn('rel="canonical" href="https://agentsolis.solists.com.tr/mainnet/founding50"', response.text)
 
     def test_public_pages_load_the_shared_brand_system(self):
         for path in ("/", "/mainnet", "/mainnet/founding50", "/play", "/terms", "/privacy"):
