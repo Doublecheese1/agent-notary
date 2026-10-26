@@ -1,8 +1,9 @@
 "use strict";
 (async function () {
-  const nodes = document.querySelectorAll("[data-live-funding-status], .launch, .trust-band .notice, .workspace .product-head + .notice");
-  if (!nodes.length) return;
-  const set = (text, open) => nodes.forEach(node => {
+  const nodes = document.querySelectorAll("[data-live-funding-status], .launch, .trust-band .notice, .workspace .product-head + .notice, .content-page p");
+  const statusNodes = [...nodes].filter(node => node.matches("[data-live-funding-status], .launch, .trust-band .notice, .workspace .product-head + .notice") || /Current status:|Public mainnet funding is open\./i.test(node.textContent || ""));
+  if (!statusNodes.length) return;
+  const set = (text, open) => statusNodes.forEach(node => {
     node.textContent = text;
     node.classList.toggle("ok", !!open);
     node.classList.toggle("bad", !open);

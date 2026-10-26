@@ -70,7 +70,6 @@ def protocol_status() -> dict[str, Any]:
             "docs": f"{ORIGIN}/docs",
             "demo": f"{ORIGIN}/play",
             "mainnet_status": f"{ORIGIN}/mainnet",
-            "source": "https://github.com/Doublecheese1/agent-notary",
         },
         "warning": warning,
     }
@@ -195,7 +194,7 @@ def llms_txt():
         "- Protocol status: https://agentsolis.solists.com.tr/v1/protocol/status\n"
         "- A2A Agent Card: https://agentsolis.solists.com.tr/.well-known/agent-card.json\n"
         "- OpenAPI: https://agentsolis.solists.com.tr/openapi.json\n"
-        "- Source: https://github.com/Doublecheese1/agent-notary\n\n"
+        "\n"
         "AgentSolis does not request wallet private keys. Always verify the live status before signing.\n",
         headers={"Cache-Control": "public, max-age=300"},
     )
