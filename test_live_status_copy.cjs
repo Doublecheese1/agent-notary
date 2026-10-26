@@ -1,0 +1,10 @@
+"use strict";
+const assert = require("assert");
+const fs = require("fs");
+const script = fs.readFileSync("static/assets/live-status.js", "utf8");
+assert(script.includes("/mainnet/config"));
+assert(script.includes(".launch"));
+assert(script.includes(".trust-band .notice"));
+assert(script.includes("Public mainnet funding is open"));
+assert(script.includes("funding is currently unavailable according to the live status"));
+console.log("Live funding status copy checks passed.");

@@ -69,7 +69,9 @@ assert(html.includes('id="guide"') && html.includes('/mainnet/guide.js'), "mainn
 assert(foundingJs.includes('personal_sign') && !foundingJs.includes('eth_sendTransaction'), "Founding application must prove wallet control without sending a transaction");
 assert(foundingJs.includes('accepted_terms:true'), "Founding application must record explicit terms acceptance");
 const guideStart = guideJs.indexOf("const G=") + "const G=".length;
-const guideEnd = guideJs.indexOf(";\nfunction init", guideStart);
+const guideEnd = guideJs.indexOf(";\n// Use an international", guideStart) > guideStart
+  ? guideJs.indexOf(";\n// Use an international", guideStart)
+  : guideJs.indexOf(";\nfunction init", guideStart);
 assert(guideStart > "const G=".length && guideEnd > guideStart, "beginner guide catalog must be readable");
 const guideCatalog = require("vm").runInNewContext(`(${guideJs.slice(guideStart, guideEnd)})`);
 for (const locale of ['en','tr','es','pt-br','ru','zh-cn']) {
