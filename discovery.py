@@ -14,7 +14,27 @@ PUBLIC_LAUNCH_DATE = "2026-10-23"
 
 
 def protocol_status() -> dict[str, Any]:
-    """Facts safe to publish before external funds are accepted."""
+    """Publish the same live mainnet gate used by the transaction workspace."""
+    try:
+        # Keep discovery, A2A and llms.txt aligned with the transaction UI.
+        from mainnet import config as mainnet_config
+
+        live = mainnet_config()
+    except Exception:
+        live = {}
+    enabled = bool(live.get("enabled"))
+    accepting_funds = bool(live.get("accepting_funds"))
+    public_access = bool(live.get("public_access"))
+    paused = bool(live.get("paused"))
+    if accepting_funds:
+        status = "public_mainnet_funding_open"
+        warning = "Public mainnet funding is open. Verify the live network, token, amount, parties and contract address before signing."
+    elif public_access and not paused:
+        status = "public_access_open_funding_closed"
+        warning = "Public mainnet access is open, but the live funding gate is currently closed. Do not sign a funding transaction until accepting_funds is true."
+    else:
+        status = "status_unavailable_or_closed"
+        warning = "The live mainnet funding status is unavailable or closed. Do not fund until the workspace reports accepting_funds=true."
     return {
         "product": "AgentSolis",
         "description": "Deterministic settlement infrastructure for agent-to-agent jobs.",
@@ -23,9 +43,11 @@ def protocol_status() -> dict[str, Any]:
             "network": "Arbitrum One",
             "asset": "native USDC",
             "chain_id": 42161,
-            "enabled": False,
-            "accepting_funds": False,
-            "status": "launch_preparation",
+            "enabled": enabled,
+            "accepting_funds": accepting_funds,
+            "public_access": public_access,
+            "paused": paused,
+            "status": status,
         },
         "sandbox": {
             "enabled": True,
@@ -50,7 +72,7 @@ def protocol_status() -> dict[str, Any]:
             "mainnet_status": f"{ORIGIN}/mainnet",
             "source": "https://github.com/Doublecheese1/agent-notary",
         },
-        "warning": "Mainnet deposits are closed. The public A2A interface is read-only and never asks for a wallet key.",
+        "warning": warning,
     }
 
 
@@ -136,7 +158,9 @@ def a2a_send_message(body: dict[str, Any], a2a_version: str = Header(default="1.
         summary = "The wallet-free sandbox is available and never moves real money."
     else:
         payload = {"skill": "protocol_status", **status}
-        summary = "AgentSolis public launch is planned for 23 October 2026; mainnet deposits remain closed during preparation."
+        summary = ("AgentSolis public mainnet funding is open according to the live status."
+                   if status["production"]["accepting_funds"]
+                   else "AgentSolis public access is available, but live funding is not currently enabled.")
     task_id = str(uuid.uuid4())
     context_id = body.get("message", {}).get("contextId") or str(uuid.uuid4())
     return JSONResponse(
@@ -166,12 +190,12 @@ def llms_txt():
         "> Deterministic settlement infrastructure for agent-to-agent jobs.\n\n"
         "- Public launch: 23 October 2026.\n"
         "- Production network candidate: Arbitrum One with native USDC.\n"
-        "- Mainnet deposits: closed during verified deployment preparation.\n"
+        f"- Public mainnet funding: {'open' if protocol_status()['production']['accepting_funds'] else 'not currently enabled according to the live gate'}.\n"
         "- Wallet-free demo: https://agentsolis.solists.com.tr/play\n"
         "- Protocol status: https://agentsolis.solists.com.tr/v1/protocol/status\n"
         "- A2A Agent Card: https://agentsolis.solists.com.tr/.well-known/agent-card.json\n"
         "- OpenAPI: https://agentsolis.solists.com.tr/openapi.json\n"
         "- Source: https://github.com/Doublecheese1/agent-notary\n\n"
-        "AgentSolis does not request wallet private keys. Public mainnet money movement is not available yet.\n",
+        "AgentSolis does not request wallet private keys. Always verify the live status before signing.\n",
         headers={"Cache-Control": "public, max-age=300"},
     )

@@ -73,7 +73,8 @@ class DiscoveryTests(unittest.TestCase):
         response = llms_txt()
         text = response.body.decode("utf-8")
         self.assertIn("Public launch: 23 October 2026", text)
-        self.assertIn("Mainnet deposits: closed", text)
+        self.assertIn("Public mainnet funding:", text)
+        self.assertNotIn("Mainnet deposits: closed", text)
         self.assertIn("/.well-known/agent-card.json", text)
 
 

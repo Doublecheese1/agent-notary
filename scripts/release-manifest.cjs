@@ -15,6 +15,12 @@ const review = JSON.parse(fs.readFileSync(path.join(root, "policies/buyer-review
 const releasePath = path.join(root, "release/mainnet-release.json");
 const existing = fs.existsSync(releasePath) ? JSON.parse(fs.readFileSync(releasePath, "utf8")) : {};
 const recorded = existing.deployment_inputs || {};
+const recordedGates = existing.gates || {};
+const gate = (name, fallback = false) => {
+  const env = process.env[`MAINNET_${name.toUpperCase()}`];
+  if (env !== undefined) return String(env).toLowerCase() === "true";
+  return recordedGates[name] === true || fallback;
+};
 const publicAddress = value => /^0x[0-9a-fA-F]{40}$/.test(value || "") ? value : "";
 const manifest = {
   product: "AgentSolis",
@@ -53,7 +59,12 @@ const manifest = {
     ai_reviewer_b: "0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2",
     ai_reviewer_c: "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A"
   },
-  gates: {mainnet_enabled: false, accepting_funds: false, deployment_ui: false, operations_ui: false},
+  gates: {
+    mainnet_enabled: gate("mainnet_enabled"),
+    accepting_funds: gate("accepting_funds"),
+    deployment_ui: gate("deployment_ui"),
+    operations_ui: gate("operations_ui")
+  },
   warning: "Not deployed and not independently audited. Verify every hash and address before funding."
 };
 fs.mkdirSync(path.join(root, "release"), {recursive: true});
