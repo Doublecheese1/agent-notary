@@ -7,7 +7,7 @@ Güncelleme: 22 Ekim 2026
 - Arbitrum One ve Circle native USDC sabitlenmiş ana ağ kontratı.
 - Otomatik kanıt kontrolü ve Buyer Review anlaşmazlık akışları.
 - Başarı ödemesinde iş tutarının %1,5'i kadar protokol ücreti, 50 USDC tavan, sabit ücret yok. Anlaşma başına üst sınır kaldırılmıştır.
-- İlk 50 kabul edilen buyer cüzdanına ilk fonlanan ana ağ anlaşmasından itibaren 30 gün protokol ücreti muafiyeti.
+- İlk 50 kabul edilen buyer veya seller participant cüzdanına, ilgili participant'ın ilk fonlanan ana ağ anlaşmasından itibaren 30 gün protokol ücreti muafiyeti.
 - Yeni anlaşmaları durdurma; mevcut anlaşmaların iade/sonuç yollarını açık bırakma.
 - Automatic anlaşmalar için 10 USDC, Buyer Review için 100 USDC minimum uygulanır; kullanıcı talebi doğrultusunda anlaşma veya toplam escrow üst sınırı yoktur.
 - Sunucuda private key/seed phrase bulunmayan cüzdan akışı.
@@ -17,7 +17,7 @@ Güncelleme: 22 Ekim 2026
 - Sürümlenmiş otomatik ve Buyer Review politika dosyaları.
 - Private key almadan EIP-712 imzası üreten ve 2/3 sonucu zincire taşıyan `/mainnet/validator` konsolu.
 - Yeni fonlama kapatıldığında mevcut anlaşmaların teslimat, sonuçlandırma ve iade işlemlerini açık tutan backend kapısı.
-- Founding 50 kabulü, normal buyer erişimi ve yeni anlaşmaları durdurma işlemlerini Operations Safe için hazırlayan kapalı `/mainnet/operations` ekranı.
+- Founding 50 participant kabulü, normal buyer erişimi ve yeni anlaşmaları durdurma işlemlerini Operations Safe için hazırlayan kapalı `/mainnet/operations` ekranı.
 - MetaMask cevabı kaybolsa bile işlem kimliği kesinleşmeden ikinci fonlama/dağıtım göndermeyen tarayıcı koruması.
 - Resolver değişikliğinde yeni validator quorum veya AI review resolver'ın incelenmiş mevcut uygulamayla aynı runtime kodunu taşımasını zorunlu kılan rotasyon koruması.
 - Üç bağımsız AI değerlendirmesini 2/3 ve en az %85 güven eşiğiyle birleştiren; düşük güven, ayrışma, kritik bayrak, yüksek tutar veya taraf itirazında Human Review Safe'e geçen AI-öncelikli uyuşmazlık katmanı.
@@ -55,7 +55,7 @@ Safe ve kontratların zincirde oluşturulması gas harcadığı için ETH adım�
 10. `/mainnet/validator` üzerinden iki bağımsız validator imzasıyla 10 USDC Automatic canary anlaşmasını tamamla ve tüm bakiyeleri/olayları kontrol et.
 11. Buyer Review canary'de AI 2/3 uzlaşması, taraf itirazı, düşük güven, kritik bayrak, yüksek tutar ve Human Review Safe yollarını ayrı ayrı doğrula.
 12. Bağımsız güvenlik incelemesi/audit sonucundaki para güvenliğini etkileyen maddeleri kapat.
-13. Kritik fark yoksa `/mainnet/operations` ile ilk buyer cüzdanı için Safe işlemini hazırla ve imzalat. En son `MAINNET_ACCEPTING_FUNDS=true` yap.
+13. Kritik fark yoksa `/mainnet/operations` ile ilk buyer veya seller participant cüzdanı için Safe işlemini hazırla ve imzalat. En son `MAINNET_ACCEPTING_FUNDS=true` yap.
 
 ## Açılmayı otomatik durduran şartlar
 

@@ -22,10 +22,10 @@
     "review_hash": "0x3f9234a62a913d1efc1882bc7c2b2bd289cbcb28c8dcf62f5f949c49c99b3014"
   },
   "files_sha256": {
-    "escrow_source": "87a92740dd729f6d476e5f6207b3ff37489d0113a17c6b687d7e8a7d0a8d13d3",
+    "escrow_source": "c66fdd620c100279ab11511ece02943476f1061de99bc87350f3ba9489eb7445",
     "quorum_source": "2da48b6ba0e3a5c2041635426f87007ca1eab226def07eb1996ef7030c3742c8",
     "ai_review_resolver_source": "6cdeb60641b89b38a826fc0130fb74e562fa178ede7c62d0b82269683765e88e",
-    "escrow_artifact": "410cdf98774018bfbc63b7ec4b3ed1c65889370cf1fa38eb2b718e1eb3857d5c",
+    "escrow_artifact": "92fb25e44b7021b7e554059588da2e188c3eaa16c2d2552e7dc5752da88693cc",
     "quorum_artifact": "e47a10e4320f6ab5324fe169626a7b2b5c85391d240693cc972c7cb0f3071b6a",
     "ai_review_resolver_artifact": "1a51767231115d16d0b50dc96f58284cc38b1cee268d69fe59f676c566c7ae5f",
     "automatic_policy": "b2c8082346abc789c67670b80ef3fb4b8bfda71d7b8281a1befe465c8f745ffe",
@@ -36,35 +36,13 @@
     "treasury_safe": "0xeeAB450ef8A9F4596A1D95A7F0B451Dc0059c21C",
     "operations_safe": "0xc62DeAc99156D19F762A249bab2Df99cE7c0Bc0f",
     "human_review_safe": "0xb3d52A5Cf6d8862C18c274AfE5c43C0006b38Cd7",
-    "validator_quorum": "0x61835c4f99086006dcea599279c728344341717c",
     "ai_review_resolver": "0x3144c448215c3342c5158fdcce555fae6bfecd58",
-    "escrow": "0x95ed02f55695fa79744c122436f56541c6270b71",
     "validator_a": "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
-    "validator_b": "0x9c41A746c6649b36e548cf4D9C5CCe3Ef4648cbA",
+    "validator_b": "0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2",
     "validator_c": "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A",
     "ai_reviewer_a": "0x6f0e740A38C80036b8B0e5C613725B047BcDa4BD",
-    "ai_reviewer_b": "0x9c41A746c6649b36e548cf4D9C5CCe3Ef4648cbA",
+    "ai_reviewer_b": "0x1Fb26508Ab8467beb0a27714772868d8ea2dDDf2",
     "ai_reviewer_c": "0x2113caE8042E8fCf837498Eb3297D8563D92Dc2A"
-  },
-  "deployed_contracts": {
-    "validator_quorum": {
-      "address": "0x61835c4f99086006dcea599279c728344341717c",
-      "transaction": "0x423b0eeaa73853b80ae973674ecd672324c1d86a848757b4a0692a0b68c014cf",
-      "block": 517538613
-    },
-    "ai_review_resolver": {
-      "address": "0x3144c448215c3342c5158fdcce555fae6bfecd58",
-      "transaction": "0x7884bfef0d4a2a7410f9a3ae574e7a7fc970abbb1aacb6b22001b60f2c76b190",
-      "block": 517542250
-    },
-    "escrow": {
-      "address": "0x95ed02f55695fa79744c122436f56541c6270b71",
-      "transaction": "0xe76955bd4a7b2b35ca4491117b781d64ea031951b4c266daf14d706a388d121d",
-      "block": 517543781,
-      "paused": false,
-      "public_access": true,
-      "total_escrowed_units": 0
-    }
   },
   "gates": {
     "mainnet_enabled": true,
@@ -72,5 +50,5 @@
     "deployment_ui": false,
     "operations_ui": false
   },
-  "warning": "Live configuration observed at block 518227250: mainnet enabled, public access open, funding enabled and paused=false."
+  "warning": "Not deployed and not independently audited. Verify every hash and address before funding."
 }

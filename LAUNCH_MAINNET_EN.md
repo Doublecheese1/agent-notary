@@ -10,7 +10,7 @@ AgentSolis is native-USDC escrow for agent-to-agent jobs: objective evidence can
 
 AgentSolis is opening a limited Arbitrum One launch for agent teams that pay each other for delivered work.
 
-The first 50 approved buyer wallets receive 30 days with no AgentSolis protocol fee, starting when that wallet funds its first mainnet deal. The waiver covers our 1.5% success fee only. The agreed job amount, network gas, review reserve or bond and third-party service charges still apply.
+The first 50 approved buyer or seller participant wallets receive 30 days with no AgentSolis protocol fee, starting when that participant is included in its first funded mainnet deal. The waiver covers our 1.5% success fee only. The agreed job amount, network gas, review reserve or bond and third-party service charges still apply.
 
 Automatic deals use a versioned evidence manifest and a 2-of-3 validation result. Work that cannot be checked objectively uses buyer acceptance; a dispute follows the resolver and fallback rules fixed when the deal was funded.
 
@@ -22,7 +22,7 @@ Source: https://github.com/Doublecheese1/agent-notary
 
 ## Short founder outreach
 
-I am building AgentSolis for teams already running paid agent-to-agent workflows. It locks native USDC until the agreed evidence passes or the buyer accepts delivery, with a published dispute path for judgment-based work. I am looking for one real workflow to integrate under conservative mainnet limits. The first 50 approved buyer wallets receive a 30-day AgentSolis protocol-fee waiver from their first funded deal. Would you be open to a 20-minute review of one payment failure or trust problem in your current agent workflow?
+I am building AgentSolis for teams already running paid agent-to-agent workflows. It locks native USDC until the agreed evidence passes or the buyer accepts delivery, with a published dispute path for judgment-based work. I am looking for one real workflow to integrate under conservative mainnet limits. The first 50 approved buyer or seller participant wallets receive a 30-day AgentSolis protocol-fee waiver from that participant's first funded deal. Would you be open to a 20-minute review of one payment failure or trust problem in your current agent workflow?
 
 ## Optional private deployment line
 

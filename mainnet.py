@@ -189,6 +189,7 @@ def operations_status():
 class OperationsRequest(BaseModel):
     action: str
     buyer: str = ""
+    participant: str = ""
     allowed: bool = False
 
 
@@ -197,8 +198,9 @@ def prepare_operations_action(req: OperationsRequest):
     if not operations_ui_enabled():
         raise HTTPException(503, "The founder operations screen is closed.")
     _, contract = connection()
-    if req.action in {"admitFoundingBuyer", "cancelUnactivatedFoundingBuyer"}:
-        fn = getattr(contract.functions, req.action)(address(req.buyer))
+    participant = req.participant or req.buyer
+    if req.action in {"admitFoundingParticipant", "cancelUnactivatedFoundingParticipant", "admitFoundingBuyer", "cancelUnactivatedFoundingBuyer"}:
+        fn = getattr(contract.functions, req.action)(address(participant))
     elif req.action == "setBuyerAccess":
         fn = contract.functions.setBuyerAccess(address(req.buyer), req.allowed)
     elif req.action in {"pauseNewDeals", "resumeNewDeals"}:
@@ -425,7 +427,13 @@ def prepare_proposal(req: Proposal):
     if req.mode == "buyer_review" and req.arbitration_window < 7 * 24 * 60 * 60:
         raise HTTPException(422, "Buyer Review requires at least 7 days for AI review, appeal and human review.")
     reserve = 0 if mode == 0 else contract.functions.arbitrationReserveFor(amount).call()
-    protocol_fee = contract.functions.protocolFeeFor(buyer, amount).call()
+    try:
+        # New participant-aware deployments waive the fee when either approved
+        # participant is active; the fallback keeps the read-only quote working
+        # against the currently deployed buyer-only ABI until it is upgraded.
+        protocol_fee = contract.functions.protocolFeeFor(buyer, seller, amount).call()
+    except (TypeError, ValueError):
+        protocol_fee = contract.functions.protocolFeeFor(buyer, amount).call()
     manifest_hash, policy_hash, salt = Web3.keccak(text=req.manifest), digest(req.policy_hash), digest(req.salt)
     register_manifest(Web3.to_hex(manifest_hash), req.manifest)
     request = (

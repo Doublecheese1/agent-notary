@@ -118,7 +118,7 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
     event PublicAccessChanged(bool open);
     event AutomaticValidatorChanged(address indexed validator);
     event ReviewArbitratorChanged(address indexed arbitrator);
-    event FoundingSeatChanged(address indexed buyer, SeatState state, uint256 seatCount, uint256 feeWaiverUntil);
+    event FoundingSeatChanged(address indexed participant, SeatState state, uint256 seatCount, uint256 feeWaiverUntil);
     event DealProposed(
         bytes32 indexed id,
         address indexed buyer,
@@ -232,29 +232,64 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
         emit ReviewArbitratorChanged(arbitrator);
     }
 
-    function admitFoundingBuyer(address buyer) external onlyOperations {
-        require(buyer != address(0), "buyer required");
-        SeatState oldState = foundingSeats[buyer];
+    function _admitFoundingParticipant(address participant) internal {
+        require(participant != address(0), "participant required");
+        SeatState oldState = foundingSeats[participant];
         require(oldState == SeatState.None || oldState == SeatState.Cancelled, "seat exists");
         require(foundingSeatCount < FOUNDING_LIMIT, "founding seats full");
-        foundingSeats[buyer] = SeatState.Approved;
-        approvedBuyers[buyer] = true;
+        foundingSeats[participant] = SeatState.Approved;
         foundingSeatCount += 1;
-        emit FoundingSeatChanged(buyer, SeatState.Approved, foundingSeatCount, 0);
+        emit FoundingSeatChanged(participant, SeatState.Approved, foundingSeatCount, 0);
     }
 
-    function cancelUnactivatedFoundingBuyer(address buyer) external onlyOperations {
-        require(foundingSeats[buyer] == SeatState.Approved, "not unactivated");
-        foundingSeats[buyer] = SeatState.Cancelled;
-        approvedBuyers[buyer] = false;
+    function admitFoundingParticipant(address participant) external onlyOperations {
+        _admitFoundingParticipant(participant);
+    }
+
+    /// @notice Backwards-compatible name; the seat now applies to either role.
+    function admitFoundingBuyer(address buyer) external onlyOperations {
+        _admitFoundingParticipant(buyer);
+        approvedBuyers[buyer] = true;
+    }
+
+    function _cancelUnactivatedFoundingParticipant(address participant) internal {
+        require(foundingSeats[participant] == SeatState.Approved, "not unactivated");
+        foundingSeats[participant] = SeatState.Cancelled;
         foundingSeatCount -= 1;
-        emit FoundingSeatChanged(buyer, SeatState.Cancelled, foundingSeatCount, 0);
+        emit FoundingSeatChanged(participant, SeatState.Cancelled, foundingSeatCount, 0);
+    }
+
+    function cancelUnactivatedFoundingParticipant(address participant) external onlyOperations {
+        _cancelUnactivatedFoundingParticipant(participant);
+    }
+
+    /// @notice Backwards-compatible name; the seat now applies to either role.
+    function cancelUnactivatedFoundingBuyer(address buyer) external onlyOperations {
+        _cancelUnactivatedFoundingParticipant(buyer);
+        approvedBuyers[buyer] = false;
     }
 
     function protocolFeeFor(address buyer, uint256 amount) public view returns (uint256) {
+        return _protocolFeeForParticipants(buyer, address(0), amount);
+    }
+
+    function protocolFeeFor(address buyer, address seller, uint256 amount) public view returns (uint256) {
+        return _protocolFeeForParticipants(buyer, seller, amount);
+    }
+
+    function _protocolFeeForParticipants(address buyer, address seller, uint256 amount) internal view returns (uint256) {
         if (foundingSeats[buyer] == SeatState.Active && block.timestamp < feeWaiverUntil[buyer]) return 0;
+        if (seller != address(0) && foundingSeats[seller] == SeatState.Active && block.timestamp < feeWaiverUntil[seller]) return 0;
         uint256 fee = amount * PROTOCOL_FEE_BPS / BPS_DENOMINATOR;
         return fee > MAX_PROTOCOL_FEE ? MAX_PROTOCOL_FEE : fee;
+    }
+
+    function _activateFoundingParticipant(address participant) internal {
+        if (foundingSeats[participant] == SeatState.Approved) {
+            foundingSeats[participant] = SeatState.Active;
+            feeWaiverUntil[participant] = block.timestamp + FOUNDING_PERIOD;
+            emit FoundingSeatChanged(participant, SeatState.Active, foundingSeatCount, feeWaiverUntil[participant]);
+        }
     }
 
     function arbitrationReserveFor(uint256 amount) public pure returns (uint256) {
@@ -291,11 +326,8 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
         id = keccak256(abi.encode(address(this), block.chainid, msg.sender, request.seller, request.salt));
         require(deals[id].state == State.None, "duplicate deal");
 
-        if (foundingSeats[msg.sender] == SeatState.Approved) {
-            foundingSeats[msg.sender] = SeatState.Active;
-            feeWaiverUntil[msg.sender] = block.timestamp + FOUNDING_PERIOD;
-            emit FoundingSeatChanged(msg.sender, SeatState.Active, foundingSeatCount, feeWaiverUntil[msg.sender]);
-        }
+        _activateFoundingParticipant(msg.sender);
+        _activateFoundingParticipant(request.seller);
 
         Deal storage d = deals[id];
         d.buyer = msg.sender;
@@ -306,7 +338,7 @@ contract AgentNotaryMainnetEscrow is EIP712, Pausable, ReentrancyGuard {
         d.amount = request.amount;
         d.arbitrationReserve = request.arbitrationReserve;
         // Price and any Founding waiver are fixed when funds enter escrow.
-        d.protocolFee = protocolFeeFor(msg.sender, request.amount);
+        d.protocolFee = protocolFeeFor(msg.sender, request.seller, request.amount);
         d.fallbackSellerBps = request.fallbackSellerBps;
         d.manifestHash = request.manifestHash;
         d.policyHash = request.policyHash;

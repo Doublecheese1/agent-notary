@@ -297,6 +297,11 @@ class MainnetEscrowTest(unittest.TestCase):
         self._submit_validation(deal_id, content, 0)
         self.assertEqual(self.token.functions.balanceOf(self.treasury).call(), 0)
 
+    def test_founding_fee_is_waived_for_an_approved_seller(self):
+        self.escrow.functions.admitFoundingParticipant(self.seller).transact({"from": self.ops})
+        deal_id = self._propose(self._request())
+        self.assertEqual(self._deal(deal_id)[8], 0)
+
     def test_no_admin_withdraw_or_rescue_entrypoint(self):
         names = {item.get("name") for item in self.escrow.abi if item.get("type") == "function"}
         self.assertFalse({"withdraw", "sweep", "rescue", "emergencyWithdraw"} & names)

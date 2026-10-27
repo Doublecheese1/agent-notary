@@ -7,6 +7,7 @@ import sqlite3
 import time
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Literal
 
 from eth_account import Account
 from eth_account.messages import encode_defunct
@@ -43,13 +44,20 @@ def _db():
     db.execute("PRAGMA journal_mode=WAL")
     db.executescript("""
         CREATE TABLE IF NOT EXISTS founding_challenges (
-            wallet TEXT PRIMARY KEY, nonce TEXT NOT NULL, expires_at INTEGER NOT NULL
+            wallet TEXT PRIMARY KEY, nonce TEXT NOT NULL, expires_at INTEGER NOT NULL,
+            role TEXT NOT NULL DEFAULT 'buyer'
         );
         CREATE TABLE IF NOT EXISTS founding_applications (
             wallet TEXT PRIMARY KEY, use_case TEXT NOT NULL, created_at INTEGER NOT NULL,
-            status TEXT NOT NULL DEFAULT 'pending'
+            status TEXT NOT NULL DEFAULT 'pending', role TEXT NOT NULL DEFAULT 'buyer'
         );
     """)
+    for table, definition in (("founding_challenges", "role TEXT NOT NULL DEFAULT 'buyer'"), ("founding_applications", "role TEXT NOT NULL DEFAULT 'buyer'")):
+        try:
+            db.execute(f"ALTER TABLE {table} ADD COLUMN {definition}")
+        except sqlite3.OperationalError as exc:
+            if "duplicate column name" not in str(exc).lower():
+                raise
     try:
         yield db
         db.commit()
@@ -66,16 +74,24 @@ def _wallet(raw: str) -> str:
     return Web3.to_checksum_address(raw)
 
 
-def _message(wallet: str, nonce: str, expires_at: int) -> str:
+def _role(raw: str) -> str:
+    value = (raw or "buyer").strip().lower()
+    if value not in {"buyer", "seller", "both"}:
+        raise HTTPException(422, "Choose buyer, seller or both.")
+    return value
+
+
+def _message(wallet: str, nonce: str, expires_at: int, role: str = "buyer") -> str:
     return (
         "AgentSolis Founding 50 application\n\n"
-        f"Wallet: {wallet}\nNonce: {nonce}\nExpires: {expires_at}\n\n"
+        f"Wallet: {wallet}\nRole: {role}\nNonce: {nonce}\nExpires: {expires_at}\n\n"
         "This signature proves wallet ownership. It does not move funds or approve token spending."
     )
 
 
 class WalletRequest(BaseModel):
     wallet: str
+    role: Literal["buyer", "seller", "both"] = "buyer"
 
 
 class ApplicationRequest(BaseModel):
@@ -83,6 +99,7 @@ class ApplicationRequest(BaseModel):
     nonce: str = Field(min_length=32, max_length=128)
     signature: str = Field(min_length=100, max_length=1024)
     use_case: str = Field(min_length=10, max_length=500)
+    role: Literal["buyer", "seller", "both"] = "buyer"
     accepted_terms: bool
 
 
@@ -115,13 +132,14 @@ def challenge(req: WalletRequest):
     if not applications_open():
         raise HTTPException(503, "Founding 50 applications are not open.")
     wallet = _wallet(req.wallet)
+    role = _role(req.role)
     nonce, expires_at = secrets.token_hex(24), int(time.time()) + CHALLENGE_TTL
     with _db() as db:
         db.execute(
-            "INSERT OR REPLACE INTO founding_challenges(wallet, nonce, expires_at) VALUES(?,?,?)",
-            (wallet.lower(), nonce, expires_at),
+            "INSERT OR REPLACE INTO founding_challenges(wallet, nonce, expires_at, role) VALUES(?,?,?,?)",
+            (wallet.lower(), nonce, expires_at, role),
         )
-    return {"wallet": wallet, "nonce": nonce, "expires_at": expires_at, "message": _message(wallet, nonce, expires_at)}
+    return {"wallet": wallet, "role": role, "nonce": nonce, "expires_at": expires_at, "message": _message(wallet, nonce, expires_at, role)}
 
 
 @router.post("/apply")
@@ -134,11 +152,14 @@ def apply(req: ApplicationRequest):
     now = int(time.time())
     with _db() as db:
         row = db.execute(
-            "SELECT nonce, expires_at FROM founding_challenges WHERE wallet = ?", (wallet.lower(),)
+            "SELECT nonce, expires_at, role FROM founding_challenges WHERE wallet = ?", (wallet.lower(),)
         ).fetchone()
         if not row or not secrets.compare_digest(row["nonce"], req.nonce) or int(row["expires_at"]) < now:
             raise HTTPException(409, "The signing request expired. Start the application again.")
-        message = _message(wallet, req.nonce, int(row["expires_at"]))
+        role = _role(req.role)
+        if role != row["role"]:
+            raise HTTPException(409, "The participant role changed. Start the application again.")
+        message = _message(wallet, req.nonce, int(row["expires_at"]), role)
         try:
             recovered = Account.recover_message(encode_defunct(text=message), signature=req.signature)
         except Exception as exc:
@@ -150,8 +171,8 @@ def apply(req: ApplicationRequest):
             db.execute("DELETE FROM founding_challenges WHERE wallet = ?", (wallet.lower(),))
             return {"submitted": True, "status": existing["status"], "already_submitted": True}
         db.execute(
-            "INSERT INTO founding_applications(wallet, use_case, created_at, status) VALUES(?,?,?,'pending')",
-            (wallet.lower(), req.use_case.strip(), now),
+            "INSERT INTO founding_applications(wallet, use_case, created_at, status, role) VALUES(?,?,?,'pending',?)",
+            (wallet.lower(), req.use_case.strip(), now, role),
         )
         db.execute("DELETE FROM founding_challenges WHERE wallet = ?", (wallet.lower(),))
     return {"submitted": True, "status": "pending", "already_submitted": False}
@@ -161,6 +182,6 @@ def application_list() -> list[dict]:
     """Used only from the password-protected founder report."""
     with _db() as db:
         rows = db.execute(
-            "SELECT wallet, use_case, created_at, status FROM founding_applications ORDER BY created_at ASC"
+            "SELECT wallet, use_case, created_at, status, role FROM founding_applications ORDER BY created_at ASC"
         ).fetchall()
     return [dict(row) for row in rows]

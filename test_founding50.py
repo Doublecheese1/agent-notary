@@ -54,6 +54,20 @@ class Founding50ApplicationsTest(unittest.TestCase):
             founding50.apply(request)
         self.assertEqual(403, caught.exception.status_code)
 
+    def test_seller_role_is_bound_to_signed_application(self):
+        wallet = Account.create()
+        challenge = founding50.challenge(founding50.WalletRequest(wallet=wallet.address, role="seller"))
+        signature = Account.sign_message(
+            encode_defunct(text=challenge["message"]), wallet.key
+        ).signature.hex()
+        request = founding50.ApplicationRequest(
+            wallet=wallet.address, role="seller", nonce=challenge["nonce"], signature=signature,
+            use_case="Sell research services with Buyer Review.", accepted_terms=True,
+        )
+        result = founding50.apply(request)
+        self.assertTrue(result["submitted"])
+        self.assertEqual("seller", founding50.application_list()[0]["role"])
+
 
 if __name__ == "__main__":
     unittest.main()
