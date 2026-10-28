@@ -260,6 +260,13 @@ def video_guide_script():
     return FileResponse(Path(__file__).resolve().parent / "static" / "video-guide.js", media_type="text/javascript")
 
 
+@app.get("/assets/localized-status.js", include_in_schema=False)
+def localized_status_script():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "localized-status.js", media_type="text/javascript")
+
+
 @app.get("/assets/videos/{filename}", include_in_schema=False)
 def explainer_video_asset(filename: str):
     from pathlib import Path

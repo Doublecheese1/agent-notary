@@ -11,7 +11,8 @@ LOCALES = {
         "steps": [("Anlaş", "İşi, fiyatı, teslim kanıtını ve süreleri yazılı olarak belirleyin."), ("Kilitle", "Alıcı, işi güvenceye almak için USDC'yi akıllı sözleşmeye kilitler."), ("Teslim et", "Satıcı işi ve kararlaştırılan teslim kanıtını gönderir."), ("Sonuçlandır", "İş kabul edilirse ödeme satıcıya gider; itiraz varsa yayımlanmış inceleme yolu işler.")],
         "rules": "Ücret ve güvenlik", "fee": "Başarılı satıcı ödemesinde iş tutarının %1,5'i; en fazla 50 USDC.",
         "safety": "AgentSolis hiçbir zaman kurtarma kelimelerinizi veya özel anahtarınızı istemez.",
-        "closed": "Halka açık mainnet erişimi açıktır. AgentSolis Arbitrum One üzerindeki yerel USDC'yi kullanır; imzalamadan önce ağı, tutarı, tarafları ve sözleşme adresini cüzdanınızda doğrulayın.",
+        "network": "AgentSolis Arbitrum One üzerindeki yerel USDC'yi kullanır. İmzalamadan önce ağı, tutarı, tarafları ve sözleşme adresini cüzdanınızda doğrulayın.",
+        "status": ("Canlı mainnet durumu kontrol ediliyor…", "Halka açık erişim ve fonlama şu anda etkin.", "Halka açık erişim etkin, ancak fonlama şu anda kullanılamıyor.", "Halka açık işlemler şu anda kullanılamıyor.", "Canlı mainnet durumu doğrulanamadı."),
         "open": "İşlem ekranını aç", "guide": "İlk kez mi kullanıyorsunuz? Adım adım rehberi açın", "founding": "Founding 50'ye başvur", "notice": "Bu çeviri kullanım kolaylığı sağlar. Akıllı sözleşme parametreleri, adresler ve cüzdanınızda gösterilen son işlem bilgileri teknik olarak esas alınır. İmzalamadan önce bunları kontrol edin.",
     },
     "es": {
@@ -23,7 +24,8 @@ LOCALES = {
         "steps": [("Acordar", "Definan el trabajo, el precio, las pruebas de entrega y los plazos."), ("Bloquear", "El comprador bloquea USDC en el contrato inteligente."), ("Entregar", "El vendedor presenta el trabajo y las pruebas acordadas."), ("Resolver", "Si se acepta, se paga al vendedor; si hay disputa, se sigue el proceso publicado.")],
         "rules": "Tarifas y seguridad", "fee": "1,5 % del importe del trabajo cuando el vendedor recibe el pago, con un máximo de 50 USDC.",
         "safety": "AgentSolis nunca solicita tu frase de recuperación ni tu clave privada.",
-        "closed": "El acceso público a mainnet está abierto. AgentSolis usa USDC nativo en Arbitrum One; comprueba la red, el importe, las partes y la dirección del contrato antes de firmar.",
+        "network": "AgentSolis utiliza USDC nativo en Arbitrum One. Comprueba la red, el importe, las partes y la dirección del contrato en tu billetera antes de firmar.",
+        "status": ("Comprobando el estado de la red principal…", "El acceso público y la financiación en la red principal están habilitados.", "El acceso público está habilitado, pero la financiación no está disponible ahora.", "Las operaciones públicas en la red principal no están disponibles ahora.", "No se pudo comprobar el estado de la red principal."),
         "open": "Abrir el espacio de transacción", "guide": "¿Es tu primera vez? Abre la guía paso a paso", "founding": "Solicitar acceso a Founding 50", "notice": "Esta traducción facilita el uso. Los parámetros del contrato inteligente, las direcciones y los datos finales que muestra tu billetera constituyen la referencia técnica. Compruébalos antes de firmar.",
     },
     "pt-br": {
@@ -35,7 +37,8 @@ LOCALES = {
         "steps": [("Acordar", "Definam o trabalho, o preço, a evidência de entrega e os prazos."), ("Bloquear", "O comprador bloqueia USDC no contrato inteligente."), ("Entregar", "O vendedor envia o trabalho e a evidência combinada."), ("Liquidar", "Se houver aceite, o vendedor recebe; se houver disputa, segue-se o processo publicado.")],
         "rules": "Taxas e segurança", "fee": "1,5% do valor do trabalho quando o vendedor recebe, limitado a 50 USDC.",
         "safety": "A AgentSolis nunca solicita sua frase de recuperação ou chave privada.",
-        "closed": "O acesso público à mainnet está aberto. A AgentSolis usa USDC nativo na Arbitrum One; confira a rede, o valor, as partes e o endereço do contrato antes de assinar.",
+        "network": "A AgentSolis usa USDC nativo na Arbitrum One. Confira a rede, o valor, as partes e o endereço do contrato na carteira antes de assinar.",
+        "status": ("Verificando o estado da rede principal…", "O acesso público e o depósito de fundos na rede principal estão habilitados.", "O acesso público está habilitado, mas o depósito de fundos está indisponível no momento.", "As operações públicas na rede principal estão indisponíveis no momento.", "Não foi possível verificar o estado da rede principal."),
         "open": "Abrir a área de transação", "guide": "Primeira vez? Abra o guia passo a passo", "founding": "Candidatar-se ao Founding 50", "notice": "Esta tradução facilita o uso. Os parâmetros do contrato inteligente, os endereços e os dados finais exibidos na carteira são a referência técnica. Confira-os antes de assinar.",
     },
     "ru": {
@@ -47,7 +50,8 @@ LOCALES = {
         "steps": [("Согласовать", "Определите работу, цену, доказательства выполнения и сроки."), ("Заблокировать", "Покупатель блокирует USDC в смарт-контракте."), ("Передать", "Продавец отправляет работу и согласованные доказательства."), ("Рассчитаться", "После приёмки продавец получает оплату; при споре действует опубликованная процедура.")],
         "rules": "Комиссии и безопасность", "fee": "1,5% от стоимости работы при успешной выплате продавцу, но не более 50 USDC.",
         "safety": "AgentSolis никогда не запрашивает seed-фразу или приватный ключ.",
-        "closed": "Публичный доступ к основной сети открыт. AgentSolis использует нативный USDC в Arbitrum One; перед подписью проверьте сеть, сумму, стороны и адрес контракта.",
+        "network": "AgentSolis использует нативный USDC в сети Arbitrum One. Перед подписью проверьте сеть, сумму, стороны и адрес контракта в своём кошельке.",
+        "status": ("Проверяем текущий статус основной сети…", "Публичный доступ и внесение средств в основной сети сейчас доступны.", "Публичный доступ открыт, но внесение средств сейчас недоступно.", "Публичные операции в основной сети сейчас недоступны.", "Не удалось проверить текущий статус основной сети."),
         "open": "Открыть экран сделки", "guide": "Впервые здесь? Откройте пошаговую инструкцию", "founding": "Подать заявку в Founding 50", "notice": "Этот перевод предназначен для удобства. Техническими исходными данными являются параметры смарт-контракта, адреса и окончательные сведения в кошельке. Проверьте их перед подписанием.",
     },
     "zh-cn": {
@@ -59,7 +63,8 @@ LOCALES = {
         "steps": [("约定", "明确工作内容、价格、交付证据和期限。"), ("锁定", "买方将 USDC 锁定在智能合约中。"), ("交付", "卖方提交工作成果和约定的证据。"), ("结算", "买方接受后向卖方付款；发生争议时按公开流程处理。")],
         "rules": "费用与安全", "fee": "卖方成功收款时收取工作金额的 1.5%，最高 50 USDC。",
         "safety": "AgentSolis 绝不会索取助记词或私钥。",
-        "closed": "主网公开访问现已开放。AgentSolis 使用 Arbitrum One 上的原生 USDC；签名前请核对网络、金额、交易双方和合约地址。",
+        "network": "AgentSolis 使用 Arbitrum One 上的原生 USDC。签名前，请在钱包中核对网络、金额、交易双方和合约地址。",
+        "status": ("正在检查主网实时状态…", "目前主网已开放公开访问并可存入资金。", "目前主网可公开访问，但暂时无法存入资金。", "目前无法在主网公开发起交易。", "无法核实主网实时状态。"),
         "open": "打开交易工作区", "guide": "第一次使用？打开分步指南", "founding": "申请加入 Founding 50", "notice": "本翻译旨在方便使用。智能合约参数、地址以及钱包显示的最终交易信息是技术依据。签名前请仔细核对。",
     },
 }
@@ -102,8 +107,9 @@ def localized_landing(locale: str) -> str:
         f'<a href="/?lang={locale}&amp;video={i:02}#videos">{escape(label)} →</a>'
         for i, label in enumerate(video_chapters, 1)
     )
+    status_check, status_open, status_limited, status_closed, status_unknown = data["status"]
     canonical = f"https://agentsolis.solists.com.tr/{locale}"
     return f'''<!doctype html><html lang="{data["lang"]}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{escape(data["title"])} — AgentSolis</title><meta name="description" content="{escape(data["lead"])}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="{canonical}">{_alternate_links()}<link rel="stylesheet" href="/assets/brand.css?v=20261023b"></head>
-<body class="landing"><header class="hero localized-hero"><div class="wrap"><nav><a class="brand" href="/" aria-label="AgentSolis home"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis</span></a><div class="landing-nav-stack"><div class="language-switcher" aria-label="Language">{_language_links(locale)}</div><a class="nav-guide" href="/mainnet?lang={locale}#guide" data-event="guide_click">{escape(data["guide"])} →</a></div></nav><div class="localized-copy"><p class="eyebrow">Arbitrum One · Native USDC · Non-custodial</p><h1>{escape(data["title"])}</h1><p class="lead">{escape(data["lead"])}</p><p class="hero-proof">{escape(data["future"])}</p><div class="notice localized-status"><strong>{escape(data["closed"])}</strong></div><a class="button" href="/mainnet?lang={locale}#guide">{escape(data["open"])} →</a> <a class="button secondary" href="/mainnet/founding50" data-event="founding_click">{escape(data["founding"])} →</a></div></div></header>
-<main><section class="section"><div class="section-head"><div><p class="eyebrow">AgentSolis</p><h2>{escape(data["steps_title"])}</h2></div></div><div class="flow flow-rail">{steps}</div><p class="eyebrow">{escape(video_intro)}</p><p class="video-guide-links">{video_links}</p></section><section class="section trust-band"><div class="section-head"><div><h2>{escape(data["rules"])}</h2></div></div><div class="cards roles"><article class="card"><h3>1.5% / 50 USDC</h3><p>{escape(data["fee"])}</p></article><article class="card"><h3>Private keys stay private</h3><p>{escape(data["safety"])}</p></article></div><div class="translation-note">{escape(data["notice"])}</div></section></main><footer><div class="wrap"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis Protocol</span></a><span><a href="/terms">Terms &amp; risks</a> · <a href="/privacy">Privacy</a></span></div></footer><script src="/assets/launch-analytics.js" defer></script></body></html>'''
+<body class="landing"><header class="hero localized-hero"><div class="wrap"><nav><a class="brand" href="/" aria-label="AgentSolis home"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis</span></a><div class="landing-nav-stack"><div class="language-switcher" aria-label="Language">{_language_links(locale)}</div><a class="nav-guide" href="/mainnet?lang={locale}#guide" data-event="guide_click">{escape(data["guide"])} →</a></div></nav><div class="localized-copy"><p class="eyebrow">Arbitrum One · Native USDC · Non-custodial</p><h1>{escape(data["title"])}</h1><p class="lead">{escape(data["lead"])}</p><p class="hero-proof">{escape(data["future"])}</p><div class="notice localized-status"><strong data-live-mainnet-status data-open="{escape(status_open)}" data-limited="{escape(status_limited)}" data-closed="{escape(status_closed)}" data-unknown="{escape(status_unknown)}">{escape(status_check)}</strong><br>{escape(data["network"])}</div><a class="button" href="/mainnet?lang={locale}#guide">{escape(data["open"])} →</a> <a class="button secondary" href="/mainnet/founding50" data-event="founding_click">{escape(data["founding"])} →</a></div></div></header>
+<main><section class="section"><div class="section-head"><div><p class="eyebrow">AgentSolis</p><h2>{escape(data["steps_title"])}</h2></div></div><div class="flow flow-rail">{steps}</div><p class="eyebrow">{escape(video_intro)}</p><p class="video-guide-links">{video_links}</p></section><section class="section trust-band"><div class="section-head"><div><h2>{escape(data["rules"])}</h2></div></div><div class="cards roles"><article class="card"><h3>1.5% / 50 USDC</h3><p>{escape(data["fee"])}</p></article><article class="card"><h3>Private keys stay private</h3><p>{escape(data["safety"])}</p></article></div><div class="translation-note">{escape(data["notice"])}</div></section></main><footer><div class="wrap"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis Protocol</span></a><span><a href="/terms">Terms &amp; risks</a> · <a href="/privacy">Privacy</a></span></div></footer><script src="/assets/localized-status.js?v=20261028a" defer></script><script src="/assets/launch-analytics.js" defer></script></body></html>'''
