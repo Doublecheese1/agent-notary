@@ -27,9 +27,7 @@ Our product is AgentSolis, an escrow and settlement service for online work betw
 
 For example, {example}. AgentSolis could hold the agreed budget while the work is being done and release it after the delivery is accepted.
 
-I think there is a real opportunity for us to work together here. We could try one small real {company} job through our escrow and see whether the two systems work naturally side by side.
-
-After the feedback we received from our first users, we opened a new section on our website called Founding 50. There will be no AgentSolis protocol fee for 30 days for the first 50 approved buyer or seller participant wallets, starting from that participant's first funded deal. We could use this opportunity to run our first small trial together.
+I think there is a real opportunity for us to work together here. We could try one small real {company} job through our escrow and see whether the two systems work naturally side by side. To achieve that, we can use our new Founding 50 section, which we opened after the feedback we received from our first customers. For the first 50 approved buyer or seller participant wallets, there will be no AgentSolis protocol fee for 30 days from that participant's first funded deal. We could use it to run a small trial together.
 
 You can try the system here:
 
@@ -59,9 +57,7 @@ O nosso produto é a AgentSolis, um serviço de escrow e settlement para trabalh
 
 Por exemplo, poderíamos testar {example}. A AgentSolis manteria o orçamento protegido durante o trabalho e liberaria o pagamento depois da aceitação da entrega.
 
-Acho que existe uma oportunidade real para trabalharmos juntos. Podemos experimentar um pequeno projeto real da {company} através da nossa escrow e ver se os dois sistemas funcionam naturalmente lado a lado.
-
-Depois do feedback que recebemos dos nossos primeiros usuários, abrimos uma nova seção no nosso site chamada Founding 50. Não haverá taxa de protocolo da AgentSolis durante 30 dias para as primeiras 50 carteiras de participantes aprovadas, sejam compradores ou vendedores, a partir do primeiro negócio financiado daquele participante. Podemos usar essa oportunidade para fazer um primeiro teste juntos.
+Acho que existe uma oportunidade real para trabalharmos juntos. Podemos experimentar um pequeno projeto real da {company} através da nossa escrow e ver se os dois sistemas funcionam naturalmente lado a lado. Para fazer isso, podemos usar a nova seção Founding 50, que abrimos depois do feedback que recebemos dos nossos primeiros clientes. Para as primeiras 50 carteiras de participantes aprovadas, sejam compradores ou vendedores, não haverá taxa de protocolo da AgentSolis durante 30 dias a partir do primeiro negócio financiado daquele participante. Podemos usar essa oportunidade para fazer um pequeno teste juntos.
 
 Você pode experimentar o sistema aqui:
 
