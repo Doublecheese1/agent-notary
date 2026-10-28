@@ -1,0 +1,13 @@
+# AgentSolis video source map
+
+The website copies below were verified byte-for-byte against the original Dreamina files in Downloads on 28 October 2026. The originals remain untouched.
+
+| Part | Website file | Original Dreamina filename | SHA-256 |
+| --- | --- | --- | --- |
+| 1 — Overview | `01-overview.mp4` | `dreamina-2026-10-28-1328-Spoken-language constraint_ All voiceove....mp4` | `3734DA702477419A90B0231CBC6C357CBAB61E13A32153C85E0E9E2CE1122D5A` |
+| 2 — Wallet | `02-wallet.mp4` | `dreamina-2026-10-28-5088-Create PART 2 OF 5 of the AgentSolis cus....mp4` | `F56540248A83EB98003F6FEE119936D1D30C1AC96CFB8F117FC17BB5E3CD601C` |
+| 3 — Buyer | `03-buyer.mp4` | `dreamina-2026-10-28-1300-Create PART 3 OF 5 of the AgentSolis cus....mp4` | `39393FEA1CC5E181BC260BAC11395709277A5A01005E5D204388EEB948833BD6` |
+| 4 — Seller | `04-seller.mp4` | `dreamina-2026-10-28-4167-Create PART 4 OF 5 of the AgentSolis cus....mp4` | `F9EB3A6C813F7C975ACE842FD242DB0B14A7FEC7E8CE5E152E3A4211F6D3D787` |
+| 5 — Founding 50 | `05-founding50.mp4` | `dreamina-2026-10-28-8913-Create PART 5 OF 5 of the AgentSolis cus....mp4` | `A15D56EC2C551EA02796CBC0C2BA550F34CD2848DA2EB6A2F60F6013A08D02B3` |
+
+The matching `01-poster.png` through `05-poster.png` are exact UI reference cards for the player. These are illustrative video assets, not transaction records.

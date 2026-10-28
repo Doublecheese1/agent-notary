@@ -253,6 +253,33 @@ def language_menu_script():
     return FileResponse(Path(__file__).resolve().parent / "static" / "language-menu.js", media_type="text/javascript")
 
 
+@app.get("/assets/video-guide.js", include_in_schema=False)
+def video_guide_script():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "video-guide.js", media_type="text/javascript")
+
+
+@app.get("/assets/videos/{filename}", include_in_schema=False)
+def explainer_video_asset(filename: str):
+    from pathlib import Path
+    from fastapi import HTTPException
+    from fastapi.responses import FileResponse
+
+    allowed = {
+        "01-overview.mp4", "02-wallet.mp4", "03-buyer.mp4", "04-seller.mp4", "05-founding50.mp4",
+        "01-poster.png", "02-poster.png", "03-poster.png", "04-poster.png", "05-poster.png",
+    }
+    if filename not in allowed:
+        raise HTTPException(status_code=404, detail="Video asset not found")
+    media_type = "video/mp4" if filename.endswith(".mp4") else "image/png"
+    return FileResponse(
+        Path(__file__).resolve().parent / "static" / "videos" / filename,
+        media_type=media_type,
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
+
+
 @app.get("/assets/flags/{code}.svg", include_in_schema=False)
 def language_flag(code: str):
     from pathlib import Path
