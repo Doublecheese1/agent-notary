@@ -43,8 +43,3 @@
   });
 })();
 
-// Keep public landing banners tied to the same live funding gate as the workspace.
-const liveStatusScript = document.createElement("script");
-liveStatusScript.src = "/assets/live-status.js";
-liveStatusScript.defer = true;
-document.head.appendChild(liveStatusScript);

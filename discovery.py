@@ -37,7 +37,7 @@ def protocol_status() -> dict[str, Any]:
         warning = "The live mainnet funding status is unavailable or closed. Do not fund until the workspace reports accepting_funds=true."
     return {
         "product": "AgentSolis",
-        "description": "Deterministic settlement infrastructure for agent-to-agent jobs.",
+        "description": "Evidence-based escrow and settlement infrastructure for online work involving people and AI agents.",
         "public_launch_date": PUBLIC_LAUNCH_DATE,
         "production": {
             "network": "Arbitrum One",
@@ -63,11 +63,8 @@ def protocol_status() -> dict[str, Any]:
             "public_money_movement_tools": False,
             "x402_payments": False,
             "mcp_server": False,
-            "a2a_read_only": True,
         },
         "links": {
-            "openapi": f"{ORIGIN}/openapi.json",
-            "docs": f"{ORIGIN}/docs",
             "demo": f"{ORIGIN}/play",
             "mainnet_status": f"{ORIGIN}/mainnet",
         },
@@ -85,12 +82,10 @@ def agent_card():
     return JSONResponse(
         {
             "name": "AgentSolis",
-            "description": "Read-only discovery agent for deterministic agent-to-agent settlement infrastructure.",
+            "description": "Read-only discovery surface for evidence-based escrow and settlement involving people and AI agents.",
             "version": "0.1.0",
-            "documentationUrl": f"{ORIGIN}/docs",
-            "supportedInterfaces": [
-                {"url": f"{ORIGIN}/a2a", "protocolBinding": "HTTP+JSON", "protocolVersion": "1.0"}
-            ],
+            "documentationUrl": f"{ORIGIN}/v1/protocol/status",
+            "supportedInterfaces": [],
             "capabilities": {"streaming": False, "pushNotifications": False, "extendedAgentCard": False},
             "defaultInputModes": ["text/plain", "application/json"],
             "defaultOutputModes": ["text/plain", "application/json"],
@@ -186,14 +181,14 @@ def a2a_send_message(body: dict[str, Any], a2a_version: str = Header(default="1.
 def llms_txt():
     return PlainTextResponse(
         "# AgentSolis\n\n"
-        "> Deterministic settlement infrastructure for agent-to-agent jobs.\n\n"
+        "> Evidence-based escrow and settlement for online work involving people and AI agents.\n\n"
         "- Public launch: 23 October 2026.\n"
         "- Production network candidate: Arbitrum One with native USDC.\n"
         f"- Public mainnet funding: {'open' if protocol_status()['production']['accepting_funds'] else 'not currently enabled according to the live gate'}.\n"
         "- Wallet-free demo: https://agentsolis.solists.com.tr/play\n"
         "- Protocol status: https://agentsolis.solists.com.tr/v1/protocol/status\n"
-        "- A2A Agent Card: https://agentsolis.solists.com.tr/.well-known/agent-card.json\n"
-        "- OpenAPI: https://agentsolis.solists.com.tr/openapi.json\n"
+        "- Discovery card: https://agentsolis.solists.com.tr/.well-known/agent-card.json\n"
+        "- OpenAPI, full docs, MCP and a callable A2A integration are not published yet.\n"
         "\n"
         "AgentSolis does not request wallet private keys. Always verify the live status before signing.\n",
         headers={"Cache-Control": "public, max-age=300"},
