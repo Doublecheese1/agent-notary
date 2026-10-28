@@ -23,12 +23,14 @@ class VideoCaptionTests(unittest.TestCase):
                     self.assertEqual(response.text.count(" --> "), len(captions))
                     self.assertEqual(len(captions), len(TIMES[chapter]))
 
-    def test_localized_pages_link_to_shared_videos_and_language(self):
+    def test_localized_pages_embed_shared_videos_and_language(self):
         for language in ("tr", "es", "pt-br", "ru", "zh-cn"):
             response = self.client.get(f"/{language}")
             self.assertEqual(response.status_code, 200)
+            self.assertIn('id="explainerVideo"', response.text)
+            self.assertIn(f'src="/assets/videos/01.{language}.vtt"', response.text)
             for chapter in TIMES:
-                self.assertIn(f"/?lang={language}&amp;video={chapter}#videos", response.text)
+                self.assertIn(f'data-video-chapter="{chapter}"', response.text)
 
     def test_only_listed_caption_files_are_served(self):
         for filename in ("01.xx.vtt", "../main.py", "06.tr.vtt"):

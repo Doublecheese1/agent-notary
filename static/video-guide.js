@@ -5,8 +5,10 @@
   const buttons = Array.from(document.querySelectorAll('[data-video-chapter]'));
   if (!video || !title || !description || buttons.length !== 5) return;
   const params = new URLSearchParams(location.search);
-  const language = ['en', 'tr', 'es', 'pt-br', 'ru', 'zh-cn'].includes((params.get('lang') || '').toLowerCase())
-    ? params.get('lang').toLowerCase() : 'en';
+  const pageLanguage = (document.documentElement.lang || '').toLowerCase();
+  const requestedLanguage = (params.get('lang') || pageLanguage).toLowerCase();
+  const language = ['en', 'tr', 'es', 'pt-br', 'ru', 'zh-cn'].includes(requestedLanguage)
+    ? requestedLanguage : 'en';
   const tracks = Array.from(video.querySelectorAll('track[kind="subtitles"]'));
 
   function showLanguage() {
@@ -50,11 +52,12 @@
     video.setAttribute('poster', `/assets/videos/${id}-poster.png`);
     video.setAttribute('src', `/assets/videos/${chapter.file}?v=20261028c`);
     tracks.forEach((track) => track.setAttribute('src', `/assets/videos/${id}.${track.srclang.toLowerCase()}.vtt`));
-    video.setAttribute('aria-label', `${chapter.title}, 30-second illustrative video in English`);
+    const selectedButton = buttons.find((button) => button.dataset.videoChapter === id);
+    video.setAttribute('aria-label', selectedButton?.dataset.title || `${chapter.title}, 30-second illustrative video in English`);
     video.load();
     showLanguage();
-    title.textContent = chapter.title;
-    description.textContent = chapter.description;
+    title.textContent = selectedButton?.dataset.title || chapter.title;
+    description.textContent = selectedButton?.dataset.description || chapter.description;
     buttons.forEach((button) => button.setAttribute('aria-pressed', button.dataset.videoChapter === id ? 'true' : 'false'));
   }
 
