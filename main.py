@@ -270,9 +270,14 @@ def explainer_video_asset(filename: str):
         "01-overview.mp4", "02-wallet.mp4", "03-buyer.mp4", "04-seller.mp4", "05-founding50.mp4",
         "01-poster.png", "02-poster.png", "03-poster.png", "04-poster.png", "05-poster.png",
     }
+    allowed.update(
+        f"{chapter}.{language}.vtt"
+        for chapter in ("01", "02", "03", "04", "05")
+        for language in ("en", "tr", "es", "pt-br", "ru", "zh-cn")
+    )
     if filename not in allowed:
         raise HTTPException(status_code=404, detail="Video asset not found")
-    media_type = "video/mp4" if filename.endswith(".mp4") else "image/png"
+    media_type = "video/mp4" if filename.endswith(".mp4") else "text/vtt" if filename.endswith(".vtt") else "image/png"
     return FileResponse(
         Path(__file__).resolve().parent / "static" / "videos" / filename,
         media_type=media_type,
