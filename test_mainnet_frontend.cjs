@@ -33,10 +33,14 @@ assert(setup.includes("agentnotary.deploymentPending") && setup.includes("Check 
 assert(setup.includes("DEFAULT_SIGNERS") && setup.includes(APPROVED_DEPLOYER), "deployment must prefill the approved private-canary signers");
 assert(setup.includes('$("escrowOperations").value = $("operations").value') && setup.includes('$("treasury").value = $("feeRecipient").value'), "deployment must mirror repeated Safe addresses to reduce entry errors");
 assert(operations.includes("prepare-operations-action") && !operations.includes("eth_sendTransaction"), "founder operations must be prepared for Safe execution, not sent from browser");
-for (const id of ["arbitrationWindow", "reasonHash", "evidenceUri", "dealLink", "checkTx", "fallbackExample", "approvalStep", "fundingStep", "sellerError"]) {
+for (const id of ["arbitrationWindow", "reasonHash", "evidenceUri", "dealLink", "checkTx", "fallbackExample", "costPreview", "hashFile", "hashFileStatus", "approvalStep", "fundingStep", "sellerError"]) {
   assert(html.includes(`id="${id}"`), `missing mainnet UI element: ${id}`);
 }
 assert(html.includes('id="propose" disabled'), "funding must wait for confirmed approval");
+assert(!html.includes("data-live-funding-status"), "workspace must not leave a second stale status indicator");
+assert(js.includes('crypto.subtle.digest("SHA-256",bytes)'), "local delivery file helper must calculate a browser-side SHA-256 hash");
+assert(!js.includes('FormData') && !js.includes('fetch(file'), "delivery file helper must not upload the selected file");
+assert(founding.includes('href="/mainnet#guide"'), "Founding 50 must not assume every applicant is a buyer");
 assert(html.includes('<option value="buyer_review" selected>'), "buyer review must be the default settlement mode");
 assert(html.includes('id="amount" value="100"'), "buyer review must default to its 100 USDC contract minimum");
 assert(html.includes('id="fallback" type="number" min="0" max="100" value="50"'), "buyer review must default to the disclosed 50/50 timeout split");

@@ -12,9 +12,11 @@ ru:{eyebrow:"Вы здесь впервые?",title:"Мы подскажем с�
 for(const copy of Object.values(G)){
   if(typeof copy.walletBody === "string") copy.walletBody = copy.walletBody.replaceAll("BtcTurk", "Coinbase");
 }
+const VIDEO={en:"Watch the wallet video (English) →",tr:"Cüzdan videosunu izle (İngilizce) →",es:"Ver el vídeo de la billetera (inglés) →","pt-br":"Ver o vídeo da carteira (inglês) →",ru:"Смотреть видео о кошельке (английский) →","zh-cn":"观看钱包视频（英语）→"};
 function init(){
  const lang=window.AgentSolisI18n?.lang||"en",x=G[lang]||G.en,$=id=>document.getElementById(id);if(!$("guide"))return;
  const set=(id,value)=>{const el=$(id);if(el&&el.textContent!==value)el.textContent=value},list=(id,items)=>{const el=$(id);if(el)el.replaceChildren(...items.map(v=>{const li=document.createElement("li");li.textContent=v;return li}))};
+ const video=$("guideWalletVideo");if(video){video.textContent=VIDEO[lang]||VIDEO.en;video.href=(lang==="en"?"/":`/${lang}`)+"?video=02#videos";}
  set("guideEyebrow",x.eyebrow);set("guideTitle",x.title);set("guideWalletTitle",x.walletTitle);set("guideWalletBody",x.walletBody);set("guideInstall",x.install);set("guideDemo",x.demo);set("guideBeforeTitle",x.before);list("guideChecklist",x.checklist);set("guideDisputeTitle",x.disputeTitle);set("guideDisputeIntro",x.disputeIntro);list("guideDisputeSteps",x.disputeSteps);set("guideReviewNote",x.reviewNote);set("guideSafety",x.safe);
  const cards=document.querySelectorAll(".guide-paths article");cards[0].querySelector("span").textContent=x.buyer;cards[1].querySelector("span").textContent=x.seller;[x.buyerSteps,x.sellerSteps].forEach((steps,i)=>{const ol=cards[i].querySelector("ol");ol.replaceChildren(...steps.map(v=>{const li=document.createElement("li");li.textContent=v;return li}))});
  const toggle=$("guideToggle"),body=$("guideBody");toggle.textContent=x.hide;toggle.onclick=()=>{const opening=body.hidden;body.hidden=!opening;toggle.textContent=opening?x.hide:x.show;toggle.setAttribute("aria-expanded",String(opening))};

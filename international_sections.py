@@ -94,6 +94,7 @@ LOCKED_LABELS = {
 def localized_main(locale: str, data: dict, steps: str) -> str:
     """Render the same nine section types as the English landing page."""
     c = COPY[locale]
+    english_note = {"tr": "İngilizce", "es": "inglés", "pt-br": "inglês", "ru": "английский", "zh-cn": "英语"}[locale]
     v, e, d, r, f, u, demo, guides, audience = (
         c[key] for key in ("video", "example", "dispute", "roles", "fees", "usdc", "demo", "guides", "audience")
     )
@@ -130,8 +131,8 @@ def localized_main(locale: str, data: dict, steps: str) -> str:
     )
     fee_cards = "".join(_card(f[i], f[i + 1]) for i in (3, 5, 7, 9))
     usdc_cards = (_card(u[3], u[4]) + _card(u[5], u[6]) + _card(u[7], u[8], links[1], f"/mainnet?lang={locale}#guide"))
-    guide_cards = (_card(guides[3], guides[4], guides[5], "/x402-vs-agent-escrow")
-                   + _card(guides[6], guides[7], guides[8], "/ai-agent-job-evidence"))
+    guide_cards = (_card(guides[3], guides[4], f"{guides[5]} ({english_note})", "/x402-vs-agent-escrow")
+                   + _card(guides[6], guides[7], f"{guides[8]} ({english_note})", "/ai-agent-job-evidence"))
     audience_cards = "".join(_card(audience[i], audience[i + 1]) for i in (3, 5, 7, 9))
     first_title, first_desc = c["chapters"][0]
     return f'''<main>
@@ -143,7 +144,7 @@ def localized_main(locale: str, data: dict, steps: str) -> str:
 <p id="videoGuideNotice" class="video-guide-notice">{escape(v[3])}</p></div>
 <div class="video-guide-chapters" aria-label="{escape(v[1], quote=True)}">{chapter_buttons}
 <div class="video-guide-copy" aria-live="polite"><h3 id="videoChapterTitle">{escape(first_title)}</h3><p id="videoChapterDescription">{escape(first_desc)}</p></div></div></div>
-<p class="video-guide-links"><a href="/play" data-event="demo_click">{escape(links[0])} →</a><a href="/mainnet?lang={locale}#guide" data-event="guide_click">{escape(links[1])} →</a></p></section>
+<p class="video-guide-links"><a href="/play" data-event="demo_click">{escape(links[0])} ({escape(english_note)}) →</a><a href="/mainnet?lang={locale}#guide" data-event="guide_click">{escape(links[1])} →</a></p></section>
 <section class="section example-section">{_header(e[0], e[1], e[2])}
 <div class="example-deal"><div class="example-title"><strong>{escape(e[3])}</strong><span>{escape(e[4])}</span></div>
 <div class="example-grid">{example_cells}</div><p class="example-total"><strong>{escape(e[13])}:</strong> {escape(e[14])}</p></div>
@@ -153,7 +154,7 @@ def localized_main(locale: str, data: dict, steps: str) -> str:
 <div class="translation-note">{escape(data["notice"])}</div></section>
 <section class="section">{_header(u[0], u[1], u[2])}<div class="cards roles">{usdc_cards}</div></section>
 <section class="section">{_header(demo[0], demo[1], demo[2])}<div class="notice"><strong>{escape(demo[3])}</strong> {escape(demo[4])}</div>
-<a class="button" href="/play" data-event="demo_click">{escape(demo[5])} →</a></section>
+<a class="button" href="/play" data-event="demo_click">{escape(demo[5])} ({escape(english_note)}) →</a></section>
 <section class="section">{_header(guides[0], guides[1], guides[2])}<div class="cards roles">{guide_cards}</div></section>
 <section class="section" id="who-can-use">{_header(audience[0], audience[1], audience[2])}<div class="cards roles">{audience_cards}</div></section>
 </main>'''

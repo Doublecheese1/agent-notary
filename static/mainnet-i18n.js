@@ -33,9 +33,20 @@ C["pt-br"].previewBody="O acesso público à mainnet e o recebimento de fundos e
 C.ru.previewBody="Публичный доступ к основной сети и приём средств открыты. AgentSolis использует нативный USDC Circle в Arbitrum One. Перед подписью проверьте сеть, токен, сумму, стороны, доказательства, сроки и адрес контракта.";
 C["zh-cn"].previewBody="主网公开访问和资金接收均已开放。AgentSolis 使用 Arbitrum One 上的 Circle 原生 USDC。签名前请核对网络、代币、金额、交易双方、证据、期限和合约地址。";
 for(const [code,value] of Object.entries({tr:"2 gün",es:"2 días","pt-br":"2 dias",ru:"2 дня","zh-cn":"2 天"}))C[code].twoDays=value;
+const EXTRA={
+ en:{reviewFunding:"Connect wallet to review exact funding",hashFile:"Generate this hash from a local file (optional)",hashFileStatus:"The file stays in your browser. Share a delivery URL for the same file."},
+ tr:{reviewFunding:"Kesin fon tutarı için cüzdanı bağla",hashFile:"Yerel dosyadan hash oluştur (isteğe bağlı)",hashFileStatus:"Dosya tarayıcınızda kalır. Aynı dosyanın teslimat bağlantısını paylaşın."},
+ es:{reviewFunding:"Conecta la billetera para ver el importe exacto",hashFile:"Crear hash de un archivo local (opcional)",hashFileStatus:"El archivo permanece en tu navegador. Comparte el enlace de entrega del mismo archivo."},
+ "pt-br":{reviewFunding:"Conecte a carteira para ver o valor exato",hashFile:"Gerar hash de um arquivo local (opcional)",hashFileStatus:"O arquivo permanece no navegador. Compartilhe o link de entrega do mesmo arquivo."},
+ ru:{reviewFunding:"Подключите кошелёк для точной суммы",hashFile:"Создать хеш локального файла (необязательно)",hashFileStatus:"Файл остаётся в браузере. Укажите ссылку доставки на тот же файл."},
+ "zh-cn":{reviewFunding:"连接钱包以查看准确注资金额",hashFile:"从本地文件生成哈希（可选）",hashFileStatus:"文件仅留在浏览器中。请分享同一文件的交付链接。"}
+};
+Object.assign(EN,EXTRA.en);
+for(const [code,values] of Object.entries(EXTRA))if(code!=="en")Object.assign(C[code],values);
 const params=new URLSearchParams(location.search);let lang=params.get("lang")||"en";if(!META[lang])lang="en";
 const copy={...EN,...(C[lang]||{})};
 const englishToKey=new Map(Object.entries(EN).map(([key,value])=>[value,key]));
+englishToKey.set("Review funding","reviewFunding");
 function t(key,vars={}){let value=copy[key]??EN[key]??key;for(const [name,replacement] of Object.entries(vars))value=value.replaceAll(`{${name}}`,String(replacement));return value}
 function translateTextNodes(){const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);for(const node of nodes){const raw=node.nodeValue,trimmed=raw.trim(),key=englishToKey.get(trimmed);if(!key)continue;node.nodeValue=raw.replace(trimmed,t(key))}for(const el of document.querySelectorAll("[placeholder]")){const key=englishToKey.get(el.placeholder);if(key)el.placeholder=t(key)}}
 function languageUrl(next){const url=new URL(location.href);url.searchParams.set("lang",META[next]?next:"en");return url.pathname+url.search+url.hash}

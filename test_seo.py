@@ -53,7 +53,8 @@ class SeoTest(unittest.TestCase):
         self.assertIn('name="description"', response.text)
         self.assertIn('rel="canonical" href="https://agentsolis.solists.com.tr/mainnet"', response.text)
         self.assertIn('type="application/ld+json"', response.text)
-        self.assertIn("Checking live mainnet funding status", response.text)
+        self.assertIn('id="status" class="status checking"', response.text)
+        self.assertNotIn("data-live-funding-status", response.text)
         self.assertNotIn("deposits stay closed", response.text)
 
     def test_public_pages_do_not_publish_stale_closed_access_copy(self):
