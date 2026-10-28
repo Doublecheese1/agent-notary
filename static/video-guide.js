@@ -48,7 +48,7 @@
     if (!chapter) return;
     video.pause();
     video.setAttribute('poster', `/assets/videos/${id}-poster.png`);
-    video.setAttribute('src', `/assets/videos/${chapter.file}`);
+    video.setAttribute('src', `/assets/videos/${chapter.file}?v=20261028c`);
     tracks.forEach((track) => track.setAttribute('src', `/assets/videos/${id}.${track.srclang.toLowerCase()}.vtt`));
     video.setAttribute('aria-label', `${chapter.title}, 30-second illustrative video in English`);
     video.load();
