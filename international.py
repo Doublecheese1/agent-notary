@@ -103,7 +103,10 @@ def _localized_navigation(locale: str) -> str:
 def _localized_footer(locale: str) -> str:
     _, _, _, _, _, _, evidence, escrow, x402, terms, privacy, english = map(escape, NAV[locale])
     return (f'<footer><div class="wrap"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis Protocol</span></a>'
-            f'<span><a href="/ai-agent-escrow">{escrow} ({english})</a> · '
+            f'<span><a href="/start">Start ({english})</a> · '
+            f'<a href="/faq">FAQ ({english})</a> · '
+            f'<a href="/contact">Contact ({english})</a> · '
+            f'<a href="/ai-agent-escrow">{escrow} ({english})</a> · '
             f'<a href="/x402-vs-agent-escrow">{x402} ({english})</a> · '
             f'<a href="/ai-agent-job-evidence">{evidence} ({english})</a> · '
             f'<a href="/terms">{terms} ({english})</a> · '
