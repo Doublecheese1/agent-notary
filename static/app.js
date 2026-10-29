@@ -46,20 +46,20 @@ async function run(success) {
   try {
     status("Connecting to sandbox…");
     await request("/sandbox/health");
+    $("step-agree").classList.add("active");
     status("The buyer is securing the simulated budget…");
     const locked = await request("/sandbox/v1/deals/lock", lockBody);
     if (typeof locked.deal_id !== "string" || locked.status !== "LOCKED") throw new Error("Unexpected lock response; settlement was not sent.");
     dealId = locked.deal_id;
     $("step-lock").classList.add("active");
     $("buyer-state").textContent = money(locked.locked_amount_usd) + " secured for this demo job.";
-    $("step-deliver").classList.add("active");
     $("seller-state").textContent = "Submitting the completed work…";
     status("The seller has delivered the work. AgentSolis is checking the demo rule…");
     const result = await request("/sandbox/v1/deals/settle", {deal_id: dealId, seller_agent_id: lockBody.seller_agent_id, deliverable: success ? valid : invalid});
     if (!["APPROVED", "REJECTED"].includes(result.decision)) throw new Error("Unexpected settlement response; inspect the response trail.");
-    $("step-validate").classList.add("active"); $("step-final").classList.add("active");
+    $("step-deliver").classList.add("active"); $("step-settle").classList.add("active");
     const approved = result.decision === "APPROVED";
-    $("decision").textContent = approved ? "Job completed · Seller paid" : "Delivery did not pass · Buyer return recorded";
+    $("decision").textContent = approved ? "Job completed · Simulated seller payout" : "Delivery did not pass · Simulated buyer return";
     $("decision").classList.toggle("error", !approved);
     $("deal").textContent = "Demo transaction reference: " + dealId;
     $("locked").textContent = money(locked.locked_amount_usd);
