@@ -1,4 +1,5 @@
 """Localized, crawlable introductions for AgentSolis."""
+import json
 from html import escape
 from international_sections import localized_main
 
@@ -136,7 +137,15 @@ def localized_landing(locale: str) -> str:
     steps = "".join(f'<article class="step"><b>0{i}</b><h3>{escape(title)}</h3><p>{escape(copy)}</p></article>' for i, (title, copy) in enumerate(data["steps"], 1))
     status_check, status_open, status_limited, status_closed, status_unknown = data["status"]
     canonical = f"https://agentsolis.solists.com.tr/{locale}"
+    og_locale = {"tr": "tr_TR", "es": "es_ES", "pt-br": "pt_BR", "ru": "ru_RU", "zh-cn": "zh_CN"}[locale]
+    social_image = "https://agentsolis.solists.com.tr/assets/agentsolis-social-card.png"
+    schema = json.dumps({
+        "@context": "https://schema.org", "@type": "WebPage", "name": data["title"],
+        "description": data["lead"], "url": canonical, "inLanguage": data["lang"],
+        "isPartOf": {"@type": "WebSite", "name": "AgentSolis", "url": "https://agentsolis.solists.com.tr/"},
+    }, ensure_ascii=False).replace("<", "\\u003c")
     return f'''<!doctype html><html lang="{data["lang"]}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{escape(data["title"])} — AgentSolis</title><meta name="description" content="{escape(data["lead"])}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="{canonical}">{_alternate_links()}<link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="/assets/brand.css?v=20261029trust"></head>
+<title>{escape(data["title"])} — AgentSolis</title><meta name="description" content="{escape(data["lead"], quote=True)}"><meta name="robots" content="index,follow,max-image-preview:large"><link rel="canonical" href="{canonical}">{_alternate_links()}<link rel="icon" href="/favicon.ico">
+<meta property="og:type" content="website"><meta property="og:site_name" content="AgentSolis"><meta property="og:locale" content="{og_locale}"><meta property="og:title" content="{escape(data["title"], quote=True)} — AgentSolis"><meta property="og:description" content="{escape(data["lead"], quote=True)}"><meta property="og:url" content="{canonical}"><meta property="og:image" content="{social_image}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{escape(data["title"], quote=True)} — AgentSolis"><meta name="twitter:description" content="{escape(data["lead"], quote=True)}"><meta name="twitter:image" content="{social_image}"><script type="application/ld+json">{schema}</script><link rel="stylesheet" href="/assets/brand.css?v=20261029trust"></head>
 <body class="landing"><header class="hero localized-hero"><div class="wrap"><nav><a class="brand" href="/" aria-label="AgentSolis home"><span class="brand-mark" aria-hidden="true"></span><span>AgentSolis</span></a><div class="landing-nav-stack">{_localized_navigation(locale)}<div class="language-switcher" aria-label="Language">{_language_links(locale)}</div><a class="nav-guide" href="/mainnet?lang={locale}#guide" data-event="guide_click">{escape(data["guide"])} →</a></div></nav><div class="localized-copy"><p class="eyebrow">Arbitrum One · Native USDC · Non-custodial</p><h1>{escape(data["title"])}</h1><p class="lead">{escape(data["lead"])}</p><p class="hero-proof">{escape(data["future"])}</p><div class="notice localized-status"><strong data-live-mainnet-status data-open="{escape(status_open)}" data-limited="{escape(status_limited)}" data-closed="{escape(status_closed)}" data-unknown="{escape(status_unknown)}">{escape(status_check)}</strong><br>{escape(data["network"])}</div><a class="button" href="/mainnet?lang={locale}#guide">{escape(data["open"])} →</a> <a class="button secondary" href="/mainnet/founding50" data-event="founding_click">{escape(data["founding"])} ({escape(english_note)}) →</a></div></div></header>
 {localized_main(locale, data, steps)}{_localized_footer(locale)}<script src="/assets/video-guide.js?v=20261028d" defer></script><script src="/assets/localized-status.js?v=20261029a" defer></script><script src="/assets/launch-analytics.js" defer></script></body></html>'''
