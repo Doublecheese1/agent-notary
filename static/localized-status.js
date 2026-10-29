@@ -1,8 +1,8 @@
 "use strict";
 (() => {
-  const status = document.querySelector("[data-live-mainnet-status]");
-  if (!status) return;
-  const update = (key) => { status.textContent = status.dataset[key]; };
+  const statuses = document.querySelectorAll("[data-live-mainnet-status]");
+  if (!statuses.length) return;
+  const update = (key) => { for (const status of statuses) status.textContent = status.dataset[key]; };
   fetch("/mainnet/config", { cache: "no-store" })
     .then((response) => {
       if (!response.ok) throw new Error("Live config unavailable");
