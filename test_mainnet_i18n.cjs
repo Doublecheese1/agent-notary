@@ -42,11 +42,37 @@ assert(api.catalog.tr.previewBody.includes("Halka açık mainnet erişimi açık
 assert(!i18nSource.includes("New mainnet deposits stay closed"), "stale English closed-access copy must be removed");
 
 const dynamicStart = appSource.indexOf("const D=") + "const D=".length;
-const dynamicEnd = appSource.indexOf(";\r\nconst T=", dynamicStart) >= 0
-  ? appSource.indexOf(";\r\nconst T=", dynamicStart)
-  : appSource.indexOf(";\nconst T=", dynamicStart);
+const dynamicEnd = [";\r\nconst REVIEW_COPY=", ";\nconst REVIEW_COPY=", ";\r\nconst T=", ";\nconst T="]
+  .map((marker) => appSource.indexOf(marker, dynamicStart))
+  .filter((index) => index >= 0)
+  .sort((a, b) => a - b)[0];
 assert(dynamicStart > "const D=".length && dynamicEnd > dynamicStart, "dynamic translation catalog must be readable");
 const dynamic = vm.runInNewContext(`(${appSource.slice(dynamicStart, dynamicEnd)})`);
+const fundingGuard = appSource.match(/^function updateFundingButtons\(\)\{.*\}$/m)?.[0];
+if (appSource.includes("const REVIEW_COPY=")) {
+assert(fundingGuard, "funding preflight guard must exist");
+const nodes = { approve: { before(node) { nodes[node.id] = node; } }, propose: {} };
+const guardContext = {
+  REVIEW_COPY: { en: { closed: "closed", needWallet: "wallet", needEth: "ETH required", ready: "ready" } },
+  I18N: { lang: "en" }, account: "0x111", cfg: { accepting_funds: true },
+  fundingEthReady: false, pendingHash: "", uncertainIntent: null,
+  draft: { approvalConfirmed: false }, $: (id) => nodes[id],
+  document: { createElement: () => ({ setAttribute() {} }) },
+};
+vm.runInNewContext(fundingGuard, guardContext);
+guardContext.updateFundingButtons();
+assert(nodes.approve.disabled && nodes.propose.disabled, "zero ETH must block approval and funding");
+assert.strictEqual(nodes.fundingPreflight.textContent, "ETH required");
+guardContext.fundingEthReady = true;
+guardContext.updateFundingButtons();
+assert(!nodes.approve.disabled && nodes.propose.disabled, "funding needs an approved USDC allowance");
+guardContext.draft.approvalConfirmed = true;
+guardContext.updateFundingButtons();
+assert(nodes.approve.disabled && !nodes.propose.disabled, "confirmed approval enables funding");
+guardContext.pendingHash = "0xpending";
+guardContext.updateFundingButtons();
+assert(nodes.approve.disabled && nodes.propose.disabled, "pending transaction blocks duplicate action");
+}
 for (const locale of locales) {
   assert(dynamic[locale], `missing dynamic catalog: ${locale}`);
   assert.deepStrictEqual(Object.keys(dynamic[locale]).sort(), Object.keys(dynamic.en).sort(), `dynamic translation keys differ for ${locale}`);
