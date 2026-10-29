@@ -157,6 +157,7 @@ def robots():
         "Disallow: /pilot/admin",
         "Disallow: /pilot/deal/",
         "Allow: /.well-known/agent-card.json",
+        "Allow: /.well-known/security.txt",
         "Allow: /llms.txt",
         f"Sitemap: {PUBLIC_ORIGIN}/sitemap.xml",
         "",
@@ -175,6 +176,9 @@ def sitemap():
         ("/x402-vs-agent-escrow", "0.8"),
         ("/ai-agent-job-evidence", "0.8"),
         ("/play", "0.8"),
+        ("/start", "0.7"),
+        ("/faq", "0.7"),
+        ("/contact", "0.4"),
         ("/terms", "0.4"),
         ("/privacy", "0.4"),
     ]
@@ -353,6 +357,42 @@ def founder_reports(access_key: str):
             "X-Robots-Tag": "noindex, nofollow, noarchive",
         },
     )
+
+@app.get('/start', include_in_schema=False)
+def start_page():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / 'static' / 'start.html')
+
+
+@app.get('/faq', include_in_schema=False)
+def faq_page():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / 'static' / 'faq.html')
+
+
+@app.get('/contact', include_in_schema=False)
+def contact_page():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / 'static' / 'contact.html')
+
+
+@app.get('/.well-known/security.txt', include_in_schema=False)
+def security_contact():
+    from datetime import datetime, timedelta, timezone
+    from fastapi.responses import PlainTextResponse
+    expires = (datetime.now(timezone.utc) + timedelta(days=180)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    body = '\n'.join([
+        'Contact: mailto:agentsolis@solists.com.tr',
+        'Canonical: https://agentsolis.solists.com.tr/.well-known/security.txt',
+        'Preferred-Languages: en, tr',
+        f'Expires: {expires}',
+        '',
+    ])
+    return PlainTextResponse(body, headers={'Cache-Control': 'public, max-age=86400'})
+
 
 @app.get("/{locale}", include_in_schema=False)
 def international_landing(locale: str):
