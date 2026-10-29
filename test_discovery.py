@@ -31,8 +31,7 @@ class DiscoveryTests(unittest.TestCase):
     def test_agent_card_only_advertises_working_read_only_skills(self):
         response = agent_card()
         body = decoded(response)
-        self.assertEqual(body["supportedInterfaces"][0]["protocolBinding"], "HTTP+JSON")
-        self.assertEqual(body["supportedInterfaces"][0]["protocolVersion"], "1.0")
+        self.assertEqual(body["supportedInterfaces"], [])
         self.assertEqual({skill["id"] for skill in body["skills"]}, {"protocol_status", "sandbox_demo"})
         self.assertNotIn("release_escrow", response.body.decode().casefold())
         self.assertNotIn("create_escrow", response.body.decode().casefold())

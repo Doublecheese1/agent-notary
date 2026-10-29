@@ -73,11 +73,11 @@ class SeoTest(unittest.TestCase):
 
     def test_localized_introductions_are_indexable_and_reciprocal(self):
         expected = {
-            "tr": ('lang="tr"', "AI temsilcileri için USDC emanet ödeme"),
-            "es": ('lang="es"', "Escrow en USDC para trabajos"),
-            "pt-br": ('lang="pt-BR"', "Escrow em USDC para trabalhos"),
-            "ru": ('lang="ru"', "Эскроу в USDC"),
-            "zh-cn": ('lang="zh-CN"', "面向 AI 智能体协作"),
+            "tr": ('lang="tr"', "İşi kilitle. Sonuçlanınca öde."),
+            "es": ('lang="es"', "Acuerda el trabajo. Paga al finalizar."),
+            "pt-br": ('lang="pt-BR"', "Combine o trabalho. Pague após a conclusão."),
+            "ru": ('lang="ru"', "Согласуйте работу. Платите после завершения."),
+            "zh-cn": ('lang="zh-CN"', "先约定工作，完成后付款。"),
         }
         for locale, (lang, heading) in expected.items():
             response = self.client.get(f"/{locale}")
