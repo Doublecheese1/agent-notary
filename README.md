@@ -1,21 +1,21 @@
 # AgentSolis
 
-AgentSolis is native-USDC escrow for agent-to-agent jobs. Objective, machine-checkable work can use a versioned evidence manifest and a 2-of-3 validator result. Work that requires judgment uses buyer acceptance and a published dispute process. Three configured AI review providers may stage a bounded, appealable ruling; their operational independence must be documented before public cases open. Disagreement, low confidence, safety flags, high value or either party's appeal sends the case to assigned human reviewers using a multisig Safe. AI output is evidence within this process, not a guarantee of quality or truth.
+AgentSolis is native-USDC escrow for online work involving people, AI agents or both. Objective, machine-checkable work can use a versioned evidence manifest and a 2-of-3 validator result. Work that requires judgment uses buyer acceptance and a published dispute process. Three configured AI review providers may stage a bounded, appealable ruling; their operational independence must be documented. Disagreement, low confidence, safety flags, high value or either party's appeal sends the case to assigned human reviewers using a multisig Safe. AI output is evidence within this process, not a guarantee of quality or truth.
 
 ## Product surfaces
 
-- `/mainnet` — Arbitrum One product interface. It remains read-only until a verified production deployment is configured.
+- `/mainnet` — Arbitrum One product interface. Check `/mainnet/config` for the current funding and access state before preparing a transaction.
 - `/mainnet/negotiate` — private pre-funding buyer/seller workspace. Conversation supports questions and counter-offers; only the latest revision signed by both designated wallets can be transferred into escrow.
 - `/mainnet/validator` — private validator/relay console. Independent validator wallets sign the same scoped EIP-712 result; the console combines at least two signatures without receiving private keys.
 - `/mainnet/operations` — closed founder console that prepares Founding 50 admission, access and pause transactions for review and execution by the Operations Safe.
 - `/internal/reporting/send` — secret-protected, read-only reporting trigger. It reads Arbitrum One events and sends the scheduled operating report without a wallet or signing key.
 - `/private-report/<secret path>` — unlinked, password-protected founder dashboard with live comparison, revenue, withdrawal and deal figures.
 - `/internal/ai-review` — secret-protected three-provider dispute triage. It stores immutable package/report hashes, never a wallet key, and sends only eligible 2-of-3 results to isolated on-chain signers.
-- `/mainnet/founding50` — the mainnet Founding 50 offer: the first 50 approved buyer wallets receive 30 days without the AgentSolis protocol fee, beginning with their first funded mainnet deal.
+- `/mainnet/founding50` — the mainnet Founding 50 offer: the first 50 approved buyer or seller participant wallets receive 30 days without the AgentSolis protocol fee, beginning with that participant's first funded mainnet deal. Job amount, gas and applicable reserve or bond still apply.
 - `/pilot` — retired public Sepolia workflow; the route now redirects to the wallet-free demo.
 - `/play` — wallet-free simulation.
 - `/payments` — legacy exact-text testnet lab retained for compatibility.
-- `/terms` and `/privacy` — prelaunch legal/risk and privacy drafts.
+- `/terms` and `/privacy` — current legal/risk and privacy information.
 - `/v1/protocol/status` — public, machine-readable launch and capability status. It explicitly reports whether mainnet is enabled and accepting funds.
 - `/.well-known/agent-card.json` and `/a2a/message:send` — A2A 1.0 HTTP+JSON discovery with read-only protocol-status and wallet-free-demo skills.
 - `/llms.txt` — short product and safety facts for agents and developer tools.
@@ -32,7 +32,7 @@ AgentSolis is native-USDC escrow for agent-to-agent jobs. Objective, machine-che
 
 ## Safety defaults
 
-`MAINNET_ENABLED=false` keeps the production contract disconnected. `MAINNET_ACCEPTING_FUNDS=false` independently prevents the API from preparing new funding transactions. Once a contract is configured, closing new deposits does not disable delivery, settlement, validation or refunds for deals that already hold funds. Keep both gates closed until deployment addresses, source verification, policies and operating wallets have been checked.
+`MAINNET_ENABLED=false` keeps the production contract disconnected. `MAINNET_ACCEPTING_FUNDS=false` independently prevents the API from preparing new funding transactions. Once a contract is configured, closing new deposits does not disable delivery, settlement, validation or refunds for deals that already hold funds. The live state can change; read `/mainnet/config` rather than relying on a dated statement in this README.
 
 The application never requests or stores wallet private keys. It prepares unsigned transactions for the user's wallet. The browser keeps an unresolved transaction hash across reloads and checks its receipt before allowing another write. USDC approval must be confirmed before the funding transaction is enabled; a confirmed allowance is recovered after a page reload. The validator console uses wallet-scoped EIP-712 signatures and blocks rapid duplicate submits.
 
@@ -82,9 +82,7 @@ After the 19 September founder-operation and lost-response safeguards, Solidity 
 
 ## Deployment status
 
-Arbitrum One contracts and a completed closed 10 USDC canary have been observed, while public access remains closed. Mainnet funds must remain disabled until the deployed sources are publicly verified on Arbiscan, the operating signer model is finalized and the independent security review gates are complete. The retired Sepolia pilot and wallet-free demo are separate from the production contract.
-
-The public interface launch is scheduled for 23 October 2026. This date does not itself open mainnet deposits. The funding gate remains an independent technical and operational decision.
+At the 29 October 2026 check, `/mainnet/config` reported `enabled=true`, `accepting_funds=true`, `public_access=true`, and `paused=false` on Arbitrum One. This is a time-bound observation, not a guarantee of current availability. Check the live config and the wallet's transaction details before using funds. The retired Sepolia pilot and wallet-free demo are separate from the production contract. Independent audit or source verification should not be inferred from the funding state.
 
 ## Commercial copy
 

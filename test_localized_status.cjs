@@ -10,8 +10,12 @@ async function check(config, expected) {
     textContent: 'Checking',
     dataset: { open: 'OPEN', limited: 'LIMITED', closed: 'CLOSED', unknown: 'UNKNOWN' },
   };
+  const secondStatus = {
+    textContent: 'Checking',
+    dataset: { open: 'OPEN 2', limited: 'LIMITED 2', closed: 'CLOSED 2', unknown: 'UNKNOWN 2' },
+  };
   const sandbox = {
-    document: { querySelector: () => status },
+    document: { querySelectorAll: () => [status, secondStatus] },
     fetch: async () => {
       if (config === null) throw new Error('Unavailable');
       return { ok: true, json: async () => config };
@@ -21,6 +25,7 @@ async function check(config, expected) {
   await tick();
   await tick();
   assert.equal(status.textContent, expected);
+  assert.equal(secondStatus.textContent, `${expected} 2`);
 }
 
 (async () => {

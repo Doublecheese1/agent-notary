@@ -240,6 +240,13 @@ def brand_styles():
     return FileResponse(Path(__file__).resolve().parent / "static" / "brand.css", media_type="text/css")
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    from pathlib import Path
+    from fastapi.responses import FileResponse
+    return FileResponse(Path(__file__).resolve().parent / "static" / "favicon.ico", media_type="image/x-icon")
+
+
 @app.get("/assets/launch-analytics.js", include_in_schema=False)
 def launch_analytics_script():
     from pathlib import Path
