@@ -71,6 +71,7 @@ button,input,textarea,select{font:inherit}
 .trust-band{background:var(--solis-navy);color:#fff;max-width:none!important;padding:64px max(22px,calc((100vw - 1080px)/2))!important}
 .trust-band .section-head{margin-bottom:24px}.trust-band .sub{color:#b9c9d2}.trust-band .card{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.16);box-shadow:none}.trust-band .card h3{color:#fff}.trust-band .card p{color:#cbd7dd}
 .notice{background:var(--solis-warn-bg);color:#65430d;border-left:4px solid var(--solis-sun);padding:16px 18px;border-radius:12px;margin-bottom:16px}
+.contract-proof{margin:18px 0 0;padding:15px 18px;border:1px solid var(--solis-line);border-radius:12px;background:var(--solis-paper);color:var(--solis-muted);font-size:13px;line-height:1.65;overflow-wrap:anywhere}.contract-proof strong{color:var(--solis-navy)}.contract-proof code{font:12px/1.5 'IBM Plex Mono',ui-monospace,monospace}
 .landing footer{background:#071222;color:white;padding:38px 22px}.landing footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.landing footer a{color:#bff5e8}
 
 /* Transaction workspace */
