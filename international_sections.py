@@ -151,6 +151,7 @@ def localized_main(locale: str, data: dict, steps: str) -> str:
 <div class="dispute-explainer"><h3>{escape(d[0])}</h3><div class="dispute-grid">{dispute_cells}</div></div></section>
 <section class="section">{_header(r[0], r[1], r[2])}<div class="cards roles">{role_cards}</div></section>
 <section class="section trust-band">{_header(f[0], f[1], f[2])}<div class="cards facts">{fee_cards}</div>
+<p class="contract-proof">{escape(data["verification"])} <a href="/mainnet/config">Live config</a> · <a href="https://sourcify.dev/server/v2/contract/42161/0x32C650445354f458e8F8B420C27Bb8113AdE5e22">Sourcify</a></p>
 <div class="translation-note">{escape(data["notice"])}</div></section>
 <section class="section">{_header(u[0], u[1], u[2])}<div class="cards roles">{usdc_cards}</div></section>
 <section class="section">{_header(demo[0], demo[1], demo[2])}<div class="notice"><strong>{escape(demo[3])}</strong> {escape(demo[4])}</div>
